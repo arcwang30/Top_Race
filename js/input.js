@@ -5,6 +5,7 @@ const Input = {
   keys: new Set(),
   pressed: new Set(),
   pointers: new Map(),
+  starts: new Map(),
   taps: [],
   ptr: { x: -1, y: -1, moved: false },
   touchMode: false,
@@ -37,7 +38,13 @@ const Input = {
       this.keys.add(e.code);
     });
     window.addEventListener('keyup', e => { this.keys.delete(e.code); });
-    window.addEventListener('blur', () => this.keys.clear());
+    const releaseAll = () => { this.keys.clear(); this.pointers.clear(); this.starts.clear(); };
+    window.addEventListener('blur', releaseAll);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
+    const endTouch = e => { if (!e.touches || e.touches.length === 0) { this.pointers.clear(); this.starts.clear(); } };
+    document.addEventListener('touchend', endTouch);
+    document.addEventListener('touchcancel', endTouch);
+    canvas.addEventListener('lostpointercapture', e => { this.pointers.delete(e.pointerId); this.starts.delete(e.pointerId); });
 
     const pos = e => {
       const r = canvas.getBoundingClientRect();
@@ -47,7 +54,7 @@ const Input = {
       if (e.pointerType === 'touch') this.touchMode = true;
       const p = pos(e);
       this.pointers.set(e.pointerId, p);
-      this.taps.push(p);
+      this.starts.set(e.pointerId, { x: p.x, y: p.y, t: performance.now() });
       this.ptr.x = p.x; this.ptr.y = p.y; this.ptr.moved = true;
       this.pressed.add('anykey');
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
@@ -58,9 +65,22 @@ const Input = {
       if (this.pointers.has(e.pointerId)) this.pointers.set(e.pointerId, p);
       if (e.pointerType !== 'touch') { this.ptr.x = p.x; this.ptr.y = p.y; this.ptr.moved = true; }
     });
-    const up = e => { this.pointers.delete(e.pointerId); };
-    canvas.addEventListener('pointerup', up);
-    canvas.addEventListener('pointercancel', up);
+    // 點擊在「放開」時才成立(移動很少);水平滑動 = 左 / 右(選單用手指左右滑切換)
+    const up = (e, cancel) => {
+      const st = this.starts.get(e.pointerId), p = pos(e);
+      this.pointers.delete(e.pointerId); this.starts.delete(e.pointerId);
+      if (!st || cancel) return;
+      const dx = p.x - st.x, dy = p.y - st.y;
+      if (Math.hypot(dx, dy) < 24) this.taps.push({ x: st.x, y: st.y });
+      else if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) { this.pressed.add(dx > 0 ? 'right' : 'left'); this.pressed.add('anykey'); }
+    };
+    canvas.addEventListener('pointerup', e => up(e, false));
+    canvas.addEventListener('pointercancel', e => up(e, true));
+    // 鎖住整頁的拖曳 / 縮放 / 下拉重新整理
+    const stop = e => { if (!(e.target && e.target.tagName === 'INPUT')) e.preventDefault(); };
+    document.addEventListener('touchmove', stop, { passive: false });
+    document.addEventListener('gesturestart', stop);
+    document.addEventListener('dblclick', stop);
     canvas.addEventListener('contextmenu', e => e.preventDefault());
     canvas.addEventListener('wheel', e => { this.wheel += e.deltaY; e.preventDefault(); }, { passive: false });
     window.addEventListener('keydown', e => { if (!(e.target && e.target.tagName === 'INPUT')) this.pressed.add('anykey'); });

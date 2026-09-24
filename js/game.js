@@ -93,7 +93,7 @@ const Game = {
       else if (s.drift) pct = Math.max(0.3, pct - 0.045 * dt);
       else if (thr && !brk) { if (pct < C.normalMax) pct = Math.min(C.normalMax, pct + C.accel * dt); }
       else if (brk && !thr) pct -= C.brake * dt;
-      else if (thr && brk) pct -= 0.22 * dt;
+      else if (thr && brk) pct -= (Save.data.autoGas ? C.brake : 0.22) * dt;
       else pct -= C.coast * dt;
       if (!boosting && pct > C.normalMax) pct = Math.max(C.normalMax, pct - 0.25 * dt);
     }
@@ -107,6 +107,7 @@ const Game = {
     const dxs = dt * C.steerRate * (0.3 + 0.7 * pct) * (s.drift ? 1.6 : 1);
     s.x += steer * dxs;
     if (s.crashT <= 0) s.x -= dxs * pct * seg.curve * C.centrifugal * (s.drift ? 0.35 : 1);
+    if (Save.data.autoGas && off && steer === 0 && s.crashT <= 0 && playing) s.x -= Math.sign(s.x) * 0.5 * dt;
     if (s.slipT > 0) { s.slipT -= dt; s.x += s.slipDir * dt * (0.5 + pct * 1.2); }
     if (s.crashT > 0) {
       s.crashT -= dt;
@@ -495,7 +496,11 @@ const Game = {
       { id: 'brake', x: 348, y: 916, r: 42, label: 'BRAKE', col: '#ff6b81' },
       { id: 'nitro', x: 462, y: 752, r: 46, label: 'NITRO', col: '#3ea8ff' }
     ];
-    if (Save.data.autoGas) btns.shift();
+    if (Save.data.autoGas) {
+      btns.shift();
+      Object.assign(btns[0], { x: 336, y: 884, r: 54 });
+      Object.assign(btns[1], { x: 456, y: 884, r: 54 });
+    }
     if (!gyro) btns.push({ id: 'left', x: 66, y: 888, r: 56, label: '◀', col: '#ffd23f' }, { id: 'right', x: 186, y: 888, r: 56, label: '▶', col: '#ffd23f' });
     Input.virtual = btns;
     for (const b of btns) {

@@ -61,3 +61,5 @@ html, body {
   align-items: center;
   justify-content: center;
 }
+
+html, body { position: fixed; inset: 0; overscroll-behavior: none; }
