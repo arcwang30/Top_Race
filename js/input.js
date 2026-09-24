@@ -11,6 +11,8 @@ const Input = {
   virtual: [],
   gyroVal: 0,
   gyroActive: false,
+  wheel: 0,
+  scrollAxis: 0,
 
   steer: 0, throttle: false, brake: false, nitro: false,
   padConnected: false,
@@ -60,6 +62,7 @@ const Input = {
     canvas.addEventListener('pointerup', up);
     canvas.addEventListener('pointercancel', up);
     canvas.addEventListener('contextmenu', e => e.preventDefault());
+    canvas.addEventListener('wheel', e => { this.wheel += e.deltaY; e.preventDefault(); }, { passive: false });
     window.addEventListener('keydown', e => { if (!(e.target && e.target.tagName === 'INPUT')) this.pressed.add('anykey'); });
 
     window.addEventListener('deviceorientation', e => {
@@ -91,7 +94,7 @@ const Input = {
     const key = (...c) => c.some(x => k.has(x));
     let left = key('ArrowLeft', 'KeyA'), right = key('ArrowRight', 'KeyD');
     let thr = key('Space'), brk = key('ArrowDown', 'KeyS', 'AltLeft', 'AltRight'), nit = key('ArrowUp', 'KeyW');
-    let analog = 0;
+    let analog = 0, sy = (key('ArrowDown', 'KeyS') ? 1 : 0) - (key('ArrowUp', 'KeyW') ? 1 : 0);
 
     const pads = (navigator.getGamepads && navigator.getGamepads()) || [];
     let gp = null;
@@ -113,10 +116,15 @@ const Input = {
       edge(12, 'up'); edge(13, 'down'); edge(14, 'left'); edge(15, 'right');
       edge(0, 'confirm'); edge(1, 'back'); edge(9, 'confirm', 'pause'); edge(2, 'nitro'); edge(3, 'nitro');
       const ay = gp.axes[1] || 0;
+      if (Math.abs(ay) > 0.3) sy += ay; if (b(13)) sy += 1; if (b(12)) sy -= 1;
       const vUp = ay < -0.6, vDown = ay > 0.6;
       if (vUp && !this._padPrev.vu) this.pressed.add('up');
       if (vDown && !this._padPrev.vd) this.pressed.add('down');
       this._padPrev.vu = vUp; this._padPrev.vd = vDown;
+      const hLeft = ax < -0.6, hRight = ax > 0.6;
+      if (hLeft && !this._padPrev.hl) this.pressed.add('left');
+      if (hRight && !this._padPrev.hr) this.pressed.add('right');
+      this._padPrev.hl = hLeft; this._padPrev.hr = hRight;
     }
 
     const vnow = {};
@@ -138,11 +146,13 @@ const Input = {
     }
     if (Save.data.autoGas) thr = true;
     this.steer = clamp(s, -1, 1);
+    this.scrollAxis = clamp(sy, -1, 1);
     this.throttle = !!thr; this.brake = !!brk; this.nitro = !!nit;
   },
 
   endFrame() {
     this.pressed.clear();
+    this.wheel = 0;
     this.taps.length = 0;
     this.ptr.moved = false;
   }

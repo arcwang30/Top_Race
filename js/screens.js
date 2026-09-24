@@ -147,10 +147,11 @@ Screens.menu = {
     UI.begin(this);
     const items = [
       ['開始遊戲', '#8dff8a', '#2fc46a', 'course'], ['操作說明', '#8ee8ff', '#3ea8ff', 'howto'],
-      ['排行榜', '#ffe680', '#ffb02e', 'ranking'], ['設定', '#d6b3ff', '#9a6bff', 'settings'], ['CREDIT', '#ffb3d1', '#ff6b9a', 'credits']
+      ['排行榜', '#ffe680', '#ffb02e', 'ranking'], ['設定', '#d6b3ff', '#9a6bff', 'settings'],
+      ['了解歷史', '#ffd6a0', '#ff9a5a', 'history'], ['CREDIT', '#ffb3d1', '#ff6b9a', 'credits']
     ];
     items.forEach(([label, c1, c2, dest], i) => {
-      if (UI.button(g, this, label, 110, 640 + i * 58, 320, 50, { c1, c2 })) {
+      if (UI.button(g, this, label, 110, 618 + i * 49, 320, 43, { c1, c2 })) {
         App.goto(dest);
       }
     });
@@ -449,6 +450,143 @@ Screens.settings = {
 UI.buttonAt = function (g, scr, index, label, x, y, w, h, o) {
   scr.n = index;
   return this.button(g, scr, label, x, y, w, h, o);
+};
+
+// ---------- 了解歷史(內文與 LOGO、粉絲團連結取自 game_live 專案) ----------
+Screens.history = {
+  sel: 99, n: 0, sub: 0, scroll: 0, aboutH: 0, lay: null, layKey: '', dragY: null, blockedT: 0, logo: null, fb: null,
+
+  H(key) {
+    const L = HISTORY_TEXT[Save.data.lang] || HISTORY_TEXT.zh;
+    return L[key] !== undefined ? L[key] : HISTORY_TEXT.zh[key];
+  },
+
+  enter() {
+    this.sub = 0; this.scroll = 0; this.sel = 99; this.dragY = null; this.blockedT = 0; this.layKey = '';
+    if (!this.logo) { this.logo = new Image(); this.logo.src = 'assets/images/ui/arc-logo.webp'; }
+    if (!this.fb) {
+      const a = document.createElement('a');
+      a.href = HISTORY_LINKS.fanPage; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.tabIndex = -1;
+      a.setAttribute('aria-label', 'Facebook');
+      a.style.cssText = 'position:fixed;display:none;z-index:50;background:transparent;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent;';
+      a.addEventListener('click', () => Sound.play('confirm'));
+      document.body.appendChild(a);
+      this.fb = a;
+    }
+  },
+  leave() { if (this.fb) this.fb.style.display = 'none'; },
+
+  card() { return this.sub === 2 ? { y: 176, h: 566, y0: 186, y1: 732 } : { y: 176, h: 646, y0: 186, y1: 812 }; },
+  fbBtn() { return { x: 90, y: 752, w: 360, h: 52 }; },
+
+  setSub(i) {
+    if (i === this.sub) return;
+    this.sub = i; this.scroll = 0; this.layKey = ''; Sound.play('select');
+  },
+
+  // 段落開頭標記: # 標題(金色大字)  • 項目  ◦ 次項目  > 次項目接續
+  layout(g, key) {
+    const ck = Save.data.lang + key;
+    if (this.layKey === ck) return this.lay;
+    const STY = {
+      '': { x: 36, size: 17, gap: 12 },
+      '#': { x: 36, size: 20, weight: 900, color: '#ffd166', before: 8, gap: 6 },
+      '•': { x: 54, gx: 36, size: 17, gap: 6 },
+      '◦': { x: 76, gx: 58, size: 17, gap: 6 },
+      '>': { x: 76, size: 17, gap: 6 }
+    };
+    const lines = []; let y = 14;
+    for (const para of this.H(key).split('\n')) {
+      const m = /^([#•◦>]) /.exec(para), st = STY[m ? m[1] : ''], text = m ? para.slice(2) : para;
+      if (st.before && lines.length) y += st.before;
+      UI.lines(g, text, 468 - st.x, st.size, st.weight).forEach((t, i) => {
+        lines.push({ t, y, x: st.x, size: st.size, weight: st.weight || 700, color: st.color, glyph: i === 0 && st.gx ? m[1] : '', gx: st.gx });
+        y += st.size + 10;
+      });
+      y += st.gap;
+    }
+    this.layKey = ck;
+    return (this.lay = { lines, h: y + 6 });
+  },
+
+  openFan() {
+    Sound.play('confirm');
+    const w = window.open(HISTORY_LINKS.fanPage, '_blank');
+    if (w) { try { w.opener = null; } catch (e) { /* ignore */ } } else this.blockedT = 3.5;
+  },
+
+  frame(g, dt) {
+    BG.draw(g, 0, [App.t * 8, App.t * 18, App.t * 36], 300);
+    g.fillStyle = THEMES[0].grass[0]; g.fillRect(0, 300, W, H - 300);
+    UI.dim(g, 0.6);
+    UI.header(g, '了解歷史', null);
+
+    const A = this.card(), arc = this.sub === 2, logoH = arc ? 204 : 0, viewH = A.y1 - A.y0;
+    const lay = this.layout(g, 'about.body.' + this.sub);
+    this.aboutH = lay.h + logoH;
+    const max = Math.max(0, this.aboutH - viewH);
+
+    // 操作:左右切分頁,上下(搖桿/十字鍵/滾輪/拖曳)捲動,捲到頭尾再按 = 換分頁
+    if (Input.was('left')) this.setSub((this.sub + 2) % 3);
+    if (Input.was('right')) this.setSub((this.sub + 1) % 3);
+    if (Input.was('down') && this.scroll >= max - 0.5) this.setSub((this.sub + 1) % 3);
+    else if (Input.was('up') && this.scroll <= 0) this.setSub((this.sub + 2) % 3);
+    let d = Input.scrollAxis * 520 * dt + Input.wheel;
+    const p = Input.pointers.values().next().value;
+    if (p) {
+      if (this.dragY === null) this.dragY = (p.y > A.y0 && p.y < A.y1) ? p.y : -1;
+      else if (this.dragY >= 0) { d -= p.y - this.dragY; this.dragY = p.y; }
+    } else this.dragY = null;
+    this.scroll = clamp(this.scroll + d, 0, Math.max(0, this.aboutH - viewH));
+    if (arc && Input.was('confirm')) this.openFan();
+
+    // 分頁列
+    for (let i = 0; i < 3; i++) {
+      const x = 22 + i * 166, on = this.sub === i;
+      UI.panel(g, x, 122, 160, 44, 22, on ? '#ffb02e' : 'rgba(255,255,255,.14)', on ? '#fff' : 'rgba(255,255,255,.35)');
+      UI.text(g, this.H('about.' + i), x + 80, 145, 15, { fill: '#fff', stroke: on ? '#40284a' : null });
+      if (UI.tapIn(x, 122, 160, 44)) this.setSub(i);
+    }
+
+    // 內文卡片
+    UI.panel(g, 20, A.y, 500, A.h, 18);
+    g.save();
+    g.beginPath(); g.rect(26, A.y0, 488, viewH); g.clip();
+    const top = A.y0 - this.scroll;
+    if (arc && this.logo.complete && this.logo.naturalWidth) {
+      const s = 184, h = s * this.logo.naturalHeight / this.logo.naturalWidth;
+      g.drawImage(this.logo, W / 2 - s / 2, top + 6, s, h);
+    }
+    for (const ln of lay.lines) {
+      const y = top + logoH + ln.y;
+      if (y > A.y0 - 20 && y < A.y1 + 20) {
+        UI.text(g, ln.t, ln.x + 4, y, ln.size, { align: 'left', weight: ln.weight, fill: ln.color || '#e6ecff', stroke: null });
+        if (ln.glyph) UI.text(g, ln.glyph, ln.gx + 4, y, ln.size, { align: 'left', fill: '#ffd166', stroke: null });
+      }
+    }
+    g.restore();
+    if (max > 0) {
+      g.fillStyle = 'rgba(255,255,255,.14)'; g.fillRect(510, A.y0, 4, viewH);
+      const th = Math.max(28, viewH * viewH / this.aboutH), ty = A.y0 + (viewH - th) * (this.scroll / max);
+      g.fillStyle = 'rgba(255,209,102,.85)'; g.fillRect(510, ty, 4, th);
+      if (this.scroll < max - 4) UI.text(g, '▼', 492, A.y1 - 8, 16, { fill: '#ffd166', stroke: null, alpha: 0.5 + 0.5 * Math.sin(App.t * 5) });
+    }
+
+    UI.begin(this);
+    const fbShow = arc;
+    if (fbShow) {
+      const b = this.fbBtn();
+      UI.button(g, this, this.H('about.fb'), b.x, b.y, b.w, b.h, { c1: '#8ee8ff', c2: '#3ea8ff', size: 22 });
+      const r = document.getElementById('game').getBoundingClientRect();
+      this.fb.style.display = 'block';
+      this.fb.style.left = (r.left + b.x / W * r.width) + 'px'; this.fb.style.top = (r.top + b.y / H * r.height) + 'px';
+      this.fb.style.width = (b.w / W * r.width) + 'px'; this.fb.style.height = (b.h / H * r.height) + 'px';
+    } else this.fb.style.display = 'none';
+    if (UI.button(g, this, '返回', 170, arc ? 826 : 832, 200, 54, { back: true }) || Input.was('back')) App.goto('menu');
+    this.sel = 99;
+    if (this.blockedT > 0) { this.blockedT -= dt; UI.text(g, this.H('about.fb.blocked'), W / 2, 900, 15, { fill: '#ff9fb5', sw: 4 }); }
+    UI.text(g, '← → 切換分頁　↑ ↓ / 滾輪 捲動', 16, 942, 14, { align: 'left', fill: '#40284a', stroke: '#ffffff', sw: 5 });
+  }
 };
 
 // ---------- CREDIT ----------

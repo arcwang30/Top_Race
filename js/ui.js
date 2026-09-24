@@ -51,9 +51,8 @@ const UI = {
     for (let i = 0; i < str.length; i++) this.text(g, str[i], x + cell * i + cell / 2, y, size, { sw: 5 });
   },
 
-  wrap(g, str, x, y, maxW, lineH, size, o) {
-    str = tr(str);
-    g.font = `${(o && o.weight) || 700} ${size}px ${FONT}`;
+  lines(g, str, maxW, size, weight) {
+    g.font = `${weight || 700} ${size}px ${FONT}`;
     const lines = []; let cur = '';
     const words = Save.data.lang === 'en';
     for (const ch of (words ? str.split(/(?<= )/) : str)) {
@@ -61,6 +60,11 @@ const UI = {
       if (g.measureText(cur + ch).width > maxW && cur) { lines.push(cur.trimEnd()); cur = ch; } else cur += ch;
     }
     if (cur) lines.push(cur);
+    return lines;
+  },
+
+  wrap(g, str, x, y, maxW, lineH, size, o) {
+    const lines = this.lines(g, tr(str), maxW, size, o && o.weight);
     lines.forEach((ln, i) => this.text(g, ln, x, y + i * lineH, size, Object.assign({ align: 'left', stroke: null }, o || {})));
     return lines.length * lineH;
   },

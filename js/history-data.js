@@ -1,0 +1,245 @@
+'use strict';
+
+// 「了解歷史」內文與標題,原樣複製自 game_live 專案 (src/core/i18n.js) 的 about.* 條目(中 / 日 / 英)。
+// 段落開頭的 # • ◦ > 是樣式標記:標題 / 項目 / 次項目 / 次項目接續。
+const HISTORY_LINKS = { fanPage: 'https://www.facebook.com/profile.php?id=61594197187795' };
+
+const HISTORY_TEXT = {
+  zh: {
+      'about.0': '關於射擊遊戲', 'about.1': '概念結構', 'about.2': '關於Arc遊戲庫', 'about.soon': '（內容準備中）',
+      'about.body.0':
+        '縱向射擊遊戲（Vertical Scrolling Shooter，常簡稱為縱捲軸射擊或簡稱 STG）是電子遊戲史上最古老且最輝煌的類型之一。這種類型通常採用由上而下（Top-Down）的鳥瞰視角，玩家操縱位於畫面下方的戰機，迎擊從上方如潮水般湧現的敵軍。從早期一兩個像素組成的子彈，到後來滿螢幕華麗的彈幕，縱向射擊遊戲經歷了數個技術與玩法上的關鍵變革階段：\n' +
+        '# 1. 奠基期（1970年代末）：固定畫面與移動的先驅\n' +
+        '在「捲軸（Scrolling）」技術尚未成熟前，早期的射擊遊戲多為固定畫面（Single-screen）。\n' +
+        '• 《太空侵略者》（Space Invaders, 1978）： 雖然不是捲軸遊戲，但它確立了「橫向移動、向上射擊」的黃金公式，為縱向射擊遊戲打下了核心玩法的地基。\n' +
+        '• 《小蜜蜂》（Galaxian, 1979）： 首度引進彩色畫面與敵機弧形軌道俯衝攻擊，使畫面生動許多。\n' +
+        '# 2. 捲軸革命與黃金期（1980年代）：真正的「縱向捲軸」誕生\n' +
+        '1980年代初期，背景能不斷向後滾動的捲軸技術被發明，這讓玩家產生了「戰機正向前翱翔」的空間延伸感。\n' +
+        '• 《鐵板陣》（Xevious, 1983）： 由 南夢宮 (Namco) 推出，這款作品被公認為縱向捲軸射擊遊戲的始祖與里程碑。它開創性地將武器分為對空的雷射與對地的炸彈（需要對準地面準星），並首次加入完整的世界觀與隱藏要素，奠定了傳統 STG 的標準架構。\n' +
+        '• 《1942》（1984）： 卡普空 (Capcom) 以二戰為背景的名作，引入了「迴旋（Loop）」的緊急閃避機制，並開創了二戰軍事風 STG 的熱潮。\n' +
+        '• 《大旋風》、《究極虎》（Twin Cobra, 1987）： 由東亞企劃（Toaplan）開發，確立了「強化火力（P子彈）＋全螢幕保命炸彈（Bomb）」的 STG 經典公式。\n' +
+        '• 《兵蜂》（TwinBee, 1985）： 科樂美 (Konami) 推出的作品，打破了當時一味的科幻與軍事嚴肅風格，以粉嫩可愛的色調與「射擊鈴鐺改變顏色以獲得不同特殊能力」的逗趣系統著稱。\n' +
+        '# 3. 高峰與極致（1990年代）：音速戰機與「彈幕」的誕生\n' +
+        '進入90年代後，雖然大型電玩（街機）市場逐漸被 2D 格鬥遊戲（如《快打旋風》）佔據，但縱向射擊遊戲在技術與美術上達到了頂峰，並分化出極限流派。\n' +
+        '• 《四國戰機 / 音速戰機》（Sonic Wings, 1992）： 引進多國戰機與各具特色的駕駛員（包括一隻貓），節奏明快，成為街機房的常客。\n' +
+        '• 《雷電》（Raiden, 1990）： 由 Seibu Kaihatsu 開發，以極具重量感的戰機設計、流暢的擦彈與極高難度聞名，成為縱向射擊代名詞之一。\n' +
+        '• 《閃電風暴》（RayForce, 1994）： TAITO 製作的經典作品，主打雙層視角概念，戰機可以鎖定「位於下方背景層」的敵人發射追蹤雷射，美術與音樂表現皆達神級水準。\n' +
+        '• 彈幕射擊遊戲（Bullet Hell / Danmaku）的興起：\n' +
+        '◦ 1995年，由東亞企劃班底重組的 CAVE 公司 推出了《首領蜂》（DonPachi），隨後在 1997年 推出 《怒首領蜂》。\n' +
+        '◦ 這正式宣告了「彈幕（Bullet Hell）」時代的來臨。這類遊戲將敵機子彈壓縮得極密、極多、極其華麗，但將玩家戰機的被判定受擊點（Hitbox）縮小到只有一兩個像素，玩法從早期的「背敵機位置」轉變為極度考驗動態視力與微操的「在彈幕縫隙中求生」。\n' +
+        '# 4. 小眾與精神延續（2000年代至今）：東方 Project 與獨立遊戲\n' +
+        '隨著 3D 遊戲全面普及，2D 縱向射擊遊戲在商業主流市場逐漸式微，轉變為核心玩家群體的硬派狂歡，並在同人與獨立遊戲界開出奇花。\n' +
+        '• 《斑鳩》（Ikaruga, 2001）： 由 Treasure 開發，引入了震驚業界的「黑與白」同色免疫、異色雙倍傷害屬性轉換系統，將射擊遊戲提升到了如同解謎一般的策略高度。\n' +
+        '• 《東方 Project》系列（1996年至今）： 由神主 ZUN 一人核心開發的同人彈幕遊戲系列（如《東方紅魔鄉》、《東方妖妖夢》）。它憑藉著優秀的彈幕設計、世界觀和無數迷人的美少女角色，引爆了龐大的二創熱潮，成功讓彈幕射擊文化在網路世代得以發揚光大。\n' +
+        '• 現代移動端與獨立遊戲： 近年來，許多縱向射擊遊戲轉戰智慧型手機（如《傲氣雄鷹 Sky Force》系列、各式微課金雷霆戰機類手遊），利用單指滑動便能輕鬆遊玩；或是像《J数を再定義する》之類的獨立作品，繼續傳承著傳統 STG 的硬派精神。\n' +
+        '# 總結\n' +
+        '縱向射擊遊戲的歷史是一段「從大眾娛樂走向極致硬派」的演變史。它雖然不再身處遊戲產業的舞台中央，但它留下的捲軸技術、判定概念與極限流暢的硬體優化經驗，早已深深烙印在現代電子遊戲的基因之中。',
+      // 「概念結構」內文（作者提供）。開頭的 # • ◦ > 是樣式標記（標題 / 項目 / 次項目 / 次項目接續），說明見 menu-scene.js 的 aboutLayout
+      'about.body.1':
+        '縱向飛機射擊遊戲（Vertical Scrolling Shooter，簡稱 STG），核心開發流程可以拆解為以下幾個關鍵模組：\n' +
+        '# 1. 遊戲視角與場景初始化\n' +
+        '• 相機設定： 將相機調整為正交投影（Orthographic），視角由上往下看（Top-down）。\n' +
+        '• 背景滾動（捲軸）： 縱向射擊遊戲的「前進感」通常是透過背景移動來營造的。\n' +
+        '◦ 實作方法： 讓一張無限循環的星空或地面貼圖，透過程式碼不斷改變其 UV 偏移量（Offset），或者讓兩張背景圖交替拼接、往下移動並循環重置坐標。\n' +
+        '# 2. 玩家戰機控制 (Player)\n' +
+        '• 移動邏輯： 監聽鍵盤（WASD / 方向鍵）、滑鼠或手機觸控。\n' +
+        '◦ 關鍵細節： 必須使用 Mathf.Clamp 限制戰機的坐標，防止玩家飛出螢幕邊界。\n' +
+        '• 自動射擊 / 手動射擊：\n' +
+        '◦ 設定一個射擊間隔時間（CD）。當玩家按下按鍵或畫面按壓時，透過 Instantiate（生成）子彈物件，並給予子彈一個向上的速度。\n' +
+        '# 3. 子彈與彈幕系統 (Bullets & Danmaku)\n' +
+        '• 子彈移動： 子彈生成後，朝特定方向直行或沿著特定軌跡（如追蹤、散射）移動。\n' +
+        '• 物件池（Object Pooling）技術： 這是射擊遊戲最重要的優化！ 畫面上會同時出現成百上千顆子彈，如果頻繁地建立（Create）與銷毀（Destroy）物件，會導致遊戲嚴重卡頓（GC 凍結）。\n' +
+        '◦ 實作方法： 事先建立一個子彈池，子彈射出時「啟用（Active）」，飛出螢幕或打中敵人時「隱藏（Deactive）」，重複循環使用。\n' +
+        '• 邊界回收： 在螢幕上方與下方設定一個隱形的邊界觸發器（Boundary Trigger），任何子彈或敵人越過此邊界，立刻回收或銷毀，避免消耗效能。\n' +
+        '# 4. 敵人與生成器 (Enemies & Spawner)\n' +
+        '• 敵人行為： 建立不同類型的敵人路徑（如：直直往下飛、S型走位、在空中停留一陣子後離去）。\n' +
+        '• 生成控制器（Spawn Manager）：\n' +
+        '◦ 定時生成： 使用協程（Coroutine）或計時器，每隔幾秒在螢幕上方隨機坐標生成敵人。\n' +
+        '◦ 關卡劇本： 進階做法是寫一個 XML/JSON 配置表或時間軸，規定在遊戲開始第 10 秒出現小兵 A、第 30 秒出現精英怪 B、第 60 秒出現 Boss。\n' +
+        '# 5. 碰撞檢測與生命值 (Collision & HP)\n' +
+        '• 碰撞分組（Layer Matrix）： 明確區分碰撞層，避免「敵人的子彈打到敵人」或「玩家的子彈打到自己」。\n' +
+        '◦ 玩家子彈 只能與 敵人/敵人子彈 發生碰撞。\n' +
+        '◦ 敵人子彈 只能與 玩家 發生碰撞。\n' +
+        '• 受傷觸發： 當觸發碰撞（Trigger Enter）時：\n' +
+        '> 1. 扣除目標的 HP。\n' +
+        '> 2. 生成爆炸特效（VFX）與音效（SFX）。\n' +
+        '> 3. 如果 HP <= 0，觸發毀滅邏輯（玩家扣命或遊戲結束、敵人給予積分）。\n' +
+        '# 6. 遊戲主循環與 UI 系統 (Game Loop & UI)\n' +
+        '• 分數與核心數據： 建立一個 GameManager 來記錄當前分數、玩家剩餘生命（Lives）。\n' +
+        '• UI 介面： 製作抬頭顯示器（HUD），展示血條、炸彈數量、當前得分。\n' +
+        '• 狀態切換： 處理「主選單 → 遊戲中 → 暫停 → 玩家死亡 → Game Over / 重新開始」的邏輯切換。',
+      // 「關於Arc遊戲庫」內文（作者提供）
+      'about.body.2':
+        '「ARCの概遊庫」這個名字，發想起源於諧音「蓋油庫」(即:概念遊戲保藏庫)。期望自己，以及所有開發者所開發的作品，都能夠像「蓋油庫」一樣，賺大錢！\n' +
+        '同時也可以很自豪、很酷地說出自己開發遊戲的喜悅，以及一路走來的心路歷程。除了可以從遊戲中遊玩雛型範本之外，同時可透過內建的歷史功能，了解各系列類型遊戲的組成與開發構成等相關知識，進而對遊戲開發產生興趣。\n' +
+        '目前年過50的作者，回頭一看，進入遊戲業界也將近25年了。這一路走來，雖然參與、開發過不少遊戲，卻始終沒有真正做出一款讓自己「超級成名」的TITLE。\n' +
+        '近年來AI開發盛行，遊戲產業也正面臨前所未有的變化。「選擇走遊戲這條路，究竟是正確的嗎？」這個問題開始不斷浮現在我的腦海裡。\n' +
+        '因此我不得不重新思考——人生走到這個階段，我存在的意義究竟是什麼？而其中，我最常問自己的一個問題就是：「我能為這個產業留下什麼？」\n' +
+        '常常在想，是否能夠運用自己這25年來所學到的東西，讓那些對遊戲開發有興趣的新生代，重新產生一點「想做遊戲」的衝動？但要怎麼做？\n' +
+        '「不然，就來做一本可以玩的遊戲書吧！」從小，我就是個很不愛看「有字的書」的人。（漫畫除外！）與其坐在那裡讀一大堆文字，不如先親身體驗看看。覺得有興趣，再回頭鑽研。就這樣——「ARCの概遊庫」誕生了！\n' +
+        '就像我常常形容的：大多數的遊戲開發者，幾乎很難能成為第二個宮本茂，也未必能像神話般屢屢敗部復活的小島秀夫桑一樣，成為世人熟知的大師。難道就因此喪志、放棄嗎？我想不必。\n' +
+        '因為每一個開發者，都曾經擁有那顆熱愛遊戲的赤子之心。曾經捧著遊戲雜誌，期待下一款新作的到來；曾經跑進電玩店，投下硬幣，和朋友一起打《快打旋風》，為了輸贏大呼小叫；曾經為了一款遊戲可以興奮上一整天。\n' +
+        '那些年華與時光，也許就像短暫的流星般一閃而過。但直到現在，我還是相信——玩遊戲，是因為好玩；而做遊戲，不也就是因為好玩嗎？\n' +
+        '即使我們未必能成為那個站在聚光燈下的人，至少，也可以留下自己曾經努力做過、曾經熱愛過的作品。這，就是我想做「ARCの概遊庫」的理由。\n' +
+        '「ARCの概遊庫」，一款可以玩的遊戲書、一段屬於遊戲開發者的故事。也是一群喜歡遊戲的人所留下的足跡。希望各位喜歡。感謝！！',
+      'about.fb': '前往 Facebook 粉絲團', 'about.fb.blocked': '瀏覽器擋住了新視窗，請手動開啟粉絲團網址',
+  },
+  ja: {
+      'about.0': '射撃ゲームについて', 'about.1': 'コンセプト構成', 'about.2': 'Arcゲームライブラリ', 'about.soon': '（準備中）',
+      'about.body.0':
+        '縦スクロールシューティングゲーム（Vertical Scrolling Shooter、一般に縦シューやSTGと略される）は、ビデオゲームの歴史において最も古く、かつ最も輝かしいジャンルの一つです。このジャンルは通常、上から見下ろすトップダウン（俯瞰）視点を採用しており、プレイヤーは画面下部にある自機を操作し、上方から怒涛の如く押し寄せる敵軍を迎え撃ちます。初期の1〜2ピクセルで構成された弾から、のちに画面を埋め尽くす華麗な弾幕に至るまで、縦スクロールシューティングは技術とゲームプレイの両面でいくつかの重要な変革期を経てきました。\n' +
+        '# 1. 黎明期（1970年代末）：固定画面と移動の先駆者\n' +
+        '「スクロール」技術がまだ成熟していなかった初期のシューティングゲームは、その多くが固定画面（Single-screen）でした。\n' +
+        '• 『スペースインベーダー』（Space Invaders, 1978）： スクロールゲームではありませんが、「左右に移動し、上に向かって撃つ」という黄金律を確立し、縦スクロールシューティングのコアなゲームプレイの基礎を築きました。\n' +
+        '• 『ギャラクシアン』（Galaxian, 1979）： 初めてカラー画面を導入し、敵機が弧を描いてインベーダーのように一斉にではなく、個別にダイブ攻撃を仕掛けてくるなど、画面をより躍動的にしました。\n' +
+        '# 2. スクロール革命と黄金期（1980年代）：真の「縦スクロール」誕生\n' +
+        '1980年代初頭、背景が絶え間なく後方へと流れるスクロール技術が発明され、これによりプレイヤーに「自機が前方に突き進んでいる」という空間的な広がりを感じさせることができるようになりました。\n' +
+        '• 『ゼビウス』（Xevious, 1983）： ナムコ（Namco）がリリースしたこの作品は、縦スクロールシューティングゲームの始祖であり、大いなるマイルストーンとして広く認められています。武器を対空レーザーと対地爆弾（地上照準を合わせる必要がある）に分けるという画期的なシステムを導入し、初めて本格的な世界観や隠し要素を盛り込み、伝統的なSTGの標準的な骨組みを確立しました。\n' +
+        '• 『1942』（1984）： カプコン（Capcom）による第二次世界大戦を舞台にした名作。緊急回避メカニズムである「宙返り（Loop）」を導入し、第二次世界大戦風ミリタリーSTGのブームを巻き起こしました。\n' +
+        '• 『究極タイガー』（Twin Cobra, 1987）： 東亜プラン（Toaplan）が開発し、「ショットパワーアップ（Pアイテム）＋画面全体攻撃の緊急回避ボンバー（Bomb）」という、STGのクラシックな公式を決定づけました。\n' +
+        '• 『ツインビー』（TwinBee, 1985）： コナミ（Konami）がリリースした作品。当時のSFやミリタリーといったシリアスな路線を打ち破り、パステルカラーの可愛らしい色調と、「ベルを撃って色を変えることで異なる特殊能力を獲得する」というコミカルなシステムで人気を博しました。\n' +
+        '# 3. ピークと極致（1990年代）：音速の戦いと「弾幕」の誕生\n' +
+        '1990年代に入ると、アーケード（ゲームセンター）市場は次第に2D格闘ゲーム（『ストリートファイター』など）に占拠されていきましたが、縦スクロールシューティングは技術とグラフィックの面で頂点に達し、さらに極限の派生ジャンルを生み出しました。\n' +
+        '• 『ソニックウィングス』（Sonic Wings, 1992）： 多国籍の戦闘機と、それぞれ個性豊かなパイロット（猫を含む）を導入。テンポが良く、ゲームセンターの定番タイトルとなりました。\n' +
+        '• 『雷電』（Raiden, 1990）： セイブ開発（Seibu Kaihatsu）が開発。非常に重量感のある機体デザイン、滑らかなドット絵、そして非常に高い難易度で知られ、縦スクロールシューティングの代名詞の一つとなりました。\n' +
+        '• 『レイフォース』（RayForce, 1994）： タイトー（TAITO）が制作した傑作。2層の視点概念を主軸に据え、自機は「下層の背景レイヤーにいる」敵をロックオンして誘導レーザーを発射することができ、グラフィックと音楽の表現は神がかったクオリティに達していました。\n' +
+        '• 弾幕シューティングゲーム（Bullet Hell / Danmaku）の台頭：\n' +
+        '◦ 1995年、東亜プランの元スタッフが再集結して設立されたCAVE（ケイブ）が『首領蜂』（DonPachi）をリリース、続く1997年に『怒首領蜂』をリリースしました。\n' +
+        '◦ これにより、正式に「弾幕」時代の到来が告げられました。このタイプのゲームは、敵の弾を極限まで高密度、大量、そして華麗に詰め込む一方、プレイヤー側の自機の当たり判定（Hitbox）をわずか1〜2ピクセルにまで縮小させました。ゲームプレイは、初期の「敵の出現位置を覚える」ものから、動体視力と繊細なレバー捌き（精密操作）が極限まで試される「弾幕の隙間を縫って生き残る」ものへと変貌を遂げました。\n' +
+        '# 4. ニッチ化と精神の継承（2000年代〜現在）：東方Projectとインディーゲーム\n' +
+        '3Dゲームが全面的に普及するにつれ、2D縦スクロールシューティングは商業的なメインストリーム市場からは次第に姿を消し、コアなプレイヤー層のためのハードコアな狂宴へと変化していきました。しかし、同人やインディーゲームの領域で独自の進化を遂げることになります。\n' +
+        '• 『斑鳩』（Ikaruga, 2001）： トレジャー（Treasure）が開発。業界に衝撃を与えた「白と黒」の属性変更システム（同色の弾は吸収・無効化し、異色の敵には2倍のダメージを与える）を導入し、シューティングゲームをまるでパズルを解くかのような戦略的な高さへと引き上げました。\n' +
+        '• 『東方Project』シリーズ（1996年〜現在）： 主宰のZUN氏がほぼ一人で開発している同人弾幕ゲームシリーズ（『東方紅魔郷』『東方妖々夢』など）。優れた弾幕デザイン、魅力的な世界観、そして数多くの魅力的な美少女キャラクターによって爆発的な二次創作ブームを巻き起こし、弾幕シューティング文化をインターネット世代に広く浸透させることに成功しました。\n' +
+        '• 現代のモバイル展開とインディーゲーム： 近年、多くの縦スクロールシューティングゲームがスマートフォンへと舞台を移し（『Sky Force』シリーズや、各種課金型のシューティングアプリなど）、指一本のフリックで手軽に遊べるようになっています。あるいは、伝統的なSTGの硬派な精神を受け継ぐような、様々なインディー作品が開発され続けています。\n' +
+        '# まとめ\n' +
+        '縦スクロールシューティングゲームの歴史は、「大衆娯楽から極限のハードコアへ」と至る変遷の歴史です。もはやゲーム産業のステージ中央に身を置くことはなくなりましたが、このジャンルが遺したスクロール技術、当たり判定の概念、そして極限までスムーズなハードウェアの最適化ノウハウは、現代のビデオゲームの遺伝子の中に今も深く刻み込まれています。',
+      // 「コンセプト構成」内文（日文）。行頭の # • ◦ > はスタイル記号（見出し / 項目 / 副項目 / 副項目の続き）
+      'about.body.1':
+        '縦スクロールシューティングゲーム（Vertical Scrolling Shooter、略称：STG）のコア開発フローは、主に以下のキーモジュールに分解することができます。\n' +
+        '# 1. ゲーム視点とシーンの初期化 (Camera & Background)\n' +
+        '• カメラ設定： カメラの投影モードを正投影（Orthographic）に設定し、視点を上から下へ見下ろすトップダウン（Top-down）にします。\n' +
+        '• 背景のスクロール（スクロール）： 縦スクロールシューティングにおける「前進感」は、通常、背景を移動させることで表現します。\n' +
+        '◦ 実装方法： 無限ループする星空や地面のテクスチャを用意し、コードからUVオフセット（Offset）を常に変化させるか、2枚の背景画像を交互につなぎ合わせ、下方向へ移動させて座標をループリセットします。\n' +
+        '# 2. プレイヤー機体の制御 (Player)\n' +
+        '• 移動ロジック： キーボード（WASD / 方向キー）、マウス、またはスマホのタッチ操作を監視（リスン）します。\n' +
+        '◦ 重要なディテール： 機体が画面外に飛び出さないよう、Mathf.Clamp などを使って機体の座標を制限する必要があります。\n' +
+        '• オート射撃 / マニュアル射撃：\n' +
+        '◦ 射撃のインターバル時間（クールダウン：CD）を設定します。プレイヤーがボタンを押す、または画面をタップしている間、Instantiate（生成）によって弾オブジェクトを生成し、弾に上方向の速度を与えます。\n' +
+        '# 3. 弾と弾幕システム (Bullets & Danmaku)\n' +
+        '• 弾の移動： 弾は生成された後、特定の方向へ直進するか、特定の軌道（追跡、拡散など）に沿って移動します。\n' +
+        '• オブジェクトプール（Object Pooling）技術： これはシューティングゲームにおいて最も重要な最適化です！ 画面上には同時に何百、何千もの弾が表示されます。オブジェクトの生成（Create）と破棄（Destroy）を頻繁に繰り返すと、深刻なラグ（GCフリーズ）の原因になります。\n' +
+        '◦ 実装方法： あらかじめ弾のプールを作成しておき、弾を発射するときに「有効化（Active）」し、画面外に出るか敵に当たったときに「非有効化（Deactive）」して、繰り返し再利用します。\n' +
+        '• 境界での回収： 画面の上下に透明な境界トリガー（Boundary Trigger）を設定し、弾や敵がこの境界を越えたらすぐに回収または破棄することで、パフォーマンスの浪費を防ぎます。\n' +
+        '# 4. 敵とスポナー (Enemies & Spawner)\n' +
+        '• 敵の挙動： さまざまなタイプの敵の移動ルートを作成します（例：まっすぐ下降する、S字に動く、空中でしばらく停止してから去るなど）。\n' +
+        '• 生成コントローラー（Spawn Manager）：\n' +
+        '◦ 定期生成： コルーチン（Coroutine）やタイマーを使用し、数秒ごとに画面上部のランダムな座標に敵を生成します。\n' +
+        '◦ ステージスクリプト（タイムライン）： 応用的なアプローチとして、XML/JSONの構成表やタイムラインを作成し、「ゲーム開始10秒後にザコ敵Aが登場」「30秒後にエリート敵Bが登場」「60秒後にボスが登場」といったルールを設定します。\n' +
+        '# 5. 当たり判定と体力 (Collision & HP)\n' +
+        '• 衝突レイヤー設定（Layer Matrix）： 「敵の弾が敵に当たる」「プレイヤーの弾が自分に当たる」といった誤判定を防ぐため、衝突レイヤーを明確に区別します。\n' +
+        '◦ プレイヤーの弾は、敵 / 敵の弾 とのみ衝突する。\n' +
+        '◦ 敵の弾は、プレイヤー とのみ衝突する。\n' +
+        '• 被弾トリガー： 衝突（Trigger Enter）を検知した際、以下の処理を行います。\n' +
+        '> 1. 対象のHPを減算する。\n' +
+        '> 2. 爆発エフェクト（VFX）と効果音（SFX）を生成する。\n' +
+        '> 3. HPが0以下になった場合、撃破ロジック（プレイヤーなら残機減少またはゲームオーバー、敵ならスコア加算）を実行する。\n' +
+        '# 6. ゲームのメインループとUIシステム (Game Loop & UI)\n' +
+        '• スコアとコアデータ： GameManager を作成し、現在のスコアやプレイヤーの残機（Lives）を管理・記録します。\n' +
+        '• UI表示： HUD（ヘッドアップディスプレイ）を作成し、HPバー、ボムの残り数、現在のスコアなどを表示します。\n' +
+        '• 状態の遷移（ステート管理）： 「メインメニュー → ゲーム中 → 一時停止 → プレイヤー死亡 → ゲームオーバー / リトライ」というロジックの切り替えを処理します。',
+      // 「Arcゲームライブラリ」内文（日文）
+      'about.body.2':
+        '「ARCの概遊庫（がいゆうこ）」という名前は、台湾華語の「蓋油庫（ガイヨウクー：油槽所を建てる）」という言葉の語呂合わせから生まれました（その真の意味は「概念ゲームの保藏庫」です）。自分自身、そしてすべての開発者が生み出す作品が、この「蓋油庫」の言葉通り、大儲けできる（油田を掘り当てる）ような存在になってほしいという願いが込められています。\n' +
+        '同時に、自分がゲームを開発する喜びや、これまでの道のりを、誇らしく、そしてクールに語れる場所でもあります。ここではゲームのプロトタイプを実際に遊べるだけでなく、内蔵された「歴史機能」を通じて、様々なジャンルのゲームがどのように構成され、開発されてきたかという知識を学ぶことができます。そこから、ゲーム開発に興味を持つきっかけになれば幸いです。\n' +
+        '現在、50歳を超えた私がふと振り返ると、ゲーム業界に入ってからもうすぐ25年になります。これまでの道のりで、数多くのゲームに関わり、開発してきましたが、自分を「超有名」にするような代表作（タイトル）には、ついに巡り合えませんでした。\n' +
+        '近年、AI開発が盛んになり、ゲーム産業はかつてない変革期を迎えています。「ゲームの道を選んだことは、果たして正しかったのだろうか？」そんな問いが、最近頭をよぎるようになりました。\n' +
+        '人生のこのステージに至り、「自分が存在する意味とは一体何だろう？」と、改めて考えざるを得なくなったのです。その中で、私が最も自分に問いかけたのは、「自分はこの産業に何を残せるだろうか？」ということでした。\n' +
+        '自分がこの25年間で学んできたことを活かし、ゲーム開発に興味を持つ次世代の若者たちに、もう一度「ゲームを作りたい！」という衝動を呼び起こすことはできないだろうか？ ――そう常々考えていました。しかし、一体どうすればいいのか？\n' +
+        '「それなら、“遊べるゲームの参考書”を作ってみよう！」幼い頃から、私は「文字ばかりの本」を読むのが大の苦手でした（漫画は別ですが！）。机に向かって膨大な文字を読むくらいなら、まずは体感してみる。面白いと思ったら、そこから深く掘り下げればいい。そうして生まれたのが、この「ARCの概遊庫」です。\n' +
+        '私がよく口にする言葉があります。ほとんどのゲーム開発者は、第二の宮本茂氏になることは難しいですし、神話のように何度も窮地から復活を遂げた小島秀夫氏のように、世界に名を馳せる巨匠になれるわけでもありません。だからといって、志を失い、諦めるべきでしょうか？ 私はそうは思いません。\n' +
+        'なぜなら、すべての開発者が、かつてゲームを純粋に愛する少年のような心を持っていたからです。ゲーム雑誌を握りしめ、新作の発売を心待ちにしていた日々。ゲームセンターに駆け込み、コインを投入し、友達と『ストリートファイター』で勝った負けたと大騒ぎしたこと。たった一本のゲームのために、丸一日中興奮していられたあの頃。\n' +
+        'あの輝かしい青春や時間は、一瞬で駆け抜ける流れ星のようだったかもしれません。それでも私は今でも信じています。「ゲームを遊ぶのは楽しいからであり、ゲームを作るのもまた、楽しいからではないか」と。\n' +
+        'たとえ私たちがスポットライトを浴びる存在になれなかったとしても、少なくとも、自分がかつて必死に作り、心から愛した作品をここに残すことはできる。それこそが、私が「ARCの概遊庫」を作ろうと思った理由です。\n' +
+        '「ARCの概遊庫」――それは遊べるゲームの参考書であり、ゲーム開発者の物語。そして、ゲームを愛する者たちが残した足跡（そくせき）でもあります。皆さんに楽しんでいただけることを願っています。ありがとうございました！！',
+      'about.fb': 'Facebook ファンページへ', 'about.fb.blocked': '新しいウィンドウがブロックされました。手動でURLを開いてください',
+  },
+  en: {
+      'about.0': 'About Shooting Games', 'about.1': 'Concept Structure', 'about.2': 'About Arc Games', 'about.soon': '(Coming soon)',
+      'about.body.0':
+        'Vertical Scrolling Shooters (often shortened to vertical shmups or simply STGs) are one of the oldest and most glorious genres in video game history. Typically featuring a top-down, bird\'s-eye perspective, players control a ship at the bottom of the screen to fend off waves of enemies flooding in from above. From the early days of bullets made of just one or two pixels to the screen-filling, dazzling bullet hells of later years, the vertical shooter has undergone several pivotal eras of evolution in both technology and gameplay:\n' +
+        '# 1. The Foundation Era (Late 1970s): Single-Screen and Movement Pioneers\n' +
+        'Before scrolling technology matured, early shooting games were mostly confined to a single, fixed screen.\n' +
+        '• Space Invaders (1978): While not a scrolling game, it established the golden formula of "horizontal movement and upward shooting," laying the core gameplay foundation for all future vertical shooters.\n' +
+        '• Galaxian (1979): This title introduced color graphics and enemies that dove at the player in sweeping, curved paths, bringing a newfound dynamism to the screen.\n' +
+        '# 2. The Scrolling Revolution & Golden Age (1980s): The Birth of the True "Vertical Scroll"\n' +
+        'In the early 1980s, the invention of scrolling technology—where the background constantly rolled downward—gave players a powerful sense of spatial expansion, making them feel as if their ship was genuinely soaring forward.\n' +
+        '• Xevious (1983): Released by Namco, this masterpiece is widely recognized as the pioneer and milestone of vertical scrolling shooters. It innovatively split weapons into anti-air lasers and air-to-ground bombs (which required aligning a ground reticle). It was also the first to feature a fully realized world-building lore and hidden secrets, setting the definitive framework for traditional STGs.\n' +
+        '• 1942 (1984): Capcom\'s World War II-themed classic introduced the "loop" emergency evasion mechanic and ignited a massive wave of military-styled WW2 shooters.\n' +
+        '• Twin Cobra (1987): Developed by Toaplan, this game solidified the classic STG formula: "weapon power-ups (P items) + screen-clearing panic bombs."\n' +
+        '• TwinBee (1985): Released by Konami, this game broke away from the serious sci-fi and military themes of the era. It became famous for its pastel, cute aesthetic and a playful system where players shot floating bells to change their colors and gain different special abilities.\n' +
+        '# 3. The Peak & The Extreme (1990s): High-Speed Fighting and the Birth of "Bullet Hell"\n' +
+        'As the 1990s rolled in, the arcade market was gradually taken over by 2D fighting games like Street Fighter. However, vertical shooters reached their technical and artistic zenith during this time, branching out into extreme subgenres.\n' +
+        '• Sonic Wings / Aero Fighters (1992): This game introduced aircraft from multiple nations alongside a quirky cast of pilots (including a cat). Its brisk pace made it an absolute staple in arcades.\n' +
+        '• Raiden (1990): Developed by Seibu Kaihatsu, it became synonymous with vertical shooters thanks to its heavy, mechanical ship designs, smooth sprite animation, and notoriously punishing difficulty.\n' +
+        '• RayForce (1994): A classic produced by Taito, it centered on a dual-layer perspective concept. Players could lock onto enemies located on the lower background layer and fire homing lasers. Its art direction and musical score achieved legendary, god-tier status.\n' +
+        '• The Rise of Bullet Hell (Danmaku) Games:\n' +
+        '◦ In 1995, CAVE—a company formed by former Toaplan staff—released DonPachi, followed by DoDonpachi in 1997.\n' +
+        '◦ This officially heralded the arrival of the "Bullet Hell" era. These games compressed enemy fire into incredibly dense, massive, and stunningly intricate patterns. To compensate, they shrank the player ship\'s hitbox down to just one or two pixels. Gameplay shifted from the early days of memorizing enemy spawns to an extreme test of dynamic vision and pixel-perfect micro-dodging to survive in the gaps between bullets.\n' +
+        '# 4. Niche Appeal & Spiritual Succession (2000s–Present): Touhou Project and Indie Games\n' +
+        'With the mainstream adoption of 3D gaming, 2D vertical shooters gradually receded from commercial mass markets, transforming into a hardcore celebration for dedicated enthusiasts and blooming beautifully in the doujin and indie scenes.\n' +
+        '• Ikaruga (2001): Developed by Treasure, it shocked the industry with its "Black and White" polarity-shifting system. Absorbing bullets of the same color while dealing double damage to opposite-colored enemies elevated the shooter genre to a strategic, puzzle-like depth.\n' +
+        '• Touhou Project Series (1996–Present): A doujin bullet hell series developed almost entirely by a single creator, ZUN (e.g., The Embodiment of Scarlet Devil, Perfect Cherry Blossom). Driven by excellent bullet patterns, deep lore, and a cast of charming anime heroines, it sparked a massive wave of fan-made derivative content, successfully preserving and popularizing bullet hell culture for the internet generation.\n' +
+        '• Modern Mobile & Indie Games: In recent years, many vertical shooters have migrated to smartphones (such as the Sky Force series and various free-to-play, microtransaction-based mobile shmups), allowing casual play with single-finger swiping. Meanwhile, distinct indie titles continue to pass down the unyielding, hardcore spirit of traditional STGs.\n' +
+        '# Conclusion\n' +
+        'The history of vertical scrolling shooters is an evolution of "moving from mass entertainment to the absolute extreme of hardcore gaming." Though it no longer stands at the center stage of the gaming industry, its legacy—scrolling mechanics, the concept of precise hitboxes, and hyper-optimized hardware performance—has been deeply woven into the DNA of modern video games.',
+      // "Concept Structure" body text (English). Leading # • ◦ > are style markers (heading / bullet / sub-bullet / sub-bullet continuation), see aboutLayout in menu-scene.js
+      'about.body.1':
+        'Vertical Scrolling Shooter (commonly abbreviated as STG), the core development workflow can be broken down into the following key modules:\n' +
+        '# 1. Game View and Scene Initialization\n' +
+        '• Camera Setup: Adjust the camera projection to Orthographic and set the view to Top-down (looking straight down from above).\n' +
+        '• Background Scrolling: The sensation of "moving forward" in a vertical shooter is typically created by moving the background.\n' +
+        '◦ Implementation: Use a seamlessly looping texture of a starry sky or terrain and constantly update its UV Offset via code. Alternatively, tile two background images together, move them downward, and reset their coordinates in a continuous cycle.\n' +
+        '# 2. Player Control\n' +
+        '• Movement Logic: Listen for inputs from the keyboard (WASD / Arrow Keys), mouse, or mobile touch controls.\n' +
+        '◦ Critical Detail: You must use Mathf.Clamp to restrict the starfighter\'s coordinates, preventing the player from flying off the screen boundaries.\n' +
+        '• Auto-fire / Manual Fire:\n' +
+        '◦ Set a firing interval (Cooldown / CD). When the player presses the designated key or touches the screen, use Instantiate to spawn bullet objects and apply an upward velocity to them.\n' +
+        '# 3. Bullets & Danmaku System\n' +
+        '• Bullet Movement: Once spawned, bullets move forward in a specific direction or follow designated trajectories (e.g., homing, spread shots).\n' +
+        '• Object Pooling Technique: This is the most crucial optimization in shooting games! Hundreds or thousands of bullets can appear on screen simultaneously. Frequently creating and destroying these objects will cause severe game stuttering (GC spikes/freezes).\n' +
+        '◦ Implementation: Instantiate a bullet pool in advance. When a bullet is fired, "set it to active". When it flies off-screen or hits an enemy, "deactivate it" so it can be recycled and reused.\n' +
+        '• Boundary Recycling: Place an invisible Boundary Trigger at the top and bottom of the screen. Any bullet or enemy crossing this boundary is immediately recycled or destroyed to prevent performance waste.\n' +
+        '# 4. Enemies & Spawner\n' +
+        '• Enemy Behavior: Create distinct movement paths for different types of enemies (e.g., flying straight down, moving in an S-pattern, or hovering in the air for a while before exiting).\n' +
+        '• Spawn Manager:\n' +
+        '◦ Timed Spawning: Use a Coroutine or a timer to spawn enemies at random coordinates along the top of the screen every few seconds.\n' +
+        '◦ Level Scripting (Timeline): An advanced approach is to write an XML/JSON configuration table or timeline. This specifies that Enemy Minion A appears at 10 seconds, Elite Monster B appears at 30 seconds, and the Boss appears at 60 seconds.\n' +
+        '# 5. Collision & HP\n' +
+        '• Collision Masking (Layer Matrix): Clearly separate collision layers to prevent accidental interactions like "enemy bullets hitting enemies" or "player bullets hitting the player".\n' +
+        '◦ Player Bullets should only collide with Enemies / Enemy Bullets.\n' +
+        '◦ Enemy Bullets should only collide with the Player.\n' +
+        '• On-Hit Trigger: When a collision is detected (OnTriggerEnter), execute the following:\n' +
+        '> 1. Deduct HP from the target.\n' +
+        '> 2. Spawn explosion visual effects (VFX) and play sound effects (SFX).\n' +
+        '> 3. If HP <= 0, trigger the destruction logic (lose a life/Game Over for the player, or award points for an enemy).\n' +
+        '# 6. Game Loop & UI System\n' +
+        '• Score & Core Data: Create a GameManager to keep track of the current score and the player\'s remaining lives.\n' +
+        '• UI Interface: Design a Heads-Up Display (HUD) to display the health bar, bomb count, and current score.\n' +
+        '• State Management: Handle the state machine transitions between: Main Menu → In-Game → Paused → Player Death → Game Over / Restart.',
+      // "About Arc Games" body text (English). The CJK-first font renders a curly apostrophe as a wide glyph, so plain apostrophes are used
+      'about.body.2':
+        'The name "ARC\'s Concept Play-Chamber" (ARCの概遊庫) was inspired by a Chinese wordplay on "building an oil depot" (Gai You Ku), which in this context stands for a "Concept Game Repository." My hope is that my own work, alongside the creations of all fellow developers, can be just like that "oil depot"—bringing in massive wealth and striking it rich!\n' +
+        'At the same time, it is a place where we can proudly and coolly share the sheer joy of game development, as well as the emotional journey we\'ve walked along the way. Beyond just playing prototype templates within the game, users can utilize the built-in history feature to understand the structural composition and development of various game genres. Through this hands-on knowledge, I hope to spark a genuine interest in game development for the next generation.\n' +
+        'Now past the age of 50, I look back and realize I\'ve been in the game industry for nearly 25 years. Walking this path, though I\'ve participated in and developed quite a few games, I\'ve never truly made that one "megahit" title to skyrocket my name into stardom.\n' +
+        'With the recent boom in AI development, the game industry is facing unprecedented shifts. Questions have begun to constantly haunt my mind: "Was choosing the path of game development really the right choice?"\n' +
+        'Consequently, I found myself forced to rethink—at this stage of my life, what is the ultimate meaning of my existence? Among all my thoughts, the question I ask myself most frequently is: "What can I leave behind for this industry?"\n' +
+        'I often wonder if I can take what I\'ve learned over these past 25 years and reignite that spark, that raw impulse of "I want to make games!" within the new generation who are interested in development. But how?\n' +
+        '"Well, why not make a playable game-book?" Since childhood, I\'ve always been someone who hated reading "books with too many words" (except for manga, of course!). Instead of sitting there reading walls of text, I\'d rather experience it firsthand. If it sparks an interest, I can always go back and dive deeper later. And just like that—"ARC\'s Concept Play-Chamber" was born!\n' +
+        'As I often say: most game developers will likely never become the next Shigeru Miyamoto. Nor will we necessarily become world-renowned masters like Hideo Kojima, who mythically rises from the ashes time and time again. Should we lose heart and give up because of that? I think not.\n' +
+        'Because every single developer once possessed that innocent, childlike heart that deeply loved games. We once clutched gaming magazines, eagerly awaiting the arrival of the next new title. We once ran into arcades, dropped coins into the slots, and shouted at the top of our lungs with friends over a match of Street Fighter, living and dying by the win or loss. We once stayed excited for an entire day over just one game.\n' +
+        'Those years and moments might have flashed by like a fleeting shooting star. But even now, I still believe—we play games because they are fun, and don\'t we make games for the exact same reason?\n' +
+        'Even if we might never be the ones standing under the spotlight, at the very least, we can leave behind the works we once poured our hearts into, the works we once truly loved. This is precisely why I wanted to create "ARC\'s Concept Play-Chamber."\n' +
+        '"ARC\'s Concept Play-Chamber"—a playable game-book, a story belonging to game developers, and the footprints left behind by a group of people who simply love games. I hope you all enjoy it. Thank you so much!',
+      'about.fb': 'Facebook Fan Page', 'about.fb.blocked': 'The new window was blocked. Please open the page manually',
+  }
+};
