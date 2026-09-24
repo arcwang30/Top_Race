@@ -6,68 +6,53 @@ const HISTORY_LINKS = { fanPage: 'https://www.facebook.com/profile.php?id=615941
 
 const HISTORY_TEXT = {
   zh: {
-      'about.0': '關於射擊遊戲', 'about.1': '概念結構', 'about.2': '關於Arc遊戲庫', 'about.soon': '（內容準備中）',
+      'about.0': '關於賽車遊戲', 'about.1': '概念結構', 'about.2': '關於Arc遊戲庫', 'about.soon': '（內容準備中）',
       'about.body.0':
-        '縱向射擊遊戲（Vertical Scrolling Shooter，常簡稱為縱捲軸射擊或簡稱 STG）是電子遊戲史上最古老且最輝煌的類型之一。這種類型通常採用由上而下（Top-Down）的鳥瞰視角，玩家操縱位於畫面下方的戰機，迎擊從上方如潮水般湧現的敵軍。從早期一兩個像素組成的子彈，到後來滿螢幕華麗的彈幕，縱向射擊遊戲經歷了數個技術與玩法上的關鍵變革階段：\n' +
-        '# 1. 奠基期（1970年代末）：固定畫面與移動的先驅\n' +
-        '在「捲軸（Scrolling）」技術尚未成熟前，早期的射擊遊戲多為固定畫面（Single-screen）。\n' +
-        '• 《太空侵略者》（Space Invaders, 1978）： 雖然不是捲軸遊戲，但它確立了「橫向移動、向上射擊」的黃金公式，為縱向射擊遊戲打下了核心玩法的地基。\n' +
-        '• 《小蜜蜂》（Galaxian, 1979）： 首度引進彩色畫面與敵機弧形軌道俯衝攻擊，使畫面生動許多。\n' +
-        '# 2. 捲軸革命與黃金期（1980年代）：真正的「縱向捲軸」誕生\n' +
-        '1980年代初期，背景能不斷向後滾動的捲軸技術被發明，這讓玩家產生了「戰機正向前翱翔」的空間延伸感。\n' +
-        '• 《鐵板陣》（Xevious, 1983）： 由 南夢宮 (Namco) 推出，這款作品被公認為縱向捲軸射擊遊戲的始祖與里程碑。它開創性地將武器分為對空的雷射與對地的炸彈（需要對準地面準星），並首次加入完整的世界觀與隱藏要素，奠定了傳統 STG 的標準架構。\n' +
-        '• 《1942》（1984）： 卡普空 (Capcom) 以二戰為背景的名作，引入了「迴旋（Loop）」的緊急閃避機制，並開創了二戰軍事風 STG 的熱潮。\n' +
-        '• 《大旋風》、《究極虎》（Twin Cobra, 1987）： 由東亞企劃（Toaplan）開發，確立了「強化火力（P子彈）＋全螢幕保命炸彈（Bomb）」的 STG 經典公式。\n' +
-        '• 《兵蜂》（TwinBee, 1985）： 科樂美 (Konami) 推出的作品，打破了當時一味的科幻與軍事嚴肅風格，以粉嫩可愛的色調與「射擊鈴鐺改變顏色以獲得不同特殊能力」的逗趣系統著稱。\n' +
-        '# 3. 高峰與極致（1990年代）：音速戰機與「彈幕」的誕生\n' +
-        '進入90年代後，雖然大型電玩（街機）市場逐漸被 2D 格鬥遊戲（如《快打旋風》）佔據，但縱向射擊遊戲在技術與美術上達到了頂峰，並分化出極限流派。\n' +
-        '• 《四國戰機 / 音速戰機》（Sonic Wings, 1992）： 引進多國戰機與各具特色的駕駛員（包括一隻貓），節奏明快，成為街機房的常客。\n' +
-        '• 《雷電》（Raiden, 1990）： 由 Seibu Kaihatsu 開發，以極具重量感的戰機設計、流暢的擦彈與極高難度聞名，成為縱向射擊代名詞之一。\n' +
-        '• 《閃電風暴》（RayForce, 1994）： TAITO 製作的經典作品，主打雙層視角概念，戰機可以鎖定「位於下方背景層」的敵人發射追蹤雷射，美術與音樂表現皆達神級水準。\n' +
-        '• 彈幕射擊遊戲（Bullet Hell / Danmaku）的興起：\n' +
-        '◦ 1995年，由東亞企劃班底重組的 CAVE 公司 推出了《首領蜂》（DonPachi），隨後在 1997年 推出 《怒首領蜂》。\n' +
-        '◦ 這正式宣告了「彈幕（Bullet Hell）」時代的來臨。這類遊戲將敵機子彈壓縮得極密、極多、極其華麗，但將玩家戰機的被判定受擊點（Hitbox）縮小到只有一兩個像素，玩法從早期的「背敵機位置」轉變為極度考驗動態視力與微操的「在彈幕縫隙中求生」。\n' +
-        '# 4. 小眾與精神延續（2000年代至今）：東方 Project 與獨立遊戲\n' +
-        '隨著 3D 遊戲全面普及，2D 縱向射擊遊戲在商業主流市場逐漸式微，轉變為核心玩家群體的硬派狂歡，並在同人與獨立遊戲界開出奇花。\n' +
-        '• 《斑鳩》（Ikaruga, 2001）： 由 Treasure 開發，引入了震驚業界的「黑與白」同色免疫、異色雙倍傷害屬性轉換系統，將射擊遊戲提升到了如同解謎一般的策略高度。\n' +
-        '• 《東方 Project》系列（1996年至今）： 由神主 ZUN 一人核心開發的同人彈幕遊戲系列（如《東方紅魔鄉》、《東方妖妖夢》）。它憑藉著優秀的彈幕設計、世界觀和無數迷人的美少女角色，引爆了龐大的二創熱潮，成功讓彈幕射擊文化在網路世代得以發揚光大。\n' +
-        '• 現代移動端與獨立遊戲： 近年來，許多縱向射擊遊戲轉戰智慧型手機（如《傲氣雄鷹 Sky Force》系列、各式微課金雷霆戰機類手遊），利用單指滑動便能輕鬆遊玩；或是像《J数を再定義する》之類的獨立作品，繼續傳承著傳統 STG 的硬派精神。\n' +
-        '# 總結\n' +
-        '縱向射擊遊戲的歷史是一段「從大眾娛樂走向極致硬派」的演變史。它雖然不再身處遊戲產業的舞台中央，但它留下的捲軸技術、判定概念與極限流暢的硬體優化經驗，早已深深烙印在現代電子遊戲的基因之中。',
+        '賽車遊戲（Racing Games）的發展史是一部從「像素方塊」走向「現實模擬」與「開放世界」的科技演進史。 自 1970 年代誕生以來，賽車遊戲不僅滿足了人類對速度與改裝的渴望，更無數次將遊戲硬體與圖形技術推向極限。\n' +
+        '賽車遊戲歷史發展的四大核心階段：\n' +
+        '# 第一階段：街機的黃金啟航（1970s – 1990s）\n' +
+        '在電腦與家用主機普及前，賽車遊戲的舞台完全屬於街機（Arcade）。這時期的遊戲核心在於刺激的速度感與時間倒數的壓迫感。\n' +
+        '• 1974 年《Gran Trak 10》： 由 Atari 推出的街機，被廣泛視為史上第一款投幣式賽車遊戲。它使用黑白點陣畫面，並首次引進了實體方向盤、排檔桿與腳踏板。\n' +
+        '• 1982 年《Pole Position》： 由萬代南夢宮（Bandai Namco）推出，這款遊戲奠定了現代賽車遊戲的基石。它擺脫了鳥瞰視角，首創追尾第三人稱視角，並加入了排位賽機制。\n' +
+        '• 1986 年《OutRun》： SEGA 的傳奇作品，帶來非線性的分歧賽道、法拉利跑車、悠閒的加州海岸風情與可自由切換的廣播音樂。它讓賽車遊戲從「冰冷的競技」轉變為一種「駕駛的享受」。\n' +
+        '# 第二階段：模擬劃分與百花齊放（1990s 後半 – 2000s）\n' +
+        '隨著 3D 繪圖晶片（如 3dfx Voodoo）與家用主機的效能爆炸性突破，賽車遊戲在 1997 年前後出現了巨大的流派劃分，一夜之間從單一類別演變成三大市場：\n' +
+        '• 硬派真實模擬（Sim Racing）： 1997 年 SONY 推出 PlayStation 獨佔的《Gran Turismo》（跑車浪漫旅）。它不再只是踩油門，而是強調輪胎抓地力、車重轉移、考取虛擬駕照與真實車廠授權，證明了「擬真汽車生活」擁有無比龐大的市場。\n' +
+        '• 街頭文化與改裝（Arcade/Street）： 隨著電影《玩命關頭》風靡全球，EA 於 2003、2004 年相繼推出《極速快感：飆風再起》（Need for Speed: Underground 1 & 2）。遊戲引入豐富的霓虹燈、車體改裝系統與警匪追逐，將街頭賽車文化推向巔峰。\n' +
+        '• 道具與閤家歡樂（Party/Kart）： 1992 年誕生的《馬力歐賽車》（Mario Kart）系列在這一時期穩定奠定其「派對王者」地位，用友情破壞的道具機制和極高的流暢度，成為全家大小的娛樂首選。\n' +
+        '# 裂痕與硬體革命：娛樂與專業的兩極化（2000s 末 – 2010s 初）\n' +
+        '在這個時期，基礎的 3D 街機逐漸式微，賽車遊戲走向了更加極端的兩極化分工。\n' +
+        '• 核心線上模擬： 2008 年《iRacing》上線，它採取高昂的訂閱制與嚴格的硬體門檻（必須配備方向盤），專門服務真實車手與狂熱硬派玩家，後來甚至成為許多 F1 車手在現實賽季外的虛擬訓練工具。\n' +
+        '• 輕度擬真（Simcade）： 傳統大作如《Gran Turismo》與微軟的《Forza Motorsport》（極限競速）系列則在中間築起高牆，既保有逼真的物理，又能讓玩家用手把輕鬆遊玩。\n' +
+        '# 第四階段：開放世界與現代主導（2012 – 至今）\n' +
+        '現代玩家不再滿足於固定的封閉賽道，「把整個國家變成你的賽車場」成為了近十年的顯學。\n' +
+        '• 《Forza Horizon》（極限競速：地平線）系列： 自 2012 年首作誕生以來，該系列逐漸成為全球影響力最大的賽車遊戲。它開創了極致美麗的開放世界、歡樂的音樂節氛圍，以及極高自由度的駕駛體驗。\n' +
+        '• 多功能地圖與電競化： 諸如《The Crew》（飆酷車神）等作品甚至將整個美國地圖縮小放入遊戲中。同時，現代賽車遊戲與虛擬賽車電競（Sim Racing Esports）高度結合，優秀的虛擬賽車手現在甚至有機會直接被職業車隊簽下，成為真正的賽車手。',
       // 「概念結構」內文（作者提供）。開頭的 # • ◦ > 是樣式標記（標題 / 項目 / 次項目 / 次項目接續），說明見 menu-scene.js 的 aboutLayout
       'about.body.1':
-        '縱向飛機射擊遊戲（Vertical Scrolling Shooter，簡稱 STG），核心開發流程可以拆解為以下幾個關鍵模組：\n' +
-        '# 1. 遊戲視角與場景初始化\n' +
-        '• 相機設定： 將相機調整為正交投影（Orthographic），視角由上往下看（Top-down）。\n' +
-        '• 背景滾動（捲軸）： 縱向射擊遊戲的「前進感」通常是透過背景移動來營造的。\n' +
-        '◦ 實作方法： 讓一張無限循環的星空或地面貼圖，透過程式碼不斷改變其 UV 偏移量（Offset），或者讓兩張背景圖交替拼接、往下移動並循環重置坐標。\n' +
-        '# 2. 玩家戰機控制 (Player)\n' +
-        '• 移動邏輯： 監聽鍵盤（WASD / 方向鍵）、滑鼠或手機觸控。\n' +
-        '◦ 關鍵細節： 必須使用 Mathf.Clamp 限制戰機的坐標，防止玩家飛出螢幕邊界。\n' +
-        '• 自動射擊 / 手動射擊：\n' +
-        '◦ 設定一個射擊間隔時間（CD）。當玩家按下按鍵或畫面按壓時，透過 Instantiate（生成）子彈物件，並給予子彈一個向上的速度。\n' +
-        '# 3. 子彈與彈幕系統 (Bullets & Danmaku)\n' +
-        '• 子彈移動： 子彈生成後，朝特定方向直行或沿著特定軌跡（如追蹤、散射）移動。\n' +
-        '• 物件池（Object Pooling）技術： 這是射擊遊戲最重要的優化！ 畫面上會同時出現成百上千顆子彈，如果頻繁地建立（Create）與銷毀（Destroy）物件，會導致遊戲嚴重卡頓（GC 凍結）。\n' +
-        '◦ 實作方法： 事先建立一個子彈池，子彈射出時「啟用（Active）」，飛出螢幕或打中敵人時「隱藏（Deactive）」，重複循環使用。\n' +
-        '• 邊界回收： 在螢幕上方與下方設定一個隱形的邊界觸發器（Boundary Trigger），任何子彈或敵人越過此邊界，立刻回收或銷毀，避免消耗效能。\n' +
-        '# 4. 敵人與生成器 (Enemies & Spawner)\n' +
-        '• 敵人行為： 建立不同類型的敵人路徑（如：直直往下飛、S型走位、在空中停留一陣子後離去）。\n' +
-        '• 生成控制器（Spawn Manager）：\n' +
-        '◦ 定時生成： 使用協程（Coroutine）或計時器，每隔幾秒在螢幕上方隨機坐標生成敵人。\n' +
-        '◦ 關卡劇本： 進階做法是寫一個 XML/JSON 配置表或時間軸，規定在遊戲開始第 10 秒出現小兵 A、第 30 秒出現精英怪 B、第 60 秒出現 Boss。\n' +
-        '# 5. 碰撞檢測與生命值 (Collision & HP)\n' +
-        '• 碰撞分組（Layer Matrix）： 明確區分碰撞層，避免「敵人的子彈打到敵人」或「玩家的子彈打到自己」。\n' +
-        '◦ 玩家子彈 只能與 敵人/敵人子彈 發生碰撞。\n' +
-        '◦ 敵人子彈 只能與 玩家 發生碰撞。\n' +
-        '• 受傷觸發： 當觸發碰撞（Trigger Enter）時：\n' +
-        '> 1. 扣除目標的 HP。\n' +
-        '> 2. 生成爆炸特效（VFX）與音效（SFX）。\n' +
-        '> 3. 如果 HP <= 0，觸發毀滅邏輯（玩家扣命或遊戲結束、敵人給予積分）。\n' +
-        '# 6. 遊戲主循環與 UI 系統 (Game Loop & UI)\n' +
-        '• 分數與核心數據： 建立一個 GameManager 來記錄當前分數、玩家剩餘生命（Lives）。\n' +
-        '• UI 介面： 製作抬頭顯示器（HUD），展示血條、炸彈數量、當前得分。\n' +
-        '• 狀態切換： 處理「主選單 → 遊戲中 → 暫停 → 玩家死亡 → Game Over / 重新開始」的邏輯切換。',
+        '製作 2D 賽車遊戲，可以分成幾個簡單的步驟。\n' +
+        '# 1. 先決定遊戲內容\n' +
+        '首先要想好遊戲的基本玩法，例如玩家要駕駛汽車在賽道上比賽，完成指定圈數後結束比賽。也可以設定不同的車子、賽道和遊戲模式。\n' +
+        '# 2. 設計賽道\n' +
+        '接著製作遊戲中的賽道，可以設計彎道、直線、障礙物和起點等。賽道需要設定碰撞範圍，避免車子跑出道路。\n' +
+        '# 3. 製作玩家車輛\n' +
+        '製作一台可以由玩家控制的車子。玩家可以使用鍵盤或其他控制方式讓車子加速、減速和轉彎。\n' +
+        '# 4. 加入車輛碰撞\n' +
+        '當玩家的車子撞到牆壁或障礙物時，可以讓車子減速或改變行駛方向，增加遊戲的真實感。\n' +
+        '# 5. 製作電腦對手\n' +
+        '加入由電腦控制的車子，讓它們沿著賽道行駛。玩家可以和這些電腦車輛一起比賽，增加遊戲的挑戰性。\n' +
+        '# 6. 加入比賽規則\n' +
+        '設定比賽的規則，例如完成三圈後結束比賽，並根據車子到達終點的順序決定名次。同時可以加入計時器，記錄玩家完成比賽所花的時間。\n' +
+        '# 7. 製作遊戲介面\n' +
+        '在畫面上顯示速度、目前圈數、比賽時間和排名等資訊，讓玩家可以清楚知道目前的比賽狀況。\n' +
+        '# 8. 加入音效和特效\n' +
+        '最後加入汽車引擎聲、煞車聲、碰撞聲和背景音樂，也可以加入煙霧、加速等特效，讓遊戲更加有趣。\n' +
+        '# 9. 測試遊戲\n' +
+        '完成後進行測試，確認車子是否能正常控制、賽道是否有問題、AI 車輛是否正常行駛，以及比賽結束和排名是否正確。\n' +
+        '# 簡單來說\n' +
+        '2D 賽車遊戲的製作流程就是：\n' +
+        '規劃遊戲 → 設計賽道 → 製作車子 → 加入控制 → 加入碰撞 → 製作電腦對手 → 加入比賽規則 → 製作介面 → 加入音效特效 → 測試遊戲\n' +
+        '這樣就可以逐步完成一款基本的 2D 賽車遊戲。',
       // 「關於Arc遊戲庫」內文（作者提供）
       'about.body.2':
         '「ARCの概遊庫」這個名字，發想起源於諧音「蓋油庫」(即:概念遊戲保藏庫)。期望自己，以及所有開發者所開發的作品，都能夠像「蓋油庫」一樣，賺大錢！\n' +
@@ -85,68 +70,54 @@ const HISTORY_TEXT = {
       'about.fb': '前往 Facebook 粉絲團', 'about.fb.blocked': '瀏覽器擋住了新視窗，請手動開啟粉絲團網址',
   },
   ja: {
-      'about.0': '射撃ゲームについて', 'about.1': 'コンセプト構成', 'about.2': 'Arcゲームライブラリ', 'about.soon': '（準備中）',
+      'about.0': 'レースゲームについて', 'about.1': 'コンセプト構成', 'about.2': 'Arcゲームライブラリ', 'about.soon': '（準備中）',
       'about.body.0':
-        '縦スクロールシューティングゲーム（Vertical Scrolling Shooter、一般に縦シューやSTGと略される）は、ビデオゲームの歴史において最も古く、かつ最も輝かしいジャンルの一つです。このジャンルは通常、上から見下ろすトップダウン（俯瞰）視点を採用しており、プレイヤーは画面下部にある自機を操作し、上方から怒涛の如く押し寄せる敵軍を迎え撃ちます。初期の1〜2ピクセルで構成された弾から、のちに画面を埋め尽くす華麗な弾幕に至るまで、縦スクロールシューティングは技術とゲームプレイの両面でいくつかの重要な変革期を経てきました。\n' +
-        '# 1. 黎明期（1970年代末）：固定画面と移動の先駆者\n' +
-        '「スクロール」技術がまだ成熟していなかった初期のシューティングゲームは、その多くが固定画面（Single-screen）でした。\n' +
-        '• 『スペースインベーダー』（Space Invaders, 1978）： スクロールゲームではありませんが、「左右に移動し、上に向かって撃つ」という黄金律を確立し、縦スクロールシューティングのコアなゲームプレイの基礎を築きました。\n' +
-        '• 『ギャラクシアン』（Galaxian, 1979）： 初めてカラー画面を導入し、敵機が弧を描いてインベーダーのように一斉にではなく、個別にダイブ攻撃を仕掛けてくるなど、画面をより躍動的にしました。\n' +
-        '# 2. スクロール革命と黄金期（1980年代）：真の「縦スクロール」誕生\n' +
-        '1980年代初頭、背景が絶え間なく後方へと流れるスクロール技術が発明され、これによりプレイヤーに「自機が前方に突き進んでいる」という空間的な広がりを感じさせることができるようになりました。\n' +
-        '• 『ゼビウス』（Xevious, 1983）： ナムコ（Namco）がリリースしたこの作品は、縦スクロールシューティングゲームの始祖であり、大いなるマイルストーンとして広く認められています。武器を対空レーザーと対地爆弾（地上照準を合わせる必要がある）に分けるという画期的なシステムを導入し、初めて本格的な世界観や隠し要素を盛り込み、伝統的なSTGの標準的な骨組みを確立しました。\n' +
-        '• 『1942』（1984）： カプコン（Capcom）による第二次世界大戦を舞台にした名作。緊急回避メカニズムである「宙返り（Loop）」を導入し、第二次世界大戦風ミリタリーSTGのブームを巻き起こしました。\n' +
-        '• 『究極タイガー』（Twin Cobra, 1987）： 東亜プラン（Toaplan）が開発し、「ショットパワーアップ（Pアイテム）＋画面全体攻撃の緊急回避ボンバー（Bomb）」という、STGのクラシックな公式を決定づけました。\n' +
-        '• 『ツインビー』（TwinBee, 1985）： コナミ（Konami）がリリースした作品。当時のSFやミリタリーといったシリアスな路線を打ち破り、パステルカラーの可愛らしい色調と、「ベルを撃って色を変えることで異なる特殊能力を獲得する」というコミカルなシステムで人気を博しました。\n' +
-        '# 3. ピークと極致（1990年代）：音速の戦いと「弾幕」の誕生\n' +
-        '1990年代に入ると、アーケード（ゲームセンター）市場は次第に2D格闘ゲーム（『ストリートファイター』など）に占拠されていきましたが、縦スクロールシューティングは技術とグラフィックの面で頂点に達し、さらに極限の派生ジャンルを生み出しました。\n' +
-        '• 『ソニックウィングス』（Sonic Wings, 1992）： 多国籍の戦闘機と、それぞれ個性豊かなパイロット（猫を含む）を導入。テンポが良く、ゲームセンターの定番タイトルとなりました。\n' +
-        '• 『雷電』（Raiden, 1990）： セイブ開発（Seibu Kaihatsu）が開発。非常に重量感のある機体デザイン、滑らかなドット絵、そして非常に高い難易度で知られ、縦スクロールシューティングの代名詞の一つとなりました。\n' +
-        '• 『レイフォース』（RayForce, 1994）： タイトー（TAITO）が制作した傑作。2層の視点概念を主軸に据え、自機は「下層の背景レイヤーにいる」敵をロックオンして誘導レーザーを発射することができ、グラフィックと音楽の表現は神がかったクオリティに達していました。\n' +
-        '• 弾幕シューティングゲーム（Bullet Hell / Danmaku）の台頭：\n' +
-        '◦ 1995年、東亜プランの元スタッフが再集結して設立されたCAVE（ケイブ）が『首領蜂』（DonPachi）をリリース、続く1997年に『怒首領蜂』をリリースしました。\n' +
-        '◦ これにより、正式に「弾幕」時代の到来が告げられました。このタイプのゲームは、敵の弾を極限まで高密度、大量、そして華麗に詰め込む一方、プレイヤー側の自機の当たり判定（Hitbox）をわずか1〜2ピクセルにまで縮小させました。ゲームプレイは、初期の「敵の出現位置を覚える」ものから、動体視力と繊細なレバー捌き（精密操作）が極限まで試される「弾幕の隙間を縫って生き残る」ものへと変貌を遂げました。\n' +
-        '# 4. ニッチ化と精神の継承（2000年代〜現在）：東方Projectとインディーゲーム\n' +
-        '3Dゲームが全面的に普及するにつれ、2D縦スクロールシューティングは商業的なメインストリーム市場からは次第に姿を消し、コアなプレイヤー層のためのハードコアな狂宴へと変化していきました。しかし、同人やインディーゲームの領域で独自の進化を遂げることになります。\n' +
-        '• 『斑鳩』（Ikaruga, 2001）： トレジャー（Treasure）が開発。業界に衝撃を与えた「白と黒」の属性変更システム（同色の弾は吸収・無効化し、異色の敵には2倍のダメージを与える）を導入し、シューティングゲームをまるでパズルを解くかのような戦略的な高さへと引き上げました。\n' +
-        '• 『東方Project』シリーズ（1996年〜現在）： 主宰のZUN氏がほぼ一人で開発している同人弾幕ゲームシリーズ（『東方紅魔郷』『東方妖々夢』など）。優れた弾幕デザイン、魅力的な世界観、そして数多くの魅力的な美少女キャラクターによって爆発的な二次創作ブームを巻き起こし、弾幕シューティング文化をインターネット世代に広く浸透させることに成功しました。\n' +
-        '• 現代のモバイル展開とインディーゲーム： 近年、多くの縦スクロールシューティングゲームがスマートフォンへと舞台を移し（『Sky Force』シリーズや、各種課金型のシューティングアプリなど）、指一本のフリックで手軽に遊べるようになっています。あるいは、伝統的なSTGの硬派な精神を受け継ぐような、様々なインディー作品が開発され続けています。\n' +
-        '# まとめ\n' +
-        '縦スクロールシューティングゲームの歴史は、「大衆娯楽から極限のハードコアへ」と至る変遷の歴史です。もはやゲーム産業のステージ中央に身を置くことはなくなりましたが、このジャンルが遺したスクロール技術、当たり判定の概念、そして極限までスムーズなハードウェアの最適化ノウハウは、現代のビデオゲームの遺伝子の中に今も深く刻み込まれています。',
+        'レーシングゲーム（Racing Games）の発展史は、「ピクセルのブロック」から「リアルなシミュレーション」、そして「オープンワールド」へと進化してきた、テクノロジー発展の歴史でもあります。1970年代に誕生して以来、レーシングゲームは人々の「スピード」や「カスタマイズ」への欲求を満たすだけでなく、ゲームハードウェアやグラフィックス技術を何度も限界まで押し上げてきました。\n' +
+        'レーシングゲームの歴史における4つの主要な段階\n' +
+        '# 第1段階：アーケード黄金期の幕開け（1970年代～1990年代）\n' +
+        'コンピューターや家庭用ゲーム機が普及する以前、レーシングゲームの舞台は完全にアーケードでした。この時期のゲームの中心にあったのは、刺激的なスピード感と制限時間によるプレッシャーです。\n' +
+        '• 1974年『Gran Trak 10』： Atariが発売したアーケードゲームで、史上初のコイン式レーシングゲームとして広く知られています。白黒のドットマトリクス画面を採用し、初めて実物のステアリングホイール、シフトレバー、ペダルを導入しました。\n' +
+        '• 1982年『Pole Position』： バンダイナムコ（Bandai Namco）が発売した作品で、現代のレーシングゲームの基礎を築いたタイトルです。従来の俯瞰視点から脱却し、初めて後方から追従する三人称視点を採用。また、予選システムも導入されました。\n' +
+        '• 1986年『OutRun』： SEGAの伝説的な作品です。分岐する非線形のコース、フェラーリのスポーツカー、開放的なカリフォルニア海岸の雰囲気、そして自由に切り替えられるBGMを特徴としています。これによってレーシングゲームは、単なる「冷たい競技」から「ドライブそのものを楽しむ体験」へと変化しました。\n' +
+        '# 第2段階：シミュレーションの分化と多様化（1990年代後半～2000年代）\n' +
+        '3Dグラフィックスチップ（3dfx Voodooなど）や家庭用ゲーム機の性能が爆発的に向上すると、1997年前後からレーシングゲームは大きくジャンル分化し、一気に3つの主要市場へと発展していきました。\n' +
+        '• ハードコア・リアルシミュレーション（Sim Racing）： 1997年、SONYはPlayStation専用タイトルとして『Gran Turismo（グランツーリスモ）』を発売しました。単にアクセルを踏むだけではなく、タイヤのグリップ、荷重移動、仮想ライセンス取得、実在自動車メーカーの正式ライセンスなどを重視。「リアルな自動車生活」を体験するゲームに巨大な市場が存在することを証明しました。\n' +
+        '• ストリートカルチャーとカスタマイズ（Arcade/Street）： 映画『ワイルド・スピード』が世界的な人気を博す中、EAは2003年と2004年に『Need for Speed: Underground 1 & 2（ニード・フォー・スピード アンダーグラウンド）』を相次いで発売しました。豊富なネオン演出、車両カスタマイズシステム、警察とのカーチェイスなどを導入し、ストリートレース文化を最高潮へと押し上げました。\n' +
+        '• アイテムとファミリー向け（Party/Kart）： 1992年に誕生した『マリオカート（Mario Kart）』シリーズは、この時期に「パーティーゲームの王者」としての地位を確立しました。友情を壊しかねないアイテムシステムと高い操作性によって、家族みんなで楽しめる定番エンターテインメントとなりました。\n' +
+        '# 分裂とハードウェア革命：エンターテインメントとプロフェッショナルの二極化（2000年代後半～2010年代初頭）\n' +
+        'この時期になると、従来型の3Dアーケードレーシングは徐々に勢いを失い、レーシングゲームはより極端な二極化へと進んでいきました。\n' +
+        '• コア向けオンラインシミュレーション： 2008年に『iRacing』がサービスを開始しました。高額なサブスクリプション制と厳格なハードウェア要件（ステアリングホイールが必須）を採用し、実際のレーシングドライバーやハードコアなファンを対象としました。その後、多くのF1ドライバーが現実のシーズン外に利用するバーチャル・トレーニングツールとしても知られるようになりました。\n' +
+        '• ライトシミュレーション（Simcade）： 『Gran Turismo』やMicrosoftの『Forza Motorsport（フォルツァ モータースポーツ）』シリーズなどの大型タイトルは、その中間に位置するスタイルを確立しました。リアルな物理演算を維持しながらも、コントローラーだけで気軽にプレイできる設計となっています。\n' +
+        '# 第4段階：オープンワールドと現代の主流（2012年～現在）\n' +
+        '現代のプレイヤーは、もはや固定された閉鎖型のサーキットだけでは満足しなくなりました。「国全体を自分のレース場にする」というコンセプトが、ここ10年以上にわたってレーシングゲームの大きな潮流となっています。\n' +
+        '• 『Forza Horizon（フォルツァ ホライゾン）』シリーズ： 2012年に第1作が登場して以来、このシリーズは世界的に大きな影響力を持つレーシングゲームへと成長しました。美しく作り込まれたオープンワールド、陽気な音楽フェスティバルの雰囲気、そして非常に自由度の高いドライビング体験を確立しました。\n' +
+        '• 多機能マップとeスポーツ化： 『The Crew（ザ クルー）』のように、アメリカ全土を縮小してゲーム内に再現した作品も登場しました。同時に、現代のレーシングゲームはバーチャルレーシングのeスポーツ（Sim Racing Esports）とも強く結びついています。優れたバーチャルレーシングドライバーが、実際のプロレーシングチームからスカウトされ、本物のレーシングドライバーになる機会さえ生まれています。',
       // 「コンセプト構成」内文（日文）。行頭の # • ◦ > はスタイル記号（見出し / 項目 / 副項目 / 副項目の続き）
       'about.body.1':
-        '縦スクロールシューティングゲーム（Vertical Scrolling Shooter、略称：STG）のコア開発フローは、主に以下のキーモジュールに分解することができます。\n' +
-        '# 1. ゲーム視点とシーンの初期化 (Camera & Background)\n' +
-        '• カメラ設定： カメラの投影モードを正投影（Orthographic）に設定し、視点を上から下へ見下ろすトップダウン（Top-down）にします。\n' +
-        '• 背景のスクロール（スクロール）： 縦スクロールシューティングにおける「前進感」は、通常、背景を移動させることで表現します。\n' +
-        '◦ 実装方法： 無限ループする星空や地面のテクスチャを用意し、コードからUVオフセット（Offset）を常に変化させるか、2枚の背景画像を交互につなぎ合わせ、下方向へ移動させて座標をループリセットします。\n' +
-        '# 2. プレイヤー機体の制御 (Player)\n' +
-        '• 移動ロジック： キーボード（WASD / 方向キー）、マウス、またはスマホのタッチ操作を監視（リスン）します。\n' +
-        '◦ 重要なディテール： 機体が画面外に飛び出さないよう、Mathf.Clamp などを使って機体の座標を制限する必要があります。\n' +
-        '• オート射撃 / マニュアル射撃：\n' +
-        '◦ 射撃のインターバル時間（クールダウン：CD）を設定します。プレイヤーがボタンを押す、または画面をタップしている間、Instantiate（生成）によって弾オブジェクトを生成し、弾に上方向の速度を与えます。\n' +
-        '# 3. 弾と弾幕システム (Bullets & Danmaku)\n' +
-        '• 弾の移動： 弾は生成された後、特定の方向へ直進するか、特定の軌道（追跡、拡散など）に沿って移動します。\n' +
-        '• オブジェクトプール（Object Pooling）技術： これはシューティングゲームにおいて最も重要な最適化です！ 画面上には同時に何百、何千もの弾が表示されます。オブジェクトの生成（Create）と破棄（Destroy）を頻繁に繰り返すと、深刻なラグ（GCフリーズ）の原因になります。\n' +
-        '◦ 実装方法： あらかじめ弾のプールを作成しておき、弾を発射するときに「有効化（Active）」し、画面外に出るか敵に当たったときに「非有効化（Deactive）」して、繰り返し再利用します。\n' +
-        '• 境界での回収： 画面の上下に透明な境界トリガー（Boundary Trigger）を設定し、弾や敵がこの境界を越えたらすぐに回収または破棄することで、パフォーマンスの浪費を防ぎます。\n' +
-        '# 4. 敵とスポナー (Enemies & Spawner)\n' +
-        '• 敵の挙動： さまざまなタイプの敵の移動ルートを作成します（例：まっすぐ下降する、S字に動く、空中でしばらく停止してから去るなど）。\n' +
-        '• 生成コントローラー（Spawn Manager）：\n' +
-        '◦ 定期生成： コルーチン（Coroutine）やタイマーを使用し、数秒ごとに画面上部のランダムな座標に敵を生成します。\n' +
-        '◦ ステージスクリプト（タイムライン）： 応用的なアプローチとして、XML/JSONの構成表やタイムラインを作成し、「ゲーム開始10秒後にザコ敵Aが登場」「30秒後にエリート敵Bが登場」「60秒後にボスが登場」といったルールを設定します。\n' +
-        '# 5. 当たり判定と体力 (Collision & HP)\n' +
-        '• 衝突レイヤー設定（Layer Matrix）： 「敵の弾が敵に当たる」「プレイヤーの弾が自分に当たる」といった誤判定を防ぐため、衝突レイヤーを明確に区別します。\n' +
-        '◦ プレイヤーの弾は、敵 / 敵の弾 とのみ衝突する。\n' +
-        '◦ 敵の弾は、プレイヤー とのみ衝突する。\n' +
-        '• 被弾トリガー： 衝突（Trigger Enter）を検知した際、以下の処理を行います。\n' +
-        '> 1. 対象のHPを減算する。\n' +
-        '> 2. 爆発エフェクト（VFX）と効果音（SFX）を生成する。\n' +
-        '> 3. HPが0以下になった場合、撃破ロジック（プレイヤーなら残機減少またはゲームオーバー、敵ならスコア加算）を実行する。\n' +
-        '# 6. ゲームのメインループとUIシステム (Game Loop & UI)\n' +
-        '• スコアとコアデータ： GameManager を作成し、現在のスコアやプレイヤーの残機（Lives）を管理・記録します。\n' +
-        '• UI表示： HUD（ヘッドアップディスプレイ）を作成し、HPバー、ボムの残り数、現在のスコアなどを表示します。\n' +
-        '• 状態の遷移（ステート管理）： 「メインメニュー → ゲーム中 → 一時停止 → プレイヤー死亡 → ゲームオーバー / リトライ」というロジックの切り替えを処理します。',
+        '# 2Dレーシングゲームの制作過程\n' +
+        '2Dレーシングゲームは、いくつかの簡単なステップに分けて作ることができます。\n' +
+        '# 1. ゲームの内容を決める\n' +
+        'まず、ゲームの基本的な遊び方を考えます。例えば、プレイヤーが車を運転してコースを走り、決められた周回数を終えるとレースが終了するようにします。車やコース、ゲームモードなどを設定することもできます。\n' +
+        '# 2. コースを作る\n' +
+        '次に、ゲームのコースを作ります。カーブや直線、障害物、スタート地点などを設計します。また、車がコースの外に出ないように、壁などの当たり判定を設定します。\n' +
+        '# 3. プレイヤーの車を作る\n' +
+        'プレイヤーが操作できる車を作ります。キーボードなどを使って、車を加速・減速させたり、左右に曲がったりできるようにします。\n' +
+        '# 4. 車の衝突を設定する\n' +
+        '車が壁や障害物にぶつかったときに、速度が落ちたり、進む方向が変わったりするようにします。これによって、よりリアルなゲームになります。\n' +
+        '# 5. コンピューターの対戦車を作る\n' +
+        'コンピューターが操作する車を追加します。対戦車がコースに沿って走るように設定し、プレイヤーと競争できるようにします。\n' +
+        '# 6. レースのルールを設定する\n' +
+        '例えば、3周するとレースが終了するように設定します。そして、ゴールした順番によって順位を決めます。また、タイマーを使って、レースにかかった時間を記録することもできます。\n' +
+        '# 7. ゲーム画面を作る\n' +
+        '画面に速度、現在の周回数、レース時間、順位などを表示します。これによって、プレイヤーが現在のレース状況を簡単に確認できます。\n' +
+        '# 8. 音やエフェクトを追加する\n' +
+        '車のエンジン音、ブレーキ音、衝突音、BGMなどを追加します。また、煙や加速などのエフェクトを加えることで、ゲームをより楽しくすることができます。\n' +
+        '# 9. ゲームをテストする\n' +
+        '完成したらゲームを実際にプレイしてテストします。車を正常に操作できるか、コースに問題がないか、コンピューターの車が正常に走るか、レース終了や順位が正しく表示されるかなどを確認します。\n' +
+        '# 簡単にまとめると\n' +
+        '2Dレーシングゲームの制作の流れは、\n' +
+        'ゲームの企画 → コース制作 → 車の制作 → 操作機能の追加 → 衝突処理 → コンピューターの対戦車 → レースルールの設定 → ゲーム画面の制作 → 音やエフェクトの追加 → テスト\n' +
+        'という順番で進めることができます。',
       // 「Arcゲームライブラリ」内文（日文）
       'about.body.2':
         '「ARCの概遊庫（がいゆうこ）」という名前は、台湾華語の「蓋油庫（ガイヨウクー：油槽所を建てる）」という言葉の語呂合わせから生まれました（その真の意味は「概念ゲームの保藏庫」です）。自分自身、そしてすべての開発者が生み出す作品が、この「蓋油庫」の言葉通り、大儲けできる（油田を掘り当てる）ような存在になってほしいという願いが込められています。\n' +
@@ -164,68 +135,53 @@ const HISTORY_TEXT = {
       'about.fb': 'Facebook ファンページへ', 'about.fb.blocked': '新しいウィンドウがブロックされました。手動でURLを開いてください',
   },
   en: {
-      'about.0': 'About Shooting Games', 'about.1': 'Concept Structure', 'about.2': 'About Arc Games', 'about.soon': '(Coming soon)',
+      'about.0': 'About Racing Games', 'about.1': 'Concept Structure', 'about.2': 'About Arc Games', 'about.soon': '(Coming soon)',
       'about.body.0':
-        'Vertical Scrolling Shooters (often shortened to vertical shmups or simply STGs) are one of the oldest and most glorious genres in video game history. Typically featuring a top-down, bird\'s-eye perspective, players control a ship at the bottom of the screen to fend off waves of enemies flooding in from above. From the early days of bullets made of just one or two pixels to the screen-filling, dazzling bullet hells of later years, the vertical shooter has undergone several pivotal eras of evolution in both technology and gameplay:\n' +
-        '# 1. The Foundation Era (Late 1970s): Single-Screen and Movement Pioneers\n' +
-        'Before scrolling technology matured, early shooting games were mostly confined to a single, fixed screen.\n' +
-        '• Space Invaders (1978): While not a scrolling game, it established the golden formula of "horizontal movement and upward shooting," laying the core gameplay foundation for all future vertical shooters.\n' +
-        '• Galaxian (1979): This title introduced color graphics and enemies that dove at the player in sweeping, curved paths, bringing a newfound dynamism to the screen.\n' +
-        '# 2. The Scrolling Revolution & Golden Age (1980s): The Birth of the True "Vertical Scroll"\n' +
-        'In the early 1980s, the invention of scrolling technology—where the background constantly rolled downward—gave players a powerful sense of spatial expansion, making them feel as if their ship was genuinely soaring forward.\n' +
-        '• Xevious (1983): Released by Namco, this masterpiece is widely recognized as the pioneer and milestone of vertical scrolling shooters. It innovatively split weapons into anti-air lasers and air-to-ground bombs (which required aligning a ground reticle). It was also the first to feature a fully realized world-building lore and hidden secrets, setting the definitive framework for traditional STGs.\n' +
-        '• 1942 (1984): Capcom\'s World War II-themed classic introduced the "loop" emergency evasion mechanic and ignited a massive wave of military-styled WW2 shooters.\n' +
-        '• Twin Cobra (1987): Developed by Toaplan, this game solidified the classic STG formula: "weapon power-ups (P items) + screen-clearing panic bombs."\n' +
-        '• TwinBee (1985): Released by Konami, this game broke away from the serious sci-fi and military themes of the era. It became famous for its pastel, cute aesthetic and a playful system where players shot floating bells to change their colors and gain different special abilities.\n' +
-        '# 3. The Peak & The Extreme (1990s): High-Speed Fighting and the Birth of "Bullet Hell"\n' +
-        'As the 1990s rolled in, the arcade market was gradually taken over by 2D fighting games like Street Fighter. However, vertical shooters reached their technical and artistic zenith during this time, branching out into extreme subgenres.\n' +
-        '• Sonic Wings / Aero Fighters (1992): This game introduced aircraft from multiple nations alongside a quirky cast of pilots (including a cat). Its brisk pace made it an absolute staple in arcades.\n' +
-        '• Raiden (1990): Developed by Seibu Kaihatsu, it became synonymous with vertical shooters thanks to its heavy, mechanical ship designs, smooth sprite animation, and notoriously punishing difficulty.\n' +
-        '• RayForce (1994): A classic produced by Taito, it centered on a dual-layer perspective concept. Players could lock onto enemies located on the lower background layer and fire homing lasers. Its art direction and musical score achieved legendary, god-tier status.\n' +
-        '• The Rise of Bullet Hell (Danmaku) Games:\n' +
-        '◦ In 1995, CAVE—a company formed by former Toaplan staff—released DonPachi, followed by DoDonpachi in 1997.\n' +
-        '◦ This officially heralded the arrival of the "Bullet Hell" era. These games compressed enemy fire into incredibly dense, massive, and stunningly intricate patterns. To compensate, they shrank the player ship\'s hitbox down to just one or two pixels. Gameplay shifted from the early days of memorizing enemy spawns to an extreme test of dynamic vision and pixel-perfect micro-dodging to survive in the gaps between bullets.\n' +
-        '# 4. Niche Appeal & Spiritual Succession (2000s–Present): Touhou Project and Indie Games\n' +
-        'With the mainstream adoption of 3D gaming, 2D vertical shooters gradually receded from commercial mass markets, transforming into a hardcore celebration for dedicated enthusiasts and blooming beautifully in the doujin and indie scenes.\n' +
-        '• Ikaruga (2001): Developed by Treasure, it shocked the industry with its "Black and White" polarity-shifting system. Absorbing bullets of the same color while dealing double damage to opposite-colored enemies elevated the shooter genre to a strategic, puzzle-like depth.\n' +
-        '• Touhou Project Series (1996–Present): A doujin bullet hell series developed almost entirely by a single creator, ZUN (e.g., The Embodiment of Scarlet Devil, Perfect Cherry Blossom). Driven by excellent bullet patterns, deep lore, and a cast of charming anime heroines, it sparked a massive wave of fan-made derivative content, successfully preserving and popularizing bullet hell culture for the internet generation.\n' +
-        '• Modern Mobile & Indie Games: In recent years, many vertical shooters have migrated to smartphones (such as the Sky Force series and various free-to-play, microtransaction-based mobile shmups), allowing casual play with single-finger swiping. Meanwhile, distinct indie titles continue to pass down the unyielding, hardcore spirit of traditional STGs.\n' +
-        '# Conclusion\n' +
-        'The history of vertical scrolling shooters is an evolution of "moving from mass entertainment to the absolute extreme of hardcore gaming." Though it no longer stands at the center stage of the gaming industry, its legacy—scrolling mechanics, the concept of precise hitboxes, and hyper-optimized hardware performance—has been deeply woven into the DNA of modern video games.',
+        'The history of racing games is also a history of technological evolution—from "pixelated blocks" to "realistic simulation" and eventually to "open worlds." Since their emergence in the 1970s, racing games have not only satisfied people\'s desire for speed and vehicle customization, but have also repeatedly pushed gaming hardware and graphics technology to their limits.\n' +
+        'The Four Major Stages in the Development of Racing Games\n' +
+        '# Stage 1: The Golden Age of Arcades (1970s–1990s)\n' +
+        'Before computers and home consoles became widespread, the arcade was the primary platform for racing games. During this period, the core appeal of racing games was an exciting sense of speed and the pressure created by time limits.\n' +
+        '• 1974 – Gran Trak 10: Released by Atari, it is widely regarded as one of the earliest coin-operated racing games in history. It featured a black-and-white dot-matrix display and introduced physical controls such as a steering wheel, gear shifter, and pedals.\n' +
+        '• 1982 – Pole Position: Developed and released by Namco, this game laid the foundation for modern racing games. It moved away from the traditional top-down perspective and pioneered a third-person, chase-camera view from behind the car. It also introduced a qualifying system.\n' +
+        '• 1986 – OutRun: SEGA\'s legendary title introduced branching, nonlinear routes, Ferrari sports cars, a relaxed California coastal atmosphere, and freely selectable radio music. It transformed racing games from "cold competition" into an experience centered around the joy of driving.\n' +
+        '# Stage 2: The Rise of Simulation and Genre Diversification (Late 1990s–2000s)\n' +
+        'With the explosive improvement of 3D graphics chips, such as the 3dfx Voodoo, and the increasing power of home consoles, racing games underwent major genre diversification around 1997. Almost overnight, the genre developed into three major markets:\n' +
+        '• Hardcore Realistic Simulation (Sim Racing): In 1997, SONY released the PlayStation exclusive Gran Turismo. Rather than simply focusing on acceleration, it emphasized tire grip, weight transfer, virtual license tests, and officially licensed real-world car manufacturers. It demonstrated that there was a huge market for a realistic "automotive lifestyle" experience.\n' +
+        '• Street Culture and Customization (Arcade/Street): As the Fast & Furious film franchise became a global phenomenon, EA released Need for Speed: Underground in 2003 and Need for Speed: Underground 2 in 2004. The games introduced extensive neon lighting, vehicle customization, and police pursuits, pushing street-racing culture to new heights.\n' +
+        '• Items and Family-Friendly Fun (Party/Kart): The Mario Kart series, which began in 1992, firmly established itself during this period as the "king of party racing games." Its friendship-destroying item mechanics and highly accessible gameplay made it a popular form of entertainment for players of all ages.\n' +
+        '# The Split and Hardware Revolution: The Polarization of Entertainment and Professional Simulation (Late 2000s–Early 2010s)\n' +
+        'During this period, traditional 3D arcade racing games gradually declined, while racing games became increasingly divided into two distinct directions.\n' +
+        '• Hardcore Online Simulation: In 2008, iRacing was launched. It adopted a relatively expensive subscription model and strict hardware requirements, typically requiring a steering wheel setup. It was designed specifically for real-world racing drivers and hardcore enthusiasts. It later became a virtual training tool used by many F1 drivers outside the real-world racing season.\n' +
+        '• Accessible Simulation (Simcade): Major franchises such as Gran Turismo and Microsoft\'s Forza Motorsport series established a middle ground. They retained realistic physics while still allowing players to enjoy the games comfortably with a standard controller.\n' +
+        '# Stage 4: The Rise of Open-World Racing (2012–Present)\n' +
+        'Modern players are no longer satisfied with fixed, closed circuits. The idea of "turning an entire country into your racetrack" has become one of the defining trends in racing games over the past decade.\n' +
+        '• The Forza Horizon Series: Since the release of the first game in 2012, the series has gradually become one of the most influential racing franchises in the world. It pioneered beautifully designed open worlds, vibrant music-festival atmospheres, and highly flexible driving experiences.\n' +
+        '• Expansive Maps and the Rise of Esports: Games such as The Crew even recreated a scaled-down version of the entire United States within the game world. At the same time, modern racing games have become increasingly connected with sim racing esports. Highly skilled virtual racing drivers now even have opportunities to be recruited by professional racing teams and transition into real-world motorsport careers.',
       // "Concept Structure" body text (English). Leading # • ◦ > are style markers (heading / bullet / sub-bullet / sub-bullet continuation), see aboutLayout in menu-scene.js
       'about.body.1':
-        'Vertical Scrolling Shooter (commonly abbreviated as STG), the core development workflow can be broken down into the following key modules:\n' +
-        '# 1. Game View and Scene Initialization\n' +
-        '• Camera Setup: Adjust the camera projection to Orthographic and set the view to Top-down (looking straight down from above).\n' +
-        '• Background Scrolling: The sensation of "moving forward" in a vertical shooter is typically created by moving the background.\n' +
-        '◦ Implementation: Use a seamlessly looping texture of a starry sky or terrain and constantly update its UV Offset via code. Alternatively, tile two background images together, move them downward, and reset their coordinates in a continuous cycle.\n' +
-        '# 2. Player Control\n' +
-        '• Movement Logic: Listen for inputs from the keyboard (WASD / Arrow Keys), mouse, or mobile touch controls.\n' +
-        '◦ Critical Detail: You must use Mathf.Clamp to restrict the starfighter\'s coordinates, preventing the player from flying off the screen boundaries.\n' +
-        '• Auto-fire / Manual Fire:\n' +
-        '◦ Set a firing interval (Cooldown / CD). When the player presses the designated key or touches the screen, use Instantiate to spawn bullet objects and apply an upward velocity to them.\n' +
-        '# 3. Bullets & Danmaku System\n' +
-        '• Bullet Movement: Once spawned, bullets move forward in a specific direction or follow designated trajectories (e.g., homing, spread shots).\n' +
-        '• Object Pooling Technique: This is the most crucial optimization in shooting games! Hundreds or thousands of bullets can appear on screen simultaneously. Frequently creating and destroying these objects will cause severe game stuttering (GC spikes/freezes).\n' +
-        '◦ Implementation: Instantiate a bullet pool in advance. When a bullet is fired, "set it to active". When it flies off-screen or hits an enemy, "deactivate it" so it can be recycled and reused.\n' +
-        '• Boundary Recycling: Place an invisible Boundary Trigger at the top and bottom of the screen. Any bullet or enemy crossing this boundary is immediately recycled or destroyed to prevent performance waste.\n' +
-        '# 4. Enemies & Spawner\n' +
-        '• Enemy Behavior: Create distinct movement paths for different types of enemies (e.g., flying straight down, moving in an S-pattern, or hovering in the air for a while before exiting).\n' +
-        '• Spawn Manager:\n' +
-        '◦ Timed Spawning: Use a Coroutine or a timer to spawn enemies at random coordinates along the top of the screen every few seconds.\n' +
-        '◦ Level Scripting (Timeline): An advanced approach is to write an XML/JSON configuration table or timeline. This specifies that Enemy Minion A appears at 10 seconds, Elite Monster B appears at 30 seconds, and the Boss appears at 60 seconds.\n' +
-        '# 5. Collision & HP\n' +
-        '• Collision Masking (Layer Matrix): Clearly separate collision layers to prevent accidental interactions like "enemy bullets hitting enemies" or "player bullets hitting the player".\n' +
-        '◦ Player Bullets should only collide with Enemies / Enemy Bullets.\n' +
-        '◦ Enemy Bullets should only collide with the Player.\n' +
-        '• On-Hit Trigger: When a collision is detected (OnTriggerEnter), execute the following:\n' +
-        '> 1. Deduct HP from the target.\n' +
-        '> 2. Spawn explosion visual effects (VFX) and play sound effects (SFX).\n' +
-        '> 3. If HP <= 0, trigger the destruction logic (lose a life/Game Over for the player, or award points for an enemy).\n' +
-        '# 6. Game Loop & UI System\n' +
-        '• Score & Core Data: Create a GameManager to keep track of the current score and the player\'s remaining lives.\n' +
-        '• UI Interface: Design a Heads-Up Display (HUD) to display the health bar, bomb count, and current score.\n' +
-        '• State Management: Handle the state machine transitions between: Main Menu → In-Game → Paused → Player Death → Game Over / Restart.',
+        '# How to Make a 2D Racing Game\n' +
+        'A 2D racing game can be created by following several simple steps.\n' +
+        '# 1. Decide the Game Content\n' +
+        'First, decide how the game will be played. For example, the player drives a car around a track and completes a certain number of laps to finish the race. You can also add different cars, tracks, and game modes.\n' +
+        '# 2. Create the Track\n' +
+        'Next, design the racing track. You can add curves, straight roads, obstacles, and a starting point. Collision areas should also be added so that the car does not drive outside the track.\n' +
+        '# 3. Create the Player\'s Car\n' +
+        'Create a car that the player can control. The player should be able to accelerate, slow down, and turn the car using a keyboard or another control method.\n' +
+        '# 4. Add Collision\n' +
+        'When the car hits a wall or an obstacle, its speed can decrease or its direction can change. This makes the game feel more realistic.\n' +
+        '# 5. Create Computer-Controlled Cars\n' +
+        'Add cars controlled by the computer. These cars can follow the track and race against the player, making the game more challenging.\n' +
+        '# 6. Set the Racing Rules\n' +
+        'Set the rules of the race. For example, the race can end after the player completes three laps. The finishing order determines the rankings. A timer can also be added to record the player\'s race time.\n' +
+        '# 7. Create the Game Interface\n' +
+        'Display information such as speed, current lap, race time, and ranking on the screen. This allows the player to easily understand the current race situation.\n' +
+        '# 8. Add Sounds and Effects\n' +
+        'Add engine sounds, braking sounds, collision sounds, and background music. You can also add effects such as smoke and speed effects to make the game more exciting.\n' +
+        '# 9. Test the Game\n' +
+        'After completing the game, test it carefully. Check whether the car can be controlled properly, whether there are any problems with the track, whether the computer-controlled cars work correctly, and whether the race ending and rankings are displayed correctly.\n' +
+        '# In Simple Terms\n' +
+        'The basic process of making a 2D racing game is:\n' +
+        'Game planning → Track design → Car creation → Controls → Collision → Computer-controlled cars → Racing rules → Game interface → Sounds and effects → Testing',
       // "About Arc Games" body text (English). The CJK-first font renders a curly apostrophe as a wide glyph, so plain apostrophes are used
       'about.body.2':
         'The name "ARC\'s Concept Play-Chamber" (ARCの概遊庫) was inspired by a Chinese wordplay on "building an oil depot" (Gai You Ku), which in this context stands for a "Concept Game Repository." My hope is that my own work, alongside the creations of all fellow developers, can be just like that "oil depot"—bringing in massive wealth and striking it rich!\n' +
