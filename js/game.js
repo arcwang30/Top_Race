@@ -16,7 +16,7 @@ const Game = {
       sc: { dist: 0, drift: 0, coin: 0, cp: 0, time: 0, clear: 0 }, coins: 0,
       time: CFG.startTime, elapsed: 0, phase: 'countdown', countT: 3.6, cp: 0, stage: 1,
       drift: false, bg: [0, 0, 0], bgTheme: 0, bgPrev: 0, bgFade: 0,
-      toast: null, pops: [], parts: [], wheel: 0, t: 0, endT: 0, tickSec: -1, bumpCool: 0, treeCool: 0
+      toast: null, pops: [], parts: [], fly: [], wheel: 0, t: 0, endT: 0, tickSec: -1, bumpCool: 0, treeCool: 0
     };
   },
 
@@ -63,8 +63,8 @@ const Game = {
     const thr = canCtl && inp.throttle, brk = canCtl && inp.brake;
     const steer = (canCtl && s.slipT <= 0) ? inp.steer : 0;
     if (canCtl && inp.was('nitro') && s.nitro > 0 && s.nitroT <= 0) {
-      s.nitro--; s.nitroT = C.nitroTime; s.shake = 0.35; Sound.play('nitro');
-      this.toast('NITRO!', '', 0.8, '#7fe4ff', 72);
+      s.nitro--; s.nitroT = C.nitroTime; s.slipT = 0; s.shake = 0.35; Sound.play('nitro');
+      this.toast('NITRO!', '無敵衝刺!', 1.0, '#7fe4ff', 72);
     }
     if (s.nitroT > 0) s.nitroT = Math.max(0, s.nitroT - dt);
     const boosting = s.nitroT > 0;
@@ -157,6 +157,7 @@ const Game = {
   collide(oldZ, newZ, playing) {
     const s = this.s, T = this.track, L = CFG.segLen, RH = CFG.roadHalf;
     const i0 = Math.floor(oldZ / L), i1 = Math.floor(newZ / L);
+    const inv = s.nitroT > 0;
     for (let i = i0; i <= i1; i++) {
       const sg = T.segs[i % T.N];
       for (const sp of sg.sprites) {
@@ -169,18 +170,26 @@ const Game = {
           sp.taken = true; Sound.play('nitroGet');
           if (s.nitro < CFG.nitroMax) { s.nitro++; this.pop('NITRO +1', '#7fe4ff'); }
           else { s.sc.coin += SCORE.bottleFull; this.pop('+' + SCORE.bottleFull, '#7fe4ff'); }
+        } else if ((sp.kind === 'poop' || sp.kind === 'rock') && inv) {
+          sp.taken = true; this.smash(sp.name, sp.offset, 130, 500);
         } else if (sp.kind === 'poop' && playing && s.invT <= 0 && s.crashT <= 0 && s.slipT <= 0) {
           sp.taken = true; s.slipT = this.SLIP_T; s.slipDir = s.x > sp.offset ? 1 : -1; s.shake = 0.25;
           Sound.play('slip'); this.toast('打滑!', '', 1.0, '#c78a4a', 60);
         } else if (sp.kind === 'rock' && playing && s.invT <= 0 && s.crashT <= 0) {
           sp.taken = true; s.crashT = this.CRASH_T; s.slipT = 0; s.shake = 0.9; s.nitroT = 0;
           Sound.play('crash'); this.toast('翻車!', '', 1.4, '#ff5c7a', 72);
-        } else if (sp.kind === 'solid' && s.treeCool <= 0 && s.speed > 800) {
+        } else if (sp.kind === 'solid' && !inv && s.treeCool <= 0 && s.speed > 800) {
           s.treeCool = 0.5; s.speed *= 0.35; s.shake = 0.5;
           s.x = sp.offset - Math.sign(sp.offset) * (sp.hit + 0.3); Sound.play('bump');
         }
       }
-      for (const c of sg.cars) {
+      for (const c of sg.cars.slice()) {
+        if (inv) {
+          if (Math.abs(c.x - s.x) > 0.55 || Math.abs(newZ - c.z) > 320) continue;
+          c.dead = true; sg.cars.splice(sg.cars.indexOf(c), 1);
+          this.smash('enemy' + c.type, c.x, 170, 2000);
+          continue;
+        }
         if (s.speed <= c.speed || Math.abs(c.x - s.x) > 0.5 || s.bumpCool > 0) continue;
         if (Math.abs(newZ - c.z) > 240) continue;
         s.speed = c.speed * 0.9;
@@ -192,9 +201,20 @@ const Game = {
     }
   },
 
+  smash(name, off, w, pts) {
+    const s = this.s, y = this.info ? this.info.playerY : 850;
+    const x = W / 2 + clamp((off - s.x) * 250, -220, 220);
+    const dir = (off - s.x) >= 0 ? 1 : -1;
+    s.fly.push({ img: Spr.get(name), x, y: y - 90, vx: dir * (260 + Math.random() * 260), vy: -650 - Math.random() * 250, rot: 0, vr: dir * (8 + Math.random() * 6), w, t: 0 });
+    s.sc.coin += pts; this.pop('SMASH! +' + pts, '#ffd23f');
+    s.shake = Math.max(s.shake, 0.35); Sound.play('bump');
+    for (let i = 0; i < 14; i++) s.parts.push({ x, y: y - 90, vx: (Math.random() - 0.5) * 520, vy: -Math.random() * 420, life: 0.55, max: 0.55, r: 4, color: Math.random() < 0.5 ? '#fff3a0' : '#7fe4ff', star: true });
+  },
+
   updateCars(dt, pz) {
     const s = this.s, T = this.track;
     for (const c of T.cars) {
+      if (c.dead) continue;
       const rel = c.z - pz;
       if (rel > CFG.drawDist * CFG.segLen * 1.2 || rel < -6000) continue;
       c.z += c.speed * dt;
@@ -220,7 +240,14 @@ const Game = {
     if (off && pct > 0.12) {
       for (const sx of [-58, 58]) emit(W / 2 + sx, y - 6, (Math.random() - 0.5) * 120, -60 - Math.random() * 80, 0.5, 8 + Math.random() * 8, THEMES[s.bgTheme].grass[1]);
     }
+    s.fly.forEach(f => { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 1500 * dt; f.rot += f.vr * dt; });
+    s.fly = s.fly.filter(f => f.t < 1.2);
     if (boosting) {
+      for (let k = 0; k < 2; k++) {
+        const a = Math.random() * TAU, r = 90 + Math.random() * 40;
+        emit(W / 2 + Math.cos(a) * r, y - 70 + Math.sin(a) * r * 0.8, Math.cos(a) * 40, Math.sin(a) * 40 - 30, 0.5, 5, Math.random() < 0.5 ? '#fff3a0' : '#9ff0ff');
+        s.parts[s.parts.length - 1].star = true;
+      }
       for (const sx of [-16, 16]) emit(W / 2 + sx, y - 12, (Math.random() - 0.5) * 60, 60 + Math.random() * 80, 0.35, 5 + Math.random() * 4, Math.random() < 0.5 ? '#7fe4ff' : '#fff3a0');
     }
     if (s.crashT > 0 && Math.random() < 0.5) emit(W / 2 + (Math.random() - 0.5) * 80, y - 40, (Math.random() - 0.5) * 200, -120 - Math.random() * 120, 0.6, 6, '#ffd23f');
@@ -281,6 +308,16 @@ const Game = {
       rot = (1 - s.slipT / this.SLIP_T) * TAU * 2 * -s.slipDir;
     }
     const lean = Input.steer * 0.1 * (s.slipT > 0 || s.crashT > 0 ? 0 : 1);
+    if (s.nitroT > 0) {
+      const pulse = 1 + Math.sin(s.t * 14) * 0.06, cy = y - 70;
+      g.save();
+      const gr = g.createRadialGradient(W / 2, cy, 20, W / 2, cy, 135 * pulse);
+      gr.addColorStop(0, 'rgba(255,243,160,0.05)'); gr.addColorStop(0.7, 'rgba(127,228,255,0.35)'); gr.addColorStop(1, 'rgba(127,228,255,0)');
+      g.fillStyle = gr; g.beginPath(); g.arc(W / 2, cy, 135 * pulse, 0, TAU); g.fill();
+      g.strokeStyle = 'rgba(255,243,160,0.85)'; g.lineWidth = 4; g.setLineDash([16, 12]); g.lineDashOffset = -s.t * 90;
+      g.beginPath(); g.ellipse(W / 2, cy, 108 * pulse, 92 * pulse, 0, 0, TAU); g.stroke();
+      g.restore();
+    }
     g.save();
     if (s.invT > 0 && Math.floor(s.t * 14) % 2) g.globalAlpha = 0.45;
     g.translate(W / 2, y - hop);
@@ -293,9 +330,19 @@ const Game = {
   },
 
   drawParts(g) {
+    for (const f of this.s.fly) {
+      const h = f.w * f.img.height / f.img.width;
+      g.save(); g.translate(f.x, f.y); g.rotate(f.rot); g.globalAlpha = clamp(1.2 - f.t, 0, 1);
+      g.drawImage(f.img, -f.w / 2, -h / 2, f.w, h); g.restore();
+    }
     for (const p of this.s.parts) {
       g.globalAlpha = clamp(p.life / p.max, 0, 1);
-      g.fillStyle = p.color; g.beginPath(); g.arc(p.x, p.y, p.r * (1 + (1 - p.life / p.max) * 0.6), 0, TAU); g.fill();
+      g.fillStyle = p.color;
+      if (p.star) {
+        const r = p.r * 2.2;
+        g.beginPath(); g.moveTo(p.x, p.y - r); g.lineTo(p.x + r * 0.3, p.y - r * 0.3); g.lineTo(p.x + r, p.y); g.lineTo(p.x + r * 0.3, p.y + r * 0.3);
+        g.lineTo(p.x, p.y + r); g.lineTo(p.x - r * 0.3, p.y + r * 0.3); g.lineTo(p.x - r, p.y); g.lineTo(p.x - r * 0.3, p.y - r * 0.3); g.closePath(); g.fill();
+      } else { g.beginPath(); g.arc(p.x, p.y, p.r * (1 + (1 - p.life / p.max) * 0.6), 0, TAU); g.fill(); }
     }
     g.globalAlpha = 1;
   },

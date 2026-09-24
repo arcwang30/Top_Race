@@ -17,7 +17,7 @@ const CFG = {
   YS: 460,
   horizon: 390,
 
-  maxSpeed: 12000,
+  maxSpeed: 9000,
   normalMax: 0.8,
   accel: 0.17,
   brake: 0.65,
@@ -31,14 +31,14 @@ const CFG = {
   steerRate: 2.2,
 
   sections: FAST ? [240, 240, 240] : [3400, 3600, 3800],
-  startTime: FAST ? 40 : 100,
-  bonusTime: FAST ? [30, 30] : [85, 85],
+  startTime: FAST ? 40 : 150,
+  bonusTime: FAST ? [30, 30] : [110, 110],
   enemyGap: 95
 };
 CFG.playerZ = CFG.camH * CFG.camDepth;
 
 const SCORE = {
-  perSeg: 100, coin: 1000, cp: 100000, timeBonus: 5000,
+  perSeg: 130, coin: 1000, cp: 100000, timeBonus: 5000,
   clear: 500000, drift: 500, bottleFull: 2000, max: 9999999
 };
 

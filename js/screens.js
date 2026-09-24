@@ -240,7 +240,7 @@ Screens.howto = {
       ['油門', '按住不放,車速會線性加速;放開則慢慢滑行減速。'],
       ['剎車', '按下後減速(點放控制力道)。過急彎前先減速!'],
       ['甩尾', '「油門」+「剎車」同時按住,再按左/右,車身會飄移,能以不低的速度過彎,還有額外加分!'],
-      ['氮氣', '按下消耗 1 瓶,在 BAR 條限制時間內瞬間爆發加速。']
+      ['氮氣', '按下消耗 1 瓶,BAR 條時間內瞬間加速且無敵,碰到障礙與敵車會把牠們撞飛!']
     ];
     let y = 520;
     tips.forEach(([t, d]) => {
@@ -252,7 +252,7 @@ Screens.howto = {
   p3(g) {
     const items = [
       ['coin', '金幣', '取得後獲得 1000 分。', 44, 0],
-      ['nitro', '氮氣瓶', '最多持有 5 瓶,使用後短時間極速加速。', 34, 0],
+      ['nitro', '氮氣瓶', '最多 5 瓶。使用後極速加速且無敵,可撞飛障礙與敵車!', 34, 0],
       ['poop', '大便', '踩到會打滑轉圈、失去控制並減速。', 64, 0],
       ['rock', '石塊', '撞到會整台翻車,速度歸零。', 70, 0],
       ['enemy1', '呱呱 (青蛙)', '龜速直行的路障車,超車時小心。', 0, 1],
@@ -367,8 +367,8 @@ Screens.credits = {
 
 // ---------- 排行榜 ----------
 Screens.ranking = {
-  sel: 0, n: 0, hl: null, confirmReset: 0,
-  enter(arg) { this.hl = arg && arg.entry; this.sel = 0; this.confirmReset = 0; if (this.hl) Sound.music('menu'); },
+  sel: 0, n: 0, hl: null,
+  enter(arg) { this.hl = arg && arg.entry; this.sel = 0; if (this.hl) Sound.music('menu'); },
   frame(g, dt) {
     BG.draw(g, 0, [App.t * 8, App.t * 18, App.t * 36], 300);
     g.fillStyle = THEMES[0].grass[0]; g.fillRect(0, 300, W, H - 300);
@@ -400,12 +400,6 @@ Screens.ranking = {
     UI.begin(this);
     if (UI.button(g, this, '返回主選單', 150, 884, 240, 56, { back: true }) || Input.was('back')) App.goto('menu');
     UI.nav(this);
-    const rb = [426, 896, 96, 36];
-    UI.panel(g, rb[0], rb[1], rb[2], rb[3], 18, this.confirmReset ? '#ff5c7a' : 'rgba(255,255,255,.15)');
-    UI.text(g, this.confirmReset ? '再按確認' : '重置', rb[0] + rb[2] / 2, rb[1] + 18, 15, { stroke: null });
-    if (UI.tapIn(rb[0], rb[1], rb[2], rb[3])) {
-      if (this.confirmReset) { Save.reset(); this.confirmReset = 0; this.hl = null; Sound.play('back'); } else { this.confirmReset = 1; Sound.play('select'); }
-    }
   }
 };
 

@@ -51,7 +51,7 @@ const Road = (() => {
         if (r < 0.20) b.road(n * 0.3, n * 0.4, n * 0.3, 0, rand() < 0.6 ? hillOf() : 0);
         else if (r < 0.42) b.road(n * 0.3, n * 0.5, n * 0.3, dir * (2.2 + rand() * 1.2), rand() < 0.5 ? hillOf() : 0);
         else if (r < 0.66) b.road(14, 26 + rand() * 16, 14, dir * (4.4 + rand()), rand() < 0.4 ? hillOf() : 0);
-        else if (r < 0.66 + hairP[s]) { b.road(12, 30 + rand() * 14, 12, dir * 9.2, 0); b.road(15, 20, 15, 0, 0); }
+        else if (r < 0.66 + hairP[s]) { b.road(12, 30 + rand() * 14, 12, dir * 8.4, 0); b.road(15, 20, 15, 0, 0); }
         else if (r < 0.9) { b.road(15, 25, 15, dir * 4.2, 0); b.road(15, 25, 15, -dir * 4.2, 0); }
         else { const h = 8 + ((rand() * 8) | 0); b.road(20, 30, 20, 0, h); b.road(20, 30, 20, 0, -h); }
       }
@@ -107,7 +107,7 @@ const Road = (() => {
 
     const put = (i, sp) => { if (segs[i]) segs[i].sprites.push(sp); };
     const coin = (i, off) => put(i, { name: 'coin', offset: off, w: 300, kind: 'coin', lift: 230, phase: rand() * 6 });
-    const obst = [0.28, 0.36, 0.44];
+    const poopP = [0.06, 0.08, 0.1], rockP = [0.015, 0.025, 0.035];
     for (let sec = 0; sec < 3; sec++) {
       const from = (sec === 0 ? 70 : t.cps[sec - 1] + 50), to = t.cps[sec] - 70;
       let i = from;
@@ -116,14 +116,9 @@ const Road = (() => {
         if (r < 0.33) { const n = 6 + ((rand() * 5) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         else if (r < 0.48) { const ph = rand() * 6; for (let k = 0; k < 12; k++) coin(i + k * 2, 0.62 * Math.sin(k * 0.55 + ph)); i += 24; }
         else if (r < 0.6) { put(i, { name: 'nitro', offset: lane, w: 300, kind: 'nitro', lift: 260, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
-        else if (r < 0.6 + obst[sec] * 0.55) {
-          const n = 1 + ((rand() * 2) | 0), free = (rand() * 3) | 0;
-          for (let k = 0; k < 3; k++) if (k !== free && (k < n + 1)) put(i, { name: 'poop', offset: LANES[k] + (rand() - 0.5) * 0.15, w: 420, kind: 'poop' });
-        } else {
-          const n = 1 + ((rand() * 2) | 0), free = (rand() * 3) | 0;
-          let c = 0;
-          for (let k = 0; k < 3 && c < n; k++) if (k !== free) { put(i, { name: 'rock', offset: LANES[k] + (rand() - 0.5) * 0.12, w: 560, kind: 'rock' }); c++; }
-        }
+        else if (r < 0.6 + poopP[sec]) put(i, { name: 'poop', offset: lane + (rand() - 0.5) * 0.15, w: 420, kind: 'poop' });
+        else if (r < 0.6 + poopP[sec] + rockP[sec]) put(i, { name: 'rock', offset: lane + (rand() - 0.5) * 0.12, w: 560, kind: 'rock' });
+        else { const n = 5 + ((rand() * 4) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         i += 22 + ((rand() * 26) | 0);
       }
     }
