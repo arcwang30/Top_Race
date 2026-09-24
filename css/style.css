@@ -1,0 +1,49 @@
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #3a2a6a 0%, #1a1030 70%);
+  font-family: "Zen Maru Gothic", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#stage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#game {
+  display: block;
+  background: #000;
+  touch-action: none;
+  outline: none;
+}
+
+#nameInput {
+  position: absolute;
+  display: none;
+  left: 15%;
+  width: 70%;
+  top: 70%;
+  height: 7%;
+  text-align: center;
+  font-family: inherit;
+  font-weight: 900;
+  color: #4a2a5a;
+  background: #fff;
+  border: 4px solid #ff7aa8;
+  border-radius: 999px;
+  outline: none;
+  text-transform: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+#nameInput:focus { border-color: #ffd23f; box-shadow: 0 0 16px #ffd23f; }
