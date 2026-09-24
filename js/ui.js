@@ -4,6 +4,7 @@
 const UI = {
   text(g, str, x, y, size, o) {
     o = o || {};
+    str = tr(str);
     g.save();
     if (o.alpha !== undefined) g.globalAlpha = o.alpha;
     g.font = `${o.italic ? 'italic ' : ''}${o.weight || 900} ${size}px ${FONT}`;
@@ -51,11 +52,13 @@ const UI = {
   },
 
   wrap(g, str, x, y, maxW, lineH, size, o) {
+    str = tr(str);
     g.font = `${(o && o.weight) || 700} ${size}px ${FONT}`;
     const lines = []; let cur = '';
-    for (const ch of str) {
+    const words = Save.data.lang === 'en';
+    for (const ch of (words ? str.split(/(?<= )/) : str)) {
       if (ch === '\n') { lines.push(cur); cur = ''; continue; }
-      if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ch; } else cur += ch;
+      if (g.measureText(cur + ch).width > maxW && cur) { lines.push(cur.trimEnd()); cur = ch; } else cur += ch;
     }
     if (cur) lines.push(cur);
     lines.forEach((ln, i) => this.text(g, ln, x, y + i * lineH, size, Object.assign({ align: 'left', stroke: null }, o || {})));
@@ -102,6 +105,8 @@ const UI = {
     scr.sel = clamp(scr.sel, 0, scr.n - 1);
   },
 
+  copyright(g) { this.text(g, "©Arc's Concept Game", W - 14, 942, 18, { align: 'right', fill: '#40284a', stroke: '#ffffff', sw: 6 }); },
+
   inside(px, py, x, y, w, h) { return px >= x && px <= x + w && py >= y && py <= y + h; },
   tapIn(x, y, w, h) { return Input.taps.some(t => this.inside(t.x, t.y, x, y, w, h)); },
 
@@ -109,6 +114,6 @@ const UI = {
 
   header(g, title, sub) {
     this.text(g, title, W / 2, 62, 50, { fill: '#fff27a', sw: 10 });
-    if (sub) this.text(g, sub, W / 2, 106, 20, { fill: '#cfd8ff', stroke: null });
+    if (sub && tr(title) !== sub) this.text(g, sub, W / 2, 106, 20, { fill: '#cfd8ff', stroke: null });
   }
 };

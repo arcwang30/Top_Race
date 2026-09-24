@@ -136,13 +136,13 @@ const Game = {
         const i = s.cp++;
         if (i < 2) {
           s.time += C.bonusTime[i]; s.sc.cp += SCORE.cp; s.stage = i + 2;
-          this.toast('CHECK POINT!', `TIME +${C.bonusTime[i]} 秒`, 2.2, '#ffe680', 60);
+          this.toast('CHECK POINT!', tr('TIME +{0} 秒', C.bonusTime[i]), 2.2, '#ffe680', 60);
           Sound.play('checkpoint');
           Sound.music(this.course.music[i + 1]);
         } else {
           s.phase = 'goal'; s.endT = 0;
           s.sc.time = Math.floor(s.time) * SCORE.timeBonus; s.sc.clear = SCORE.clear;
-          this.toast('GOAL!', '恭喜完賽!', 7.5, '#ffd23f', 100);
+          this.toast('GOAL!', '恭喜完賽!', 9.5, '#ffd23f', 100);
           Sound.stopMusic(); Sound.play('checkpoint');
         }
       }
@@ -151,8 +151,9 @@ const Game = {
     // ---- 結束 ----
     if (s.phase === 'timeup' || s.phase === 'goal') {
       s.endT += dt;
-      const skip = s.phase === 'goal' && s.endT > 3.5 && (Input.was('confirm') || Input.taps.length > 0);
-      if (skip || s.endT > (s.phase === 'goal' ? 8 : 3.4)) this.finish(s.phase === 'goal');
+      if (s.phase === 'goal' && s.endT > 5.6 && !s.cheered) { s.cheered = true; Sound.play('cheer'); }
+      const skip = s.phase === 'goal' && s.endT > 6 && (Input.was('confirm') || Input.taps.length > 0);
+      if (skip || s.endT > (s.phase === 'goal' ? 10 : 3.4)) this.finish(s.phase === 'goal');
     }
 
     // ---- 背景視差 ----
@@ -265,7 +266,19 @@ const Game = {
     if (off && pct > 0.12) {
       for (const sx of [-58, 58]) emit(W / 2 + sx, y - 6, (Math.random() - 0.5) * 120, -60 - Math.random() * 80, 0.5, 8 + Math.random() * 8, THEMES[s.bgTheme].grass[1]);
     }
-    if (s.phase === 'goal' && s.endT > 2.6) {
+    if (s.phase === 'goal' && s.endT > 2.2) {
+      s.fwT = (s.fwT || 0) - dt;
+      if (s.fwT <= 0) {
+        s.fwT = 0.3 + Math.random() * 0.4;
+        const fx0 = 70 + Math.random() * 400, fy0 = 110 + Math.random() * 230;
+        const cols = [['#ff5c7a', '#ffd23f'], ['#7fe4ff', '#ffffff'], ['#8dff8a', '#ffe680'], ['#d6b3ff', '#ff9fe6']][(Math.random() * 4) | 0];
+        const n = 46, sp0 = 130 + Math.random() * 90;
+        for (let q = 0; q < n; q++) {
+          const a = q / n * TAU, v = sp0 * (0.6 + Math.random() * 0.5);
+          s.parts.push({ x: fx0, y: fy0, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1.3, max: 1.3, r: 3.2, color: cols[q % 2], fw: true });
+        }
+        Sound.play('firework');
+      }
       for (let k = 0; k < 2; k++) {
         const cols = ['#ff5c7a', '#ffd23f', '#7fe4ff', '#8dff8a', '#d6b3ff'];
         s.parts.push({ x: Math.random() * W, y: -10, vx: (Math.random() - 0.5) * 60, vy: 90 + Math.random() * 160, life: 3.2, max: 3.2, r: 5, color: cols[(Math.random() * 5) | 0], conf: true });
@@ -294,7 +307,7 @@ const Game = {
     s.phase = 'over';
     Sound.setLoops({ on: false });
     this.result = {
-      clear, score: this.total(), time: s.elapsed, coins: s.coins,
+      clear, course: this.courseId, score: this.total(), time: s.elapsed, coins: s.coins,
       parts: Object.assign({}, s.sc), stage: s.stage
     };
     App.goto('result');
@@ -353,22 +366,28 @@ const Game = {
       g.beginPath(); g.ellipse(W / 2, cy, 108 * pulse, 92 * pulse, 0, 0, TAU); g.stroke();
       g.restore();
     }
-    let view = 'rear', sx = 1, k = 0.76, cheer = false;
-    if (s.phase === 'goal' && s.endT > 1.2) {
-      const p = clamp((s.endT - 1.2) / 2.2, 0, 1), a = easeInOut(0, Math.PI, p);
-      view = a < Math.PI / 2 ? 'rear' : 'front';
-      sx = Math.max(0.04, Math.abs(Math.cos(a)));
-      k = 0.76 + 0.34 * p;
-      if (p >= 1) { cheer = true; hop = Math.abs(Math.sin(s.t * 7)) * 34; }
+    let view = 'rear', k = 0.76, cheer = false, boostFx = s.nitroT > 0;
+    if (s.phase === 'goal' && s.endT > 1.6) {
+      const t = s.endT, hy = CFG.horizon + 22, py0 = y;
+      if (t < 2.8) {
+        const e = Math.pow(clamp((t - 1.6) / 1.2, 0, 1), 2);
+        k = lerp(0.76, 0.06, e); y = lerp(py0, hy, e); boostFx = true;
+      } else {
+        view = 'front';
+        if (t < 5.6) {
+          const p = clamp((t - 2.8) / 2.8, 0, 1), z = lerp(14, 1, 1 - Math.pow(1 - p, 2.4));
+          k = 1.08 / z; y = hy + (py0 - hy) * (1 / z - 1 / 14) / (1 - 1 / 14);
+        } else { k = 1.08; y = py0; cheer = true; hop = Math.abs(Math.sin(t * 7)) * 34; }
+      }
     }
     g.save();
     if (s.invT > 0 && Math.floor(s.t * 14) % 2) g.globalAlpha = 0.45;
     g.translate(W / 2, y - hop);
-    g.scale(k * sx, k);
+    g.scale(k, k);
     if (rot) { g.translate(0, -70); g.rotate(rot); g.translate(0, 70); }
     if (s.drift) g.rotate(Input.steer * 0.17);
     g.transform(1, 0, lean, 1, 0, 0);
-    Spr.drawBuggy(g, { view, cheer, wheel: s.wheel, t: s.t, brake: Input.brake && s.phase === 'play', boost: s.nitroT > 0 });
+    Spr.drawBuggy(g, { view, cheer, wheel: view === 'front' ? s.t * 40 : s.wheel, t: s.t, brake: Input.brake && s.phase === 'play', boost: boostFx });
     g.restore();
   },
 
@@ -381,7 +400,8 @@ const Game = {
     for (const p of this.s.parts) {
       g.globalAlpha = clamp(p.life / p.max, 0, 1);
       g.fillStyle = p.color;
-      if (p.conf) { g.save(); g.translate(p.x, p.y); g.rotate(p.x * 0.05 + p.life * 6); g.fillRect(-p.r, -p.r * 0.6, p.r * 2, p.r * 1.2); g.restore(); }
+      if (p.fw) { g.save(); g.globalCompositeOperation = 'lighter'; g.beginPath(); g.arc(p.x, p.y, p.r * (0.5 + p.life / p.max), 0, TAU); g.fill(); g.restore(); }
+      else if (p.conf) { g.save(); g.translate(p.x, p.y); g.rotate(p.x * 0.05 + p.life * 6); g.fillRect(-p.r, -p.r * 0.6, p.r * 2, p.r * 1.2); g.restore(); }
       else if (p.star) {
         const r = p.r * 2.2;
         g.beginPath(); g.moveTo(p.x, p.y - r); g.lineTo(p.x + r * 0.3, p.y - r * 0.3); g.lineTo(p.x + r, p.y); g.lineTo(p.x + r * 0.3, p.y + r * 0.3);
@@ -475,6 +495,7 @@ const Game = {
       { id: 'brake', x: 348, y: 916, r: 42, label: 'BRAKE', col: '#ff6b81' },
       { id: 'nitro', x: 462, y: 752, r: 46, label: 'NITRO', col: '#3ea8ff' }
     ];
+    if (Save.data.autoGas) btns.shift();
     if (!gyro) btns.push({ id: 'left', x: 66, y: 888, r: 56, label: '◀', col: '#ffd23f' }, { id: 'right', x: 186, y: 888, r: 56, label: '▶', col: '#ffd23f' });
     Input.virtual = btns;
     for (const b of btns) {

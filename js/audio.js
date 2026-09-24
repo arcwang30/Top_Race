@@ -297,12 +297,12 @@ const Sound = (() => {
     loops.o1.frequency.setTargetAtTime(f, t, k);
     loops.o2.frequency.setTargetAtTime(f * 0.5, t, k);
     loops.lp.frequency.setTargetAtTime(500 + pct * 1300, t, k);
-    loops.eg.gain.setTargetAtTime(o.on ? 0.09 + pct * 0.06 : 0, t, k);
+    loops.eg.gain.setTargetAtTime(o.on ? 0.03 + pct * 0.025 : 0, t, k);
     loops.squeal.gain.setTargetAtTime(o.drift ? 0.3 : 0, t, 0.04);
     loops.burn.gain.setTargetAtTime(o.drift ? 0.06 + pct * 0.08 : 0, t, 0.05);
     loops.sqO.frequency.setTargetAtTime(780 + pct * 700, t, 0.08);
     loops.sqG.gain.setTargetAtTime(o.drift ? 0.07 + pct * 0.08 : 0, t, 0.04);
-    loops.rumble.gain.setTargetAtTime(o.off ? 0.55 : (o.on ? 0.05 * pct : 0), t, k);
+    loops.rumble.gain.setTargetAtTime(o.off ? 0.4 : (o.on ? 0.03 * pct : 0), t, k);
     loops.wind.gain.setTargetAtTime(o.on ? 0.02 + (o.boost ? 0.1 : pct * 0.04) : 0, t, k);
   }
 
@@ -344,6 +344,18 @@ const Sound = (() => {
       case 'go': tone('square', 880, t, 0.5, 0.17); tone('square', 1320, t, 0.5, 0.1); break;
       case 'tick': tone('square', 1200, t, 0.05, 0.12); break;
       case 'drift': noise(t, 0.2, 0.15, null, { f: 2000, type: 'bandpass', q: 5 }); break;
+      case 'cheer':
+        for (let i = 0; i < 12; i++) noise(t + i * 0.13 + Math.random() * 0.05, 0.55, 0.14, null, { f: 700 + Math.random() * 1000, type: 'bandpass', q: 1.1 });
+        tone('sawtooth', 380, t, 0.45, 0.1, null, { to: 720, lp: 2400 }); tone('sawtooth', 480, t + 0.06, 0.45, 0.09, null, { to: 900, lp: 2400 });
+        tone('sawtooth', 300, t + 0.2, 0.4, 0.08, null, { to: 640, lp: 2200 });
+        for (let k = 0; k < 18; k++) noise(t + 0.6 + k * 0.1 + Math.random() * 0.05, 0.05, 0.22, null, { f: 2600, type: 'bandpass', q: 0.8 });
+        [523, 659, 784, 1047].forEach((f, i) => tone('square', f, t + i * 0.1, 0.35, 0.1)); break;
+      case 'firework':
+        tone('sine', 500, t, 0.45, 0.09, null, { to: 1800 });
+        noise(t + 0.45, 0.55, 0.35, null, { f: 3200, to: 300, type: 'lowpass' });
+        tone('sine', 120, t + 0.45, 0.3, 0.3, null, { to: 45 });
+        for (let k = 0; k < 4; k++) tone('triangle', 1400 + Math.random() * 1500, t + 0.5 + k * 0.07, 0.15, 0.05);
+        break;
     }
   }
 

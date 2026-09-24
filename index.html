@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#1a1030">
   <title>頂尖賽車 TOP RACE</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
@@ -15,9 +16,11 @@
 <body>
   <div id="stage">
     <canvas id="game"></canvas>
+    <div id="rotate"></div>
     <input id="nameInput" type="text" maxlength="8" autocomplete="off" spellcheck="false" placeholder="NAME">
   </div>
   <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/save.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/input.js"></script>

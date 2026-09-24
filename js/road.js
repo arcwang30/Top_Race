@@ -40,6 +40,7 @@ const Road = (() => {
     const hillOf = () => (rand() < 0.5 ? -1 : 1) * (3 + ((rand() * 9) | 0));
     const hairP = [0.05, 0.08, 0.12].map(v => v * course.hair);
 
+    b.setTheme(course.themes[0]);
     b.road(10, 30, 10, 0, 0);
     for (let s = 0; s < 3; s++) {
       b.setTheme(course.themes[s]);
@@ -105,10 +106,10 @@ const Road = (() => {
     const segs = t.segs, N = segs.length;
     for (let i = 0; i < N; i++) {
       const s = segs[i], th = SC[s.theme];
-      if (i % 3 === 0) for (const side of [-1, 1]) {
-        if (rand() < 0.6) { const nm = pick(th.trees, rand); s.sprites.push({ name: nm, offset: side * (1.9 + rand() * 2.6), w: (1000 + rand() * 600) * (nm === 'candyCane' ? 0.5 : 1), kind: 'solid', hit: 0.2 }); }
+      if (i % 2 === 0) for (const side of [-1, 1]) {
+        if (rand() < 0.72) { const nm = pick(th.trees, rand); s.sprites.push({ name: nm, offset: side * (1.9 + rand() * 2.6), w: (1000 + rand() * 600) * (nm === 'candyCane' ? 0.5 : 1), kind: 'solid', hit: 0.2 }); }
       }
-      if (rand() < 0.09) s.sprites.push({ name: pick(th.bush, rand), offset: (rand() < 0.5 ? -1 : 1) * (1.2 + rand() * 0.6), w: 520 + rand() * 200, kind: 'deco' });
+      if (rand() < 0.2) s.sprites.push({ name: pick(th.bush, rand), offset: (rand() < 0.5 ? -1 : 1) * (1.2 + rand() * 0.6), w: 520 + rand() * 200, kind: 'deco' });
       if (rand() < 0.02) { const nm = pick(th.prop, rand); s.sprites.push({ name: nm, offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW[nm], kind: 'deco' }); }
       if (rand() < 0.014) s.sprites.push({ name: pick(th.animal, rand), offset: (rand() < 0.5 ? -1 : 1) * (1.15 + rand() * 0.35), w: 380, kind: 'deco', hop: rand() * 6 });
     }

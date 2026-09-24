@@ -33,8 +33,20 @@
 
   App.start('title');
 
+  const rotate = document.getElementById('rotate');
+  const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  window.tryLockPortrait = () => {
+    if (!coarse || !document.documentElement.requestFullscreen) return;
+    document.documentElement.requestFullscreen().then(() => {
+      if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => {});
+    }).catch(() => {});
+  };
+
   let last = performance.now();
   function loop(now) {
+    const landscape = coarse && window.innerWidth > window.innerHeight * 1.1;
+    if (landscape) { rotate.textContent = tr('請將手機直立握持'); rotate.style.display = 'flex'; pauseGame(); }
+    else if (rotate.style.display !== 'none') rotate.style.display = 'none';
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
     g.setTransform(res, 0, 0, res, 0, 0);

@@ -27,7 +27,8 @@ powershell -ExecutionPolicy Bypass -File tools\serve.ps1
 | `js/background.js` | 遠/中/近三層視差背景(3 個賽段各一種風格) |
 | `js/audio.js` | 程式合成的音樂與音效(音量 0~5) |
 | `js/input.js` | 鍵盤 / Xbox 手把 / 觸控與陀螺儀 |
-| `js/screens.js`, `js/ui.js` | 開場過場、主選單、操作說明、排行榜、設定、CREDIT、結算 |
+| `js/screens.js`, `js/ui.js` | 開場過場、主選單、賽事選擇、操作說明、排行榜(各賽事獨立)、設定、CREDIT、結算 |
+| `js/i18n.js` | 中/日/英語言字典(以中文原文為鍵,新增文字時在此補翻譯) |
 | `assets/` | 外部素材(選用) |
 | `builds/` | 封裝發佈版本(zip),**不進 git** |
 | `tools/` | `serve.ps1` 本機伺服器、`build.ps1` 封裝腳本 |

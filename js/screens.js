@@ -82,7 +82,7 @@ Screens.title = {
     UI.logo(g, W / 2, 200, 1.05, App.t);
     Demo.frontCar(g, W / 2, 620, 1.15, App.t);
     if (Math.floor(App.t * 1.8) % 2 === 0) UI.text(g, Input.touchMode ? 'TAP TO START' : 'PRESS ANY KEY', W / 2, 800, 40, { fill: '#fff', sw: 8 });
-    UI.text(g, '© 2026 Arc Wang', W / 2, 930, 18, { fill: '#e6dcff', stroke: null });
+    UI.copyright(g);
     if (Input.was('anykey') || Input.was('confirm')) { Sound.init(); Sound.play('confirm'); App.goto('intro'); }
   }
 };
@@ -111,6 +111,7 @@ Screens.intro = {
     // 電影黑邊
     const bar = t < 5.2 ? 70 : Math.max(0, 70 - (t - 5.2) * 400);
     g.fillStyle = '#0a0518'; g.fillRect(0, 0, W, bar); g.fillRect(0, H - bar, W, bar);
+    UI.copyright(g);
 
     if (t > 0.3 && t < 2.3) UI.text(g, 'ARC WANG  presents', W / 2, 340, 34, { fill: '#fff', sw: 8, alpha: clamp(Math.min(t - 0.3, 2.3 - t) * 3, 0, 1) });
     if (t > 2.5 && t < 4.4) {
@@ -154,7 +155,8 @@ Screens.menu = {
       }
     });
     UI.nav(this);
-    UI.text(g, Input.padConnected ? '↑↓ / A 選擇' : '↑ ↓  選擇    Enter  決定', W / 2, 940, 15, { fill: '#e6dcff', stroke: null });
+    UI.text(g, Input.padConnected ? '↑↓ / A 選擇' : '↑ ↓  選擇    Enter  決定', 16, 942, 14, { align: 'left', fill: '#40284a', stroke: '#ffffff', sw: 5 });
+    UI.copyright(g);
   }
 };
 
@@ -182,7 +184,7 @@ Screens.course = {
     g.fillStyle = th.road[0]; g.beginPath(); g.moveTo(W / 2 - 20, 300); g.lineTo(W / 2 + 20, 300); g.lineTo(W / 2 + 280, 700); g.lineTo(W / 2 - 280, 700); g.fill();
     g.restore();
     g.lineWidth = 3; g.strokeStyle = '#ffffff'; g.beginPath(); g.roundRect(x, y, w, h, 14); g.stroke();
-    UI.text(g, icon + ' ' + label, x + w / 2, y + h + 16, 15, { fill: '#fff', stroke: null });
+    UI.text(g, icon + " " + tr(label), x + w / 2, y + h + 16, 15, { fill: '#fff', stroke: null });
   },
   frame(g, dt) {
     this.t += dt; this.anim = Math.min(1, this.anim + dt * 5);
@@ -197,7 +199,7 @@ Screens.course = {
     UI.panel(g, 40, 130, 460, 640, 26, 'rgba(30,20,60,.7)', c.color[0]);
     UI.text(g, c.name, W / 2, 190, 52, { fill: c.color[0], sw: 9 });
     UI.text(g, c.en, W / 2, 236, 24, { fill: '#fff', sw: 5 });
-    UI.text(g, '難度  ' + '★'.repeat(c.stars) + '☆'.repeat(3 - c.stars), W / 2, 274, 22, { fill: '#ffd23f', stroke: null });
+    UI.text(g, tr('難度') + '  ' + '★'.repeat(c.stars) + '☆'.repeat(3 - c.stars), W / 2, 274, 22, { fill: '#ffd23f', stroke: null });
     const icons = ['☀', '🌅', '🌙'];
     for (let i = 0; i < 3; i++) this.thumb(g, 62 + i * 143, 300, 130, 150, c.themes[i], THEMES[c.themes[i]].name, icons[i]);
     UI.text(g, '3 個賽段,途中有 2 個 CHECK POINT', W / 2, 492, 17, { fill: '#cfd8ff', stroke: null });
@@ -225,6 +227,7 @@ Screens.course = {
       Save.data.course = this.idx; Save.store();
       Game.courseId = this.idx;
       if (Save.data.gyro && Input.touchMode) Input.enableGyro();
+      if (window.tryLockPortrait) window.tryLockPortrait();
       App.goto('game');
     }
     if (UI.button(g, this, '返回', 170, 884, 200, 52, { c1: '#ffb3d1', c2: '#ff6b9a', back: true }) || Input.was('back')) App.goto('menu');
@@ -237,9 +240,15 @@ Screens.game = {
   paused: false, sel: 0, n: 0,
   enter() { Game.newRun(); this.paused = false; this.sel = 0; Sound.music(Game.course.music[0]); },
   leave() { Sound.setLoops({ on: false }); Input.virtual = []; },
-  pause() { if (!this.paused && Game.s.phase !== 'over') { this.paused = true; this.sel = 0; Sound.setLoops({ on: false }); } },
+  pause() {
+    if (!this.paused && Game.s.phase !== 'over') {
+      this.paused = true; this.sel = 0; Sound.setLoops({ on: false });
+      Input.pressed.clear(); Input.taps.length = 0;
+    }
+  },
   frame(g, dt) {
     if (!this.paused && (Input.was('pause') || Input.taps.some(t => Math.hypot(t.x - 490, t.y - 106) < 30))) this.pause();
+    else if (this.paused && Input.was('pause')) { this.paused = false; Input.pressed.clear(); Input.taps.length = 0; }
     if (!this.paused) Game.update(dt);
     if (App.name !== 'game') return;
     Game.draw(g);
@@ -247,7 +256,7 @@ Screens.game = {
       UI.dim(g, 0.6);
       UI.text(g, 'PAUSE', W / 2, 260, 80, { fill: '#fff27a', sw: 12 });
       UI.begin(this);
-      if (UI.button(g, this, '繼續遊戲', 110, 380, 320, 62, { c1: '#8dff8a', c2: '#2fc46a' }) || Input.was('pause')) this.paused = false;
+      if (UI.button(g, this, '繼續遊戲', 110, 380, 320, 62, { c1: '#8dff8a', c2: '#2fc46a' })) this.paused = false;
       if (UI.button(g, this, '重新開始', 110, 460, 320, 62, { c1: '#ffe680', c2: '#ffb02e' })) { this.enter(); }
       if (UI.button(g, this, '回主選單', 110, 540, 320, 62, { c1: '#ffb3d1', c2: '#ff6b9a', back: true })) { App.goto('menu'); Sound.stopMusic(); }
       UI.nav(this);
@@ -263,7 +272,7 @@ Screens.howto = {
     BG.draw(g, 0, [App.t * 8, App.t * 18, App.t * 36], 380);
     g.fillStyle = '#8ee05a'; g.fillRect(0, 380, W, H - 380);
     UI.dim(g, 0.55);
-    UI.header(g, '操作說明', ["遊戲規則", "操作方式", "道具與敵車", "各賽事障礙"][this.page] + `  (${this.page + 1}/4)`);
+    UI.header(g, '操作說明', tr(["遊戲規則", "操作方式", "道具與敵車", "各賽事障礙"][this.page]) + `  (${this.page + 1}/4)`);
     UI.panel(g, 20, 130, 500, 690, 22);
 
     if (this.page === 0) this.p1(g); else if (this.page === 1) this.p2(g); else if (this.page === 2) this.p3(g); else this.p4(g);
@@ -282,9 +291,9 @@ Screens.howto = {
       ['🏁', '遊戲目標', '在限定時間內,跑完全部 3 個賽段的賽道即可過關。時間歸零仍未抵達終點,就是 GAME OVER!'],
       ['⏱', 'CHECK POINT', '每個賽段結尾都有檢查點。在時間內通過,就會增加倒數時間並加分!'],
       ['🌸', '留在賽道上', '賽道兩側是草叢與樹木。偏離跑道會大幅減速,撞到樹更慘。'],
-      ['💩', '避開障礙', '踩到大便會打滑失控;撞到石塊會整台翻車!也小心別撞到其他賽車。'],
+      ['💩', '避開障礙', '每個賽事都有專屬障礙,撞到會打滑、翻車或減速!也小心別撞到其他賽車。'],
       ['💰', '收集道具', '金幣加分、氮氣瓶最多可持有 5 瓶。'],
-      ['🏆', '排行榜', '遊戲結束後,積分前 20 名可登錄姓名、留名排行榜。']
+      ['🏆', '排行榜', '遊戲結束後,各賽事積分前 20 名可登錄姓名,留名排行榜。']
     ];
     rows.forEach(([ic, t, d], i) => {
       const y = 170 + i * 106;
@@ -299,9 +308,9 @@ Screens.howto = {
     const rows = [
       ['左移', '← / A', '類比左/十字左', '虛擬鍵左/傾斜'],
       ['右移', '→ / D', '類比右/十字右', '虛擬鍵右/傾斜'],
-      ['油門', 'SPACE', 'RT / A 鈕', '油門按鈕'],
-      ['剎車', '↓ / S / ALT', 'LT / B 鈕', '剎車按鈕'],
-      ['氮氣', '↑ / W', 'X / Y 鈕', '氮氣按鈕']
+      ['油門', 'SPACE', 'RT / A', '油門按鈕'],
+      ['剎車', '↓ / S / ALT', 'LT / B', '剎車按鈕'],
+      ['氮氣', '↑ / W', 'X / Y', '氮氣按鈕']
     ];
     rows.forEach((r, i) => {
       const y = 204 + i * 50;
@@ -325,15 +334,13 @@ Screens.howto = {
   p3(g) {
     const items = [
       ['coin', '金幣', '取得後獲得 1000 分。', 44, 0],
-      ['nitro', '氮氣瓶', '最多 5 瓶。使用後極速加速且無敵,可撞飛障礙與敵車!', 34, 0],
-      ['poop', '大便', '踩到會打滑轉圈、失去控制並減速。', 64, 0],
-      ['rock', '石塊', '撞到會整台翻車,速度歸零。', 70, 0],
+      ['nitro', '氮氣瓶', '最多 5 瓶,使用後極速加速且無敵,可撞飛障礙與敵車!', 34, 0],
       ['enemy1', '呱呱 (青蛙)', '龜速直行的路障車,超車時小心。', 0, 1],
       ['enemy2', '兔兔 (兔子)', '左右蛇行前進,難以預測。', 0, 1],
       ['enemy3', '黑喵 (黑貓)', '速度快,還會擋住你的路線!', 0, 1]
     ];
     items.forEach(([nm, t, d, w, car], i) => {
-      const y = 158 + i * 88, im = Spr.get(nm), sw = car ? 96 : w, sh = sw * im.height / im.width;
+      const y = 165 + i * 122, im = Spr.get(nm), sw = car ? 96 : w, sh = sw * im.height / im.width;
       const k = Math.min(1, 70 / sh);
       g.drawImage(im, 70 - sw * k / 2, y + 40 - sh * k / 2, sw * k, sh * k);
       UI.text(g, t, 130, y + 16, 24, { align: 'left', fill: '#fff27a', stroke: null });
@@ -343,8 +350,8 @@ Screens.howto = {
   p4(g) {
     COURSES.forEach((c, ci) => {
       const y = 150 + ci * 224;
-      UI.text(g, c.name + '  ' + c.en, 40, y + 14, 24, { align: 'left', fill: c.color[0], stroke: null });
-      UI.text(g, '難度 ' + '★'.repeat(c.stars) + '☆'.repeat(3 - c.stars), 500, y + 14, 16, { align: 'right', fill: '#ffd23f', stroke: null });
+      UI.text(g, tr(c.name) + "  " + c.en, 40, y + 14, 24, { align: 'left', fill: c.color[0], stroke: null });
+      UI.text(g, tr('難度') + ' ' + '★'.repeat(c.stars) + '☆'.repeat(3 - c.stars), 500, y + 14, 16, { align: 'right', fill: '#ffd23f', stroke: null });
       c.obs.forEach((o, i) => {
         const im = Spr.get(o), sh = Math.min(70, 84 * im.height / im.width), sw = sh * im.width / im.height, by = y + 40 + i * 88;
         g.drawImage(im, 40 + (84 - sw) / 2, by + (70 - sh) / 2, sw, sh);
@@ -359,61 +366,82 @@ Screens.howto = {
 Screens.settings = {
   sel: 0, n: 0,
   enter() { this.sel = 0; },
-  frame(g, dt) {
-    BG.draw(g, 1, [App.t * 8, App.t * 18, App.t * 36], 380);
-    g.fillStyle = THEMES[1].grass[0]; g.fillRect(0, 380, W, H - 380);
-    UI.dim(g, 0.5);
-    UI.header(g, '設定', 'SETTINGS');
-    const rows = [['音樂', 'music', 'BGM'], ['音效', 'sfx', 'SE']];
-    UI.begin(this);
-    rows.forEach(([label, key, en], i) => {
-      const y = 170 + i * 150, sel = this.sel === i;
-      UI.panel(g, 30, y, 480, 130, 24, sel ? 'rgba(255,210,63,.28)' : 'rgba(30,20,60,.55)', sel ? '#ffd23f' : 'rgba(255,255,255,.35)');
-      UI.text(g, label, 60, y + 32, 32, { align: 'left', fill: '#fff' });
-      UI.text(g, en, 170, y + 34, 18, { align: 'left', fill: '#cfd8ff', stroke: null });
-      UI.text(g, Save.data[key] === 0 ? 'MUTE' : String(Save.data[key]), 470, y + 32, 34, { align: 'right', fill: '#ffd23f' });
-      const v = Save.data[key];
-      for (let k = 0; k < 5; k++) {
-        const bx = 80 + k * 66, bh = 30 + k * 6;
-        g.fillStyle = k < v ? (key === 'music' ? '#7fe4ff' : '#ffb347') : 'rgba(255,255,255,.2)';
-        g.beginPath(); g.roundRect(bx, y + 112 - bh, 52, bh, 8); g.fill();
-        g.lineWidth = 3; g.strokeStyle = '#40284a'; g.stroke();
-        if (UI.tapIn(bx - 6, y + 40, 64, 84)) { this.sel = i; this.setVol(key, k + 1 === v ? k : k + 1); }
-      }
-      UI.text(g, '−', 48, y + 90, 40, { fill: '#fff' }); UI.text(g, '+', 492, y + 90, 40, { fill: '#fff' });
-      if (UI.tapIn(30, y + 60, 44, 66)) { this.sel = i; this.setVol(key, v - 1); }
-      if (UI.tapIn(470, y + 60, 44, 66)) { this.sel = i; this.setVol(key, v + 1); }
-      if (Input.ptr.moved && UI.inside(Input.ptr.x, Input.ptr.y, 30, y, 480, 130)) this.sel = i;
-      if (sel) {
-        if (Input.was('left')) this.setVol(key, v - 1);
-        if (Input.was('right')) this.setVol(key, v + 1);
-      }
-    });
-    // 陀螺儀
-    const gy = 470, gsel = this.sel === 2;
-    UI.panel(g, 30, gy, 480, 110, 24, gsel ? 'rgba(255,210,63,.28)' : 'rgba(30,20,60,.55)', gsel ? '#ffd23f' : 'rgba(255,255,255,.35)');
-    UI.text(g, '傾斜控制', 60, gy + 34, 30, { align: 'left' });
-    UI.text(g, '手機陀螺儀轉向', 60, gy + 76, 18, { align: 'left', fill: '#cfd8ff', stroke: null });
-    const on = Save.data.gyro;
-    UI.panel(g, 350, gy + 26, 130, 58, 29, on ? '#2fc46a' : 'rgba(255,255,255,.18)', '#fff');
-    UI.text(g, on ? 'ON' : 'OFF', 415, gy + 56, 30, { fill: '#fff' });
-    const toggle = () => { Save.data.gyro = !Save.data.gyro; Save.store(); Sound.play('confirm'); if (Save.data.gyro) Input.enableGyro(); };
-    if (UI.tapIn(30, gy, 480, 110)) { this.sel = 2; toggle(); }
-    if (Input.ptr.moved && UI.inside(Input.ptr.x, Input.ptr.y, 30, gy, 480, 110)) this.sel = 2;
-    if (gsel && (Input.was('left') || Input.was('right') || Input.was('confirm'))) toggle();
-
-    this.sel = clamp(this.sel, 0, 3);
-    const backHit = UI.buttonAt(g, this, 3, '返回', 170, 640, 200, 60, { back: true });
-    if (backHit || Input.was('back')) App.goto('menu');
-    if (Input.was('up')) { this.sel = (this.sel + 3) % 4; Sound.play('select'); }
-    if (Input.was('down')) { this.sel = (this.sel + 1) % 4; Sound.play('select'); }
-    UI.text(g, '音量 0~5(0 為靜音)', W / 2, 740, 20, { fill: '#e6dcff', stroke: null });
-  },
   setVol(key, v) {
     v = clamp(v, 0, 5);
     if (v === Save.data[key]) return;
     Sound.setVol(key, v);
     if (key === 'sfx') Sound.play('coin'); else Sound.play('select');
+  },
+  setLang(l) {
+    if (Save.data.lang === l) return;
+    Save.data.lang = l; Save.store(); Sound.play('confirm');
+  },
+  frame(g, dt) {
+    BG.draw(g, 1, [App.t * 8, App.t * 18, App.t * 36], 380);
+    g.fillStyle = THEMES[1].grass[0]; g.fillRect(0, 380, W, H - 380);
+    UI.dim(g, 0.5);
+    UI.header(g, '設定', 'SETTINGS');
+    const panel = (i, y, h) => {
+      const sel = this.sel === i;
+      UI.panel(g, 30, y, 480, h, 24, sel ? 'rgba(255,210,63,.28)' : 'rgba(30,20,60,.55)', sel ? '#ffd23f' : 'rgba(255,255,255,.35)');
+      if (Input.ptr.moved && UI.inside(Input.ptr.x, Input.ptr.y, 30, y, 480, h)) this.sel = i;
+    };
+
+    [['音樂', 'music', 140], ['音效', 'sfx', 268]].forEach(([label, key, y], i) => {
+      panel(i, y, 118);
+      const v = Save.data[key];
+      UI.text(g, label, 60, y + 28, 30, { align: 'left' });
+      UI.text(g, v === 0 ? 'MUTE' : String(v), 470, y + 28, 32, { align: 'right', fill: '#ffd23f' });
+      for (let k = 0; k < 5; k++) {
+        const bx = 80 + k * 66, bh = 26 + k * 5;
+        g.fillStyle = k < v ? (key === 'music' ? '#7fe4ff' : '#ffb347') : 'rgba(255,255,255,.2)';
+        g.beginPath(); g.roundRect(bx, y + 106 - bh, 52, bh, 8); g.fill();
+        g.lineWidth = 3; g.strokeStyle = '#40284a'; g.stroke();
+        if (UI.tapIn(bx - 6, y + 40, 64, 78)) { this.sel = i; this.setVol(key, k + 1 === v ? k : k + 1); }
+      }
+      UI.text(g, '−', 50, y + 86, 40, { fill: '#fff' }); UI.text(g, '+', 490, y + 86, 40, { fill: '#fff' });
+      if (UI.tapIn(30, y + 56, 44, 62)) { this.sel = i; this.setVol(key, v - 1); }
+      if (UI.tapIn(470, y + 56, 44, 62)) { this.sel = i; this.setVol(key, v + 1); }
+      if (this.sel === i) {
+        if (Input.was('left')) this.setVol(key, v - 1);
+        if (Input.was('right')) this.setVol(key, v + 1);
+      }
+    });
+
+    const toggle = (i, y, label, sub, key) => {
+      panel(i, y, 88);
+      UI.text(g, label, 60, y + 28, 28, { align: 'left' });
+      UI.text(g, sub, 60, y + 62, 15, { align: 'left', fill: '#cfd8ff', stroke: null });
+      const on = Save.data[key];
+      UI.panel(g, 370, y + 18, 120, 52, 26, on ? '#2fc46a' : 'rgba(255,255,255,.18)', '#fff');
+      UI.text(g, on ? 'ON' : 'OFF', 430, y + 45, 28, { fill: '#fff' });
+      const flip = () => { Save.data[key] = !Save.data[key]; Save.store(); Sound.play('confirm'); if (key === 'gyro' && Save.data.gyro) Input.enableGyro(); };
+      if (UI.tapIn(30, y, 480, 88)) { this.sel = i; flip(); }
+      if (this.sel === i && (Input.was('left') || Input.was('right') || Input.was('confirm'))) flip();
+    };
+    toggle(2, 398, '傾斜控制', '手機陀螺儀轉向(直握手機)', 'gyro');
+    toggle(3, 498, '自動油門', '自動全程踩住油門', 'autoGas');
+
+    panel(4, 598, 108);
+    UI.text(g, '語言', 60, 626, 28, { align: 'left' });
+    const langs = [['zh', '中文'], ['ja', '日本語'], ['en', 'English']];
+    langs.forEach(([code, label], k) => {
+      const x = 46 + k * 148, on = Save.data.lang === code;
+      UI.panel(g, x, 648, 138, 46, 23, on ? '#ffb02e' : 'rgba(255,255,255,.16)', on ? '#fff' : 'rgba(255,255,255,.4)');
+      UI.text(g, label, x + 69, 672, 22, { fill: '#fff', stroke: on ? '#40284a' : null });
+      if (UI.tapIn(x, 648, 138, 46)) { this.sel = 4; this.setLang(code); }
+    });
+    if (this.sel === 4) {
+      const idx = langs.findIndex(l => l[0] === Save.data.lang);
+      if (Input.was('left')) this.setLang(langs[(idx + 2) % 3][0]);
+      if (Input.was('right')) this.setLang(langs[(idx + 1) % 3][0]);
+    }
+
+    this.sel = clamp(this.sel, 0, 5);
+    if (UI.buttonAt(g, this, 5, '返回', 170, 736, 200, 60, { back: true }) || Input.was('back')) App.goto('menu');
+    if (Input.was('up')) { this.sel = (this.sel + 5) % 6; Sound.play('select'); }
+    if (Input.was('down')) { this.sel = (this.sel + 1) % 6; Sound.play('select'); }
+    UI.text(g, '音量 0~5(0 為靜音)', W / 2, 830, 18, { fill: '#e6dcff', stroke: null });
   }
 };
 
@@ -453,22 +481,32 @@ Screens.credits = {
 
 // ---------- 排行榜 ----------
 Screens.ranking = {
-  sel: 0, n: 0, hl: null,
-  enter(arg) { this.hl = arg && arg.entry; this.sel = 0; if (this.hl) Sound.music('menu'); },
+  sel: 0, n: 0, hl: null, cid: 0,
+  enter(arg) {
+    this.hl = arg && arg.entry; this.sel = 0;
+    this.cid = arg && arg.course !== undefined ? arg.course : (Save.data.course || 0);
+    if (this.hl) Sound.music('menu');
+  },
   frame(g, dt) {
-    BG.draw(g, 0, [App.t * 8, App.t * 18, App.t * 36], 300);
-    g.fillStyle = THEMES[0].grass[0]; g.fillRect(0, 300, W, H - 300);
+    const c = COURSES[this.cid];
+    BG.draw(g, c.themes[0], [App.t * 8, App.t * 18, App.t * 36], 300);
+    g.fillStyle = THEMES[c.themes[0]].grass[0]; g.fillRect(0, 300, W, H - 300);
     UI.dim(g, 0.55);
-    UI.header(g, '排行榜', 'RANKING  TOP 20');
-    UI.panel(g, 14, 122, 512, 730, 20);
+    UI.header(g, '排行榜', null);
+    const move = d => { this.cid = (this.cid + d + COURSES.length) % COURSES.length; this.hl = null; Sound.play('select'); };
+    UI.text(g, '◀', 60, 106, 30, { fill: '#ffd23f' }); UI.text(g, '▶', 480, 106, 30, { fill: '#ffd23f' });
+    UI.text(g, tr(c.name) + "  " + c.en, W / 2, 106, 26, { fill: c.color[0], sw: 6 });
+    if (Input.was('left') || UI.tapIn(20, 84, 90, 44)) move(-1);
+    if (Input.was('right') || UI.tapIn(430, 84, 90, 44)) move(1);
+    UI.panel(g, 14, 128, 512, 724, 20);
     const cols = { rank: 46, name: 86, score: 372, time: 508 };
-    UI.text(g, '名次', cols.rank, 144, 16, { fill: '#7fe4ff', stroke: null });
-    UI.text(g, '姓名', cols.name, 144, 16, { align: 'left', fill: '#7fe4ff', stroke: null });
-    UI.text(g, '總積分', cols.score, 144, 16, { align: 'right', fill: '#7fe4ff', stroke: null });
-    UI.text(g, '完成時間', cols.time, 144, 16, { align: 'right', fill: '#7fe4ff', stroke: null });
-    const b = Save.data.board;
+    UI.text(g, '名次', cols.rank, 148, 16, { fill: '#7fe4ff', stroke: null });
+    UI.text(g, '姓名', cols.name, 148, 16, { align: 'left', fill: '#7fe4ff', stroke: null });
+    UI.text(g, '總積分', cols.score, 148, 16, { align: 'right', fill: '#7fe4ff', stroke: null });
+    UI.text(g, '完成時間', cols.time, 148, 16, { align: 'right', fill: '#7fe4ff', stroke: null });
+    const b = Save.board(this.cid);
     for (let i = 0; i < 20; i++) {
-      const y = 180 + i * 33, e = b[i];
+      const y = 182 + i * 33, e = b[i];
       const isHl = e && e === this.hl;
       g.fillStyle = isHl ? `rgba(255,210,63,${0.35 + 0.25 * Math.sin(App.t * 8)})` : (i % 2 ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.12)');
       g.fillRect(22, y - 16, 496, 32);
@@ -494,7 +532,7 @@ Screens.result = {
   sel: 0, n: 0, t: 0, r: null, qualifies: false, done: false, name: '', input: null,
   enter() {
     this.r = Game.result; this.t = 0; this.done = false; this.sel = 0;
-    this.qualifies = Save.qualifies(this.r.score);
+    this.qualifies = Save.qualifies(this.r.score, this.r.course);
     Sound.stopMusic(); Sound.setLoops({ on: false });
     Sound.jingle(this.r.clear ? 'clear' : 'over');
     this.input = document.getElementById('nameInput');
@@ -508,9 +546,9 @@ Screens.result = {
     const nm = (this.input.value || '').trim().slice(0, 8) || 'PLAYER';
     this.submitted = true;
     const entry = { name: nm, score: this.r.score, time: Math.round(this.r.time), clear: this.r.clear };
-    Save.add(entry);
+    Save.add(entry, this.r.course);
     Sound.play('confirm');
-    App.goto('ranking', { entry });
+    App.goto('ranking', { entry, course: this.r.course });
   },
   frame(g, dt) {
     this.t += dt;
@@ -524,7 +562,7 @@ Screens.result = {
     UI.panel(g, 30, 170, 480, 300, 22);
     const p = r.parts;
     const rows = [
-      ['距離得分', p.dist], ['漂移得分', p.drift], [`金幣 × ${r.coins}`, p.coin],
+      ['距離得分', p.dist], ['漂移得分', p.drift], [tr('金幣 × {0}', r.coins), p.coin],
       ['CHECK POINT 獎勵', p.cp], ['剩餘時間獎勵', p.time], ['通關獎勵', p.clear]
     ];
     rows.forEach(([lb, v], i) => {
@@ -539,7 +577,7 @@ Screens.result = {
     const cnt = clamp((t - 1.9) / 1.4, 0, 1);
     UI.text(g, 'TOTAL SCORE', W / 2, 505, 20, { fill: '#7fe4ff', stroke: null });
     UI.digits(g, pad(r.score * cnt, 7), W / 2 - 7 * 22, 550, 44, 62);
-    UI.text(g, `完成總時間   ${fmtTime(r.time)}`, W / 2, 610, 24, { fill: '#fff', stroke: null });
+    UI.text(g, tr('完成總時間') + '   ' + fmtTime(r.time), W / 2, 610, 24, { fill: '#fff', stroke: null });
 
     if (!this.done && (Input.taps.length || Input.was('confirm')) && t > 0.5 && t < 3.6) { this.t = 3.6; Input.taps.length = 0; }
     if (t > 3.6) {
@@ -554,7 +592,7 @@ Screens.result = {
       } else {
         UI.text(g, '很可惜未進入前 20 名', W / 2, 660, 24, { fill: '#fff' });
         UI.begin(this);
-        if (UI.button(g, this, '前往排行榜', 130, 720, 280, 60, { c1: '#ffe680', c2: '#ffb02e' })) App.goto('ranking', {});
+        if (UI.button(g, this, '前往排行榜', 130, 720, 280, 60, { c1: '#ffe680', c2: '#ffb02e' })) App.goto('ranking', { course: this.r.course });
         UI.nav(this);
       }
     }

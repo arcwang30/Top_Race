@@ -63,11 +63,10 @@ const Input = {
     window.addEventListener('keydown', e => { if (!(e.target && e.target.tagName === 'INPUT')) this.pressed.add('anykey'); });
 
     window.addEventListener('deviceorientation', e => {
-      if (e.gamma === null || e.gamma === undefined) return;
-      let g = e.gamma;
-      const ang = (screen.orientation && screen.orientation.angle) || 0;
-      if (ang === 90) g = -e.beta; else if (ang === 270 || ang === -90) g = e.beta;
-      this.gyroVal = g;
+      if (e.gamma === null || e.gamma === undefined || e.beta === null) return;
+      // 直握手機像轉方向盤:以重力在螢幕平面的傾角作為轉向(順時針為正)
+      const b = e.beta * Math.PI / 180, gm = e.gamma * Math.PI / 180;
+      this.gyroVal = Math.atan2(Math.cos(b) * Math.sin(gm), Math.sin(b)) * 180 / Math.PI;
       this.gyroActive = true;
     });
   },
@@ -135,8 +134,9 @@ const Input = {
     if (analog) s = analog;
     if (Save.data.gyro && this.gyroActive && this.touchMode) {
       const g = Math.abs(this.gyroVal) < 3 ? 0 : this.gyroVal;
-      s = clamp(g / 20, -1, 1);
+      s = clamp(g / 22, -1, 1);
     }
+    if (Save.data.autoGas) thr = true;
     this.steer = clamp(s, -1, 1);
     this.throttle = !!thr; this.brake = !!brk; this.nitro = !!nit;
   },

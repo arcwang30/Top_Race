@@ -47,3 +47,17 @@ html, body {
 }
 
 #nameInput:focus { border-color: #ffd23f; box-shadow: 0 0 16px #ffd23f; }
+
+#rotate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: #1a1030;
+  color: #fff27a;
+  font-weight: 900;
+  font-size: 5vmin;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}

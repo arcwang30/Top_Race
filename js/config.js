@@ -1,7 +1,7 @@
 'use strict';
 
 const W = 540, H = 960, TAU = Math.PI * 2;
-const FONT = '"Zen Maru Gothic","Noto Sans TC","Microsoft JhengHei","PingFang TC","Hiragino Maru Gothic ProN",sans-serif';
+const FONT = '"Zen Maru Gothic","Noto Sans TC","Yu Gothic","Meiryo","Microsoft JhengHei","PingFang TC","Hiragino Maru Gothic ProN",sans-serif';
 const QS = new URLSearchParams(location.search);
 const FAST = QS.has('fast');
 
