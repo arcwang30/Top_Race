@@ -60,6 +60,61 @@ const THEMES = [
     sky: ['#161a55', '#3c2a7a', '#9a55a8'], fog: '#5a3f8f',
     grass: ['#2f9c8a', '#298f7e'], road: ['#565c7c', '#4d5372'],
     rumble: ['#ff4fa3', '#ffe24d'], lane: '#ffe9ff'
+  },
+  {
+    name: '雪原晴空',
+    sky: ['#5fb8ff', '#b8e3ff', '#f2fbff'], fog: '#eaf6ff',
+    grass: ['#f7fbff', '#e6f0fb'], road: ['#9aa6bd', '#8f9bb3'],
+    rumble: ['#4fc3ff', '#ffffff'], lane: '#ffffff'
+  },
+  {
+    name: '極光黃昏',
+    sky: ['#5a4fb0', '#e58fc0', '#ffd0a0'], fog: '#f0c0d8',
+    grass: ['#fdeaf3', '#f2d8ea'], road: ['#9a8fb5', '#8e83a9'],
+    rumble: ['#ff7ab8', '#ffffff'], lane: '#fff0f8'
+  },
+  {
+    name: '雪夜聖誕',
+    sky: ['#0a1440', '#1c2f7a', '#3e6bb0'], fog: '#3a5a98',
+    grass: ['#c6d8f5', '#b5c9ea'], road: ['#5a6788', '#505c7c'],
+    rumble: ['#ff4d5e', '#4dff9a'], lane: '#e9f3ff'
+  },
+  {
+    name: '棉花糖晴空',
+    sky: ['#8fd3ff', '#ffc4ec', '#fff0fa'], fog: '#ffe6f6',
+    grass: ['#a8f0cf', '#94e6bd'], road: ['#b9a6e0', '#ad9ad6'],
+    rumble: ['#ff7ab8', '#ffffff'], lane: '#ffffff'
+  },
+  {
+    name: '巧克力黃昏',
+    sky: ['#ff8f6b', '#ffb98a', '#ffe0b0'], fog: '#ffd2a8',
+    grass: ['#c98a5a', '#bb7c4e'], road: ['#8a6a7a', '#7f5f6f'],
+    rumble: ['#ffd23f', '#ffffff'], lane: '#fff0d0'
+  },
+  {
+    name: '霓虹樂園夜',
+    sky: ['#1b0f4a', '#4a1f7a', '#b04a9a'], fog: '#7a3f9a',
+    grass: ['#5a3fa8', '#4f3599'], road: ['#3d3562', '#362f58'],
+    rumble: ['#3ff0ff', '#ff4fd0'], lane: '#ffe6ff'
+  }
+];
+
+// 賽事(每組 3 個賽段:白天 / 黃昏 / 夜晚),各有專屬障礙與音樂
+const COURSES = [
+  {
+    id: 0, name: '櫻花之旅', en: 'SAKURA TOUR', stars: 1, seed: 20260925, hair: 1,
+    desc: '從春日櫻花道出發,經過夕陽海岸,直奔星夜祭典!',
+    themes: [0, 1, 2], obs: ['poop', 'rock'], music: ['c1s1', 'c1s2', 'c1s3'], color: ['#ffb7d5', '#ff8fbd']
+  },
+  {
+    id: 1, name: '雪之國度', en: 'SNOW KINGDOM', stars: 2, seed: 20261111, hair: 1.5,
+    desc: '晴朗雪原、極光黃昏、聖誕雪夜。小心雪堆與冰塊!',
+    themes: [3, 4, 5], obs: ['snowdrift', 'iceBlock'], music: ['c2s1', 'c2s2', 'c2s3'], color: ['#bfe8ff', '#5fb8ff']
+  },
+  {
+    id: 2, name: '糖果樂園', en: 'CANDY LAND', stars: 3, seed: 20270303, hair: 2,
+    desc: '棉花糖、巧克力到霓虹遊樂園。果凍會彈飛你,口香糖會黏住你!',
+    themes: [6, 7, 8], obs: ['jelly', 'gum'], music: ['c3s1', 'c3s2', 'c3s3'], color: ['#ffc4ec', '#ff7ab8']
   }
 ];
 

@@ -204,7 +204,7 @@ const Spr = (() => {
       if (dots) for (let i = 0; i < 9; i++) E(g, cx + Math.cos(i * 2.3) * w * 0.28, h * 0.32 + Math.sin(i * 1.7) * h * 0.14, 5, 4, dots, 0);
     });
   }
-  function pine(w, h, c1, c2, trunk) {
+  function pine(w, h, c1, c2, trunk, snow, lights) {
     return mk(w, h, g => {
       const cx = w / 2;
       R(g, cx - 10, h * 0.78, 20, h * 0.22, 6, trunk, 3);
@@ -212,7 +212,164 @@ const Spr = (() => {
         const top = h * (0.03 + i * 0.2), bot = h * (0.4 + i * 0.19), half = w * (0.27 + i * 0.09);
         g.beginPath(); g.moveTo(cx, top); g.lineTo(cx + half, bot); g.quadraticCurveTo(cx, bot + h * 0.05, cx - half, bot); g.closePath(); fs(g, c1, 3);
         g.save(); g.globalAlpha = 0.35; g.beginPath(); g.moveTo(cx, top + 6); g.lineTo(cx + half - 5, bot - 2); g.lineTo(cx + 4, bot); g.closePath(); g.fillStyle = c2; g.fill(); g.restore();
+        if (snow) {
+          const d = bot - top;
+          g.beginPath(); g.moveTo(cx, top); g.lineTo(cx + half * 0.66, top + d * 0.66);
+          g.quadraticCurveTo(cx + half * 0.3, top + d * 0.52, cx + half * 0.1, top + d * 0.74);
+          g.quadraticCurveTo(cx - half * 0.2, top + d * 0.5, cx - half * 0.66, top + d * 0.66); g.closePath(); fs(g, snow, 0);
+        }
+        if (lights) for (let k = 0; k < 4; k++) E(g, cx + (k - 1.5) * half * 0.42, bot - 8 - (k % 2) * 8, 5, 5, ['#ff5c7a', '#ffd23f', '#7fe4ff', '#8dff8a'][(k + i) % 4], 1.5);
       }
+      if (lights) poly(g, [[cx, -2], [cx + 8, 12], [cx + 22, 12], [cx + 11, 22], [cx + 15, 36], [cx, 27], [cx - 15, 36], [cx - 11, 22], [cx - 22, 12], [cx - 8, 12]].map(p => [p[0], p[1] + 6]), '#ffd23f', 2);
+    });
+  }
+  function snowBush() {
+    return mk(160, 90, g => {
+      E(g, 45, 62, 44, 26, '#ffffff'); E(g, 115, 62, 44, 26, '#ffffff'); E(g, 80, 46, 46, 32, '#ffffff');
+      g.save(); g.globalAlpha = 0.5; E(g, 80, 74, 62, 9, '#9cc8f0', 0); g.restore();
+      [[60, 50], [96, 40], [112, 62]].forEach(([x, y]) => E(g, x, y, 5, 5, '#ff5c7a', 2));
+    });
+  }
+  function snowman() {
+    return mk(120, 170, g => {
+      poly(g, [[38, 2], [82, 2], [76, 18], [44, 18]], '#3a3350', 3); R(g, 30, 16, 60, 8, 4, '#3a3350', 3);
+      g.strokeStyle = '#8a5a3a'; g.lineWidth = 5; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(36, 88); g.lineTo(8, 70); g.stroke(); g.beginPath(); g.moveTo(84, 88); g.lineTo(112, 68); g.stroke();
+      E(g, 60, 132, 38, 36, '#fff'); E(g, 60, 84, 28, 27, '#fff'); E(g, 60, 44, 22, 21, '#fff');
+      R(g, 40, 60, 40, 9, 4, '#ff5c7a', 2.5);
+      E(g, 53, 40, 3, 3.6, OUT, 0); E(g, 68, 40, 3, 3.6, OUT, 0);
+      poly(g, [[60, 46], [80, 51], [60, 54]], '#ff9a3c', 2);
+      [[60, 98], [60, 116], [60, 134]].forEach(([x, y]) => E(g, x, y, 3.4, 3.4, OUT, 0));
+      E(g, 34, 130, 8, 5, 'rgba(160,200,240,.5)', 0);
+    });
+  }
+  function igloo() {
+    return mk(200, 130, g => {
+      g.beginPath(); g.moveTo(10, 122); g.arc(100, 122, 90, Math.PI, TAU); g.closePath(); fs(g, '#f4fbff', 4);
+      g.save(); g.clip();
+      g.strokeStyle = '#9cc8f0'; g.lineWidth = 3;
+      for (let y = 100; y > 40; y -= 22) { g.beginPath(); g.moveTo(0, y); g.lineTo(200, y); g.stroke(); }
+      for (let r = 0; r < 4; r++) for (let x = (r % 2) * 20; x < 200; x += 40) { g.beginPath(); g.moveTo(x, 122 - r * 22); g.lineTo(x, 100 - r * 22); g.stroke(); }
+      g.restore();
+      g.beginPath(); g.moveTo(66, 124); g.lineTo(66, 92); g.arc(100, 92, 34, Math.PI, TAU); g.lineTo(134, 124); g.closePath(); fs(g, '#5a7ab0', 3);
+      g.beginPath(); g.moveTo(10, 122); g.arc(100, 122, 90, Math.PI, TAU); g.closePath(); fs(g, null, 4);
+    });
+  }
+  function penguin() {
+    return mk(100, 120, g => {
+      E(g, 22, 76, 9, 22, '#3a3a5a', 3, 0.3); E(g, 78, 76, 9, 22, '#3a3a5a', 3, -0.3);
+      E(g, 50, 74, 30, 40, '#3a3a5a'); E(g, 50, 82, 20, 29, '#ffffff', 0);
+      E(g, 42, 52, 5, 6, '#fff', 2); E(g, 58, 52, 5, 6, '#fff', 2); E(g, 43, 53, 2.2, 2.6, OUT, 0); E(g, 57, 53, 2.2, 2.6, OUT, 0);
+      poly(g, [[43, 62], [57, 62], [50, 72]], '#ff9a3c', 2);
+      E(g, 36, 62, 5, 3, 'rgba(255,120,150,.6)', 0); E(g, 64, 62, 5, 3, 'rgba(255,120,150,.6)', 0);
+      E(g, 38, 112, 11, 5, '#ff9a3c', 2.5); E(g, 62, 112, 11, 5, '#ff9a3c', 2.5);
+    });
+  }
+  function iceBlock() {
+    return mk(160, 130, g => {
+      const gr = g.createLinearGradient(0, 10, 0, 124); gr.addColorStop(0, '#eafaff'); gr.addColorStop(1, '#7fd0ff');
+      poly(g, [[14, 118], [8, 60], [40, 24], [84, 8], [124, 30], [150, 70], [144, 118]], gr, 4);
+      poly(g, [[40, 30], [84, 14], [70, 60], [30, 70]], 'rgba(255,255,255,.55)', 0);
+      poly(g, [[100, 40], [124, 34], [136, 80], [112, 90]], 'rgba(255,255,255,.3)', 0);
+      g.strokeStyle = '#a8def8'; g.lineWidth = 3; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(84, 30); g.lineTo(78, 64); g.lineTo(96, 84); g.stroke();
+      [[30, 40], [128, 60]].forEach(([x, y]) => poly(g, [[x, y - 8], [x + 3, y - 3], [x + 8, y], [x + 3, y + 3], [x, y + 8], [x - 3, y + 3], [x - 8, y], [x - 3, y - 3]], '#fff', 0));
+    });
+  }
+  function snowdrift() {
+    return mk(190, 100, g => {
+      E(g, 95, 76, 88, 22, '#dcecff', 0); E(g, 95, 70, 84, 24, '#ffffff'); E(g, 62, 56, 42, 26, '#ffffff'); E(g, 126, 54, 40, 24, '#ffffff');
+      g.save(); g.globalAlpha = 0.5; E(g, 95, 88, 70, 7, '#9cc8f0', 0); g.restore();
+      [[40, 60], [96, 40], [150, 56], [120, 78]].forEach(([x, y]) => E(g, x, y, 3, 3, '#cfe8ff', 0));
+      g.strokeStyle = '#8fbce8'; g.lineWidth = 2.5; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(70, 44); g.quadraticCurveTo(80, 36, 92, 44); g.stroke();
+    });
+  }
+  function lollipop(c1, c2, stick) {
+    return mk(130, 230, g => {
+      g.strokeStyle = OUT; g.lineWidth = 15; g.lineCap = 'round'; g.beginPath(); g.moveTo(65, 118); g.lineTo(65, 226); g.stroke();
+      g.strokeStyle = stick || '#ffffff'; g.lineWidth = 8; g.beginPath(); g.moveTo(65, 118); g.lineTo(65, 226); g.stroke();
+      g.strokeStyle = c2; g.lineWidth = 8; g.setLineDash([12, 14]); g.beginPath(); g.moveTo(65, 122); g.lineTo(65, 226); g.stroke(); g.setLineDash([]);
+      E(g, 65, 66, 56, 56, c1, 4);
+      g.strokeStyle = c2; g.lineWidth = 9; g.lineCap = 'round';
+      g.beginPath(); g.arc(65, 66, 12, 0, TAU * 0.8); g.stroke();
+      g.beginPath(); g.arc(65, 66, 28, Math.PI * 0.6, TAU * 0.95); g.stroke();
+      g.beginPath(); g.arc(65, 66, 44, Math.PI * 1.2, TAU + Math.PI * 0.3); g.stroke();
+      E(g, 40, 40, 9, 5, 'rgba(255,255,255,.7)', 0, -0.6);
+    });
+  }
+  function gumdrop(cols) {
+    return mk(170, 100, g => {
+      [[40, 74, 34, cols[0]], [128, 74, 34, cols[1]], [84, 66, 42, cols[2]]].forEach(([x, y, r, c]) => {
+        g.beginPath(); g.moveTo(x - r, y + 22); g.quadraticCurveTo(x - r, y - r * 1.1, x, y - r * 1.1); g.quadraticCurveTo(x + r, y - r * 1.1, x + r, y + 22); g.closePath(); fs(g, c, 3);
+        for (let k = 0; k < 8; k++) E(g, x + Math.cos(k * 1.7) * r * 0.6, y - 6 + Math.sin(k * 2.3) * r * 0.5, 2.2, 2.2, 'rgba(255,255,255,.8)', 0);
+        E(g, x - r * 0.4, y - r * 0.5, r * 0.22, r * 0.12, 'rgba(255,255,255,.6)', 0, -0.6);
+      });
+    });
+  }
+  function cupcake() {
+    return mk(130, 140, g => {
+      poly(g, [[22, 66], [108, 66], [96, 136], [34, 136]], '#ffd6a0', 3.5);
+      g.strokeStyle = '#e8a860'; g.lineWidth = 3; for (let x = 44; x < 100; x += 14) { g.beginPath(); g.moveTo(x - (x - 65) * 0.05, 70); g.lineTo(x - (x - 65) * 0.2, 132); g.stroke(); }
+      E(g, 65, 60, 46, 20, '#ff9fd0'); E(g, 65, 42, 36, 18, '#ffb3dc'); E(g, 65, 26, 24, 14, '#ff9fd0');
+      E(g, 65, 12, 8, 8, '#ff3f5c', 2.5); g.strokeStyle = '#3a8a3a'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(65, 5); g.lineTo(72, -1); g.stroke();
+      [[45, 58], [80, 56], [62, 44], [72, 34]].forEach(([x, y], i) => E(g, x, y, 2.6, 2.6, ['#fff', '#7fe4ff', '#ffe680', '#8dff8a'][i], 0));
+    });
+  }
+  function candyCane() {
+    return mk(110, 190, g => {
+      const path = () => { g.beginPath(); g.moveTo(28, 186); g.lineTo(28, 62); g.arc(58, 62, 30, Math.PI, 0.05 * Math.PI, false); };
+      g.lineCap = 'round'; path(); g.lineWidth = 26; g.strokeStyle = OUT; g.stroke();
+      path(); g.lineWidth = 18; g.strokeStyle = '#ffffff'; g.stroke();
+      path(); g.lineWidth = 18; g.strokeStyle = '#ff4d5e'; g.setLineDash([14, 18]); g.stroke(); g.setLineDash([]);
+    });
+  }
+  function donut() {
+    return mk(170, 130, g => {
+      g.save(); g.globalAlpha = 0.15; E(g, 85, 100, 74, 22, '#000', 0); g.restore();
+      E(g, 85, 80, 70, 46, '#e3a25a', 4); E(g, 85, 74, 64, 40, '#ff8fc8', 2.5);
+      g.save(); g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.ellipse(85, 76, 22, 14, 0, 0, TAU); g.fill(); g.restore();
+      g.beginPath(); g.ellipse(85, 76, 22, 14, 0, 0, TAU); g.lineWidth = 3; g.strokeStyle = OUT; g.stroke();
+      [[40, 70, '#fff'], [58, 50, '#ffe680'], [110, 48, '#7fe4ff'], [130, 68, '#8dff8a'], [120, 92, '#fff'], [52, 92, '#ffe680'], [88, 104, '#7fe4ff']].forEach(([x, y, c], i) => { g.save(); g.translate(x, y); g.rotate(i); R(g, -6, -2, 12, 4, 2, c, 0); g.restore(); });
+    });
+  }
+  function balloon() {
+    return mk(100, 210, g => {
+      g.strokeStyle = '#6a5a7a'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(50, 104); g.quadraticCurveTo(40, 150, 52, 204); g.stroke();
+      E(g, 50, 56, 36, 46, '#ff5c7a'); poly(g, [[44, 100], [56, 100], [50, 110]], '#ff5c7a', 3);
+      E(g, 36, 36, 8, 14, 'rgba(255,255,255,.6)', 0, 0.4);
+      R(g, 36, 196, 28, 12, 4, '#8a5a3a', 3);
+    });
+  }
+  function gummy() {
+    return mk(110, 130, g => {
+      const c = '#ffa53a';
+      E(g, 22, 84, 11, 9, c, 3); E(g, 78, 84, 11, 9, c, 3);
+      E(g, 34, 116, 13, 10, c, 3); E(g, 66, 116, 13, 10, c, 3);
+      E(g, 50, 88, 28, 30, c); E(g, 50, 46, 26, 24, c);
+      E(g, 30, 26, 10, 10, c, 3); E(g, 70, 26, 10, 10, c, 3);
+      E(g, 50, 54, 11, 8, '#ffd28a', 2); E(g, 50, 51, 3.6, 2.8, OUT, 0);
+      E(g, 40, 42, 3, 3.6, OUT, 0); E(g, 60, 42, 3, 3.6, OUT, 0);
+      E(g, 38, 76, 8, 12, 'rgba(255,255,255,.4)', 0, 0.3);
+    });
+  }
+  function jelly() {
+    return mk(160, 130, g => {
+      E(g, 80, 118, 70, 10, '#ffffff', 3);
+      const gr = g.createLinearGradient(0, 20, 0, 120); gr.addColorStop(0, '#ff9fe6'); gr.addColorStop(1, '#ff4fb8');
+      g.beginPath(); g.moveTo(22, 118); g.quadraticCurveTo(22, 20, 80, 16); g.quadraticCurveTo(138, 20, 138, 118); g.closePath(); fs(g, gr, 4);
+      g.save(); g.globalAlpha = 0.6; E(g, 54, 54, 12, 26, '#fff', 0, 0.4); g.restore();
+      E(g, 62, 84, 4, 5, OUT, 0); E(g, 98, 84, 4, 5, OUT, 0);
+      g.beginPath(); g.arc(80, 90, 8, 0.15 * Math.PI, 0.85 * Math.PI); g.lineWidth = 2.5; g.strokeStyle = OUT; g.stroke();
+    });
+  }
+  function gum() {
+    return mk(170, 90, g => {
+      E(g, 85, 62, 74, 20, '#ff8fc8'); E(g, 50, 50, 30, 20, '#ff8fc8'); E(g, 122, 48, 32, 22, '#ff8fc8'); E(g, 88, 44, 30, 20, '#ff8fc8');
+      E(g, 120, 30, 16, 16, 'rgba(255,255,255,.55)', 3);
+      g.strokeStyle = '#ffb3dc'; g.lineWidth = 4; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(30, 74); g.quadraticCurveTo(14, 60, 22, 42); g.stroke(); g.beginPath(); g.moveTo(148, 72); g.quadraticCurveTo(166, 60, 156, 44); g.stroke();
+      E(g, 70, 46, 3.4, 4, OUT, 0); E(g, 104, 46, 3.4, 4, OUT, 0);
     });
   }
   function palm() {
@@ -389,6 +546,18 @@ const Spr = (() => {
     bushDry: () => bush('#d8c25a', '#a89a3a', true),
     bushNight: () => bush('#238a7c', '#0f5a58', true),
     lantern, redLantern, umbrella, rabbit, crab, fox, signBoard: sign,
+    snowPine: () => pine(190, 250, '#4fbf7a', '#2f8f5a', '#8a5a44', '#ffffff'),
+    snowPineB: () => pine(190, 250, '#3fa8b8', '#2a7a90', '#7a5a4a', '#ffffff'),
+    snowPineD: () => pine(190, 250, '#8a6ac8', '#5a4a98', '#6a4a5a', '#ffe6f2'),
+    snowPineN: () => pine(190, 250, '#2f7a9a', '#1a4a70', '#4a3a58', '#dcecff'),
+    xmasTree: () => pine(180, 260, '#2fa05a', '#1d6a42', '#6a4a3a', '#ffffff', true),
+    snowBush, snowman, igloo, penguin, iceBlock, snowdrift,
+    lollipopA: () => lollipop('#ff8fc8', '#ffffff'), lollipopB: () => lollipop('#7fe4ff', '#ffffff', '#ffd6ec'),
+    lollipopC: () => lollipop('#ffe680', '#ff9a3c'), lollipopD: () => lollipop('#c98a5a', '#ffe6c0', '#ffe6c0'),
+    lollipopN: () => lollipop('#ff4fd0', '#3ff0ff', '#e6d0ff'), lollipopN2: () => lollipop('#3ff0ff', '#ff4fd0', '#e6d0ff'),
+    gumdropA: () => gumdrop(['#ff7ab8', '#7fe4ff', '#ffe680']), gumdropB: () => gumdrop(['#ff9a3c', '#c98a5a', '#ffd23f']),
+    gumdropN: () => gumdrop(['#ff4fd0', '#3ff0ff', '#b48aff']),
+    cupcake, candyCane, donut, balloon, gummy, jelly, gum,
     coin, nitro, poop, rock, arrowR: () => arrow(1), arrowL: () => arrow(-1),
     enemy1: () => enemy('#5ad27a', '#fff3a0', 'frog'),
     enemy2: () => enemy('#ff8fc7', '#ffffff', 'bunny'),

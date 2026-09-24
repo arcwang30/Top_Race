@@ -145,12 +145,11 @@ Screens.menu = {
 
     UI.begin(this);
     const items = [
-      ['開始遊戲', '#8dff8a', '#2fc46a', 'game'], ['操作說明', '#8ee8ff', '#3ea8ff', 'howto'],
+      ['開始遊戲', '#8dff8a', '#2fc46a', 'course'], ['操作說明', '#8ee8ff', '#3ea8ff', 'howto'],
       ['排行榜', '#ffe680', '#ffb02e', 'ranking'], ['設定', '#d6b3ff', '#9a6bff', 'settings'], ['CREDIT', '#ffb3d1', '#ff6b9a', 'credits']
     ];
     items.forEach(([label, c1, c2, dest], i) => {
       if (UI.button(g, this, label, 110, 640 + i * 58, 320, 50, { c1, c2 })) {
-        if (dest === 'game' && Save.data.gyro && Input.touchMode) Input.enableGyro();
         App.goto(dest);
       }
     });
@@ -159,10 +158,84 @@ Screens.menu = {
   }
 };
 
+// ---------- 賽事選擇 ----------
+const OBS_INFO = {
+  poop: ['大便', '踩到會打滑轉圈'], rock: ['石頭', '撞到整台翻車'],
+  snowdrift: ['雪堆', '陷入雪中大幅減速'], iceBlock: ['冰塊', '撞到整台翻車'],
+  jelly: ['果凍', '被彈飛失去控制'], gum: ['口香糖', '被黏住幾乎停下']
+};
+
+Screens.course = {
+  sel: 0, n: 0, idx: 0, anim: 1, dir: 1, t: 0,
+  enter() { this.idx = clamp(Save.data.course || 0, 0, COURSES.length - 1); this.sel = 0; this.anim = 1; this.t = 0; Sound.music('menu'); },
+  change(d) {
+    this.idx = (this.idx + d + COURSES.length) % COURSES.length; this.dir = d; this.anim = 0; Sound.play('select');
+  },
+  thumb(g, x, y, w, h, theme, label, icon) {
+    const th = THEMES[theme], k = w / W;
+    g.save();
+    g.beginPath(); g.roundRect(x, y, w, h, 14); g.clip();
+    g.translate(x, y); g.scale(k, k);
+    BG.draw(g, theme, [this.t * 30 + theme * 200, this.t * 60 + theme * 300, this.t * 120], 300);
+    g.fillStyle = th.grass[0]; g.fillRect(0, 300, W, 400);
+    g.fillStyle = th.rumble[0]; g.beginPath(); g.moveTo(W / 2 - 26, 300); g.lineTo(W / 2 + 26, 300); g.lineTo(W / 2 + 330, 700); g.lineTo(W / 2 - 330, 700); g.fill();
+    g.fillStyle = th.road[0]; g.beginPath(); g.moveTo(W / 2 - 20, 300); g.lineTo(W / 2 + 20, 300); g.lineTo(W / 2 + 280, 700); g.lineTo(W / 2 - 280, 700); g.fill();
+    g.restore();
+    g.lineWidth = 3; g.strokeStyle = '#ffffff'; g.beginPath(); g.roundRect(x, y, w, h, 14); g.stroke();
+    UI.text(g, icon + ' ' + label, x + w / 2, y + h + 16, 15, { fill: '#fff', stroke: null });
+  },
+  frame(g, dt) {
+    this.t += dt; this.anim = Math.min(1, this.anim + dt * 5);
+    const c = COURSES[this.idx], th0 = c.themes[0];
+    BG.draw(g, th0, [App.t * 10, App.t * 22, App.t * 44], 330);
+    g.fillStyle = THEMES[th0].grass[0]; g.fillRect(0, 330, W, H - 330);
+    UI.dim(g, 0.5);
+    UI.header(g, '選擇賽事', 'SELECT COURSE');
+
+    const ease = 1 - Math.pow(1 - this.anim, 3), off = (1 - ease) * 70 * this.dir;
+    g.save(); g.globalAlpha = 0.3 + 0.7 * ease; g.translate(off, 0);
+    UI.panel(g, 40, 130, 460, 640, 26, 'rgba(30,20,60,.7)', c.color[0]);
+    UI.text(g, c.name, W / 2, 190, 52, { fill: c.color[0], sw: 9 });
+    UI.text(g, c.en, W / 2, 236, 24, { fill: '#fff', sw: 5 });
+    UI.text(g, '難度  ' + '★'.repeat(c.stars) + '☆'.repeat(3 - c.stars), W / 2, 274, 22, { fill: '#ffd23f', stroke: null });
+    const icons = ['☀', '🌅', '🌙'];
+    for (let i = 0; i < 3; i++) this.thumb(g, 62 + i * 143, 300, 130, 150, c.themes[i], THEMES[c.themes[i]].name, icons[i]);
+    UI.text(g, '3 個賽段,途中有 2 個 CHECK POINT', W / 2, 492, 17, { fill: '#cfd8ff', stroke: null });
+    UI.wrap(g, c.desc, 66, 530, 410, 28, 20, { fill: '#fff' });
+    UI.text(g, '本賽事障礙', W / 2, 612, 20, { fill: '#7fe4ff', stroke: null });
+    c.obs.forEach((o, i) => {
+      const im = Spr.get(o), sw = 80, sh = Math.min(64, sw * im.height / im.width), sw2 = sh * im.width / im.height;
+      const bx = 66 + i * 220;
+      g.drawImage(im, bx + (80 - sw2) / 2, 640 + (64 - sh) / 2, sw2, sh);
+      UI.text(g, OBS_INFO[o][0], bx + 88, 656, 21, { align: 'left', fill: '#fff27a', stroke: null });
+      UI.text(g, OBS_INFO[o][1], bx + 88, 684, 14, { align: 'left', fill: '#fff', stroke: null });
+    });
+    g.restore();
+
+    for (let i = 0; i < COURSES.length; i++) {
+      g.fillStyle = i === this.idx ? '#ffd23f' : 'rgba(255,255,255,.35)';
+      g.beginPath(); g.arc(W / 2 + (i - 1) * 26, 790, i === this.idx ? 8 : 6, 0, TAU); g.fill();
+    }
+    UI.text(g, '◀', 20, 450, 46, { fill: '#ffd23f' }); UI.text(g, '▶', 520, 450, 46, { fill: '#ffd23f' });
+    if (Input.was('left') || UI.tapIn(0, 300, 48, 300)) this.change(-1);
+    if (Input.was('right') || UI.tapIn(492, 300, 48, 300)) this.change(1);
+
+    UI.begin(this);
+    if (UI.button(g, this, '確認出發', 110, 812, 320, 60, { c1: '#8dff8a', c2: '#2fc46a' })) {
+      Save.data.course = this.idx; Save.store();
+      Game.courseId = this.idx;
+      if (Save.data.gyro && Input.touchMode) Input.enableGyro();
+      App.goto('game');
+    }
+    if (UI.button(g, this, '返回', 170, 884, 200, 52, { c1: '#ffb3d1', c2: '#ff6b9a', back: true }) || Input.was('back')) App.goto('menu');
+    UI.nav(this);
+  }
+};
+
 // ---------- 遊戲 ----------
 Screens.game = {
   paused: false, sel: 0, n: 0,
-  enter() { Game.newRun(); this.paused = false; this.sel = 0; Sound.music('s1'); },
+  enter() { Game.newRun(); this.paused = false; this.sel = 0; Sound.music(Game.course.music[0]); },
   leave() { Sound.setLoops({ on: false }); Input.virtual = []; },
   pause() { if (!this.paused && Game.s.phase !== 'over') { this.paused = true; this.sel = 0; Sound.setLoops({ on: false }); } },
   frame(g, dt) {
@@ -190,13 +263,13 @@ Screens.howto = {
     BG.draw(g, 0, [App.t * 8, App.t * 18, App.t * 36], 380);
     g.fillStyle = '#8ee05a'; g.fillRect(0, 380, W, H - 380);
     UI.dim(g, 0.55);
-    UI.header(g, '操作說明', ['遊戲規則', '操作方式', '道具與障礙'][this.page] + `  (${this.page + 1}/3)`);
+    UI.header(g, '操作說明', ["遊戲規則", "操作方式", "道具與敵車", "各賽事障礙"][this.page] + `  (${this.page + 1}/4)`);
     UI.panel(g, 20, 130, 500, 690, 22);
 
-    if (this.page === 0) this.p1(g); else if (this.page === 1) this.p2(g); else this.p3(g);
+    if (this.page === 0) this.p1(g); else if (this.page === 1) this.p2(g); else if (this.page === 2) this.p3(g); else this.p4(g);
 
-    const pv = () => { this.page = (this.page + 2) % 3; Sound.play('select'); };
-    const nx = () => { this.page = (this.page + 1) % 3; Sound.play('select'); };
+    const pv = () => { this.page = (this.page + 3) % 4; Sound.play('select'); };
+    const nx = () => { this.page = (this.page + 1) % 4; Sound.play('select'); };
     if (Input.was('left') || UI.tapIn(20, 830, 80, 64)) pv();
     if (Input.was('right') || UI.tapIn(440, 830, 80, 64)) nx();
     UI.text(g, '◀', 60, 862, 44, { fill: '#ffd23f' }); UI.text(g, '▶', 480, 862, 44, { fill: '#ffd23f' });
@@ -265,6 +338,19 @@ Screens.howto = {
       g.drawImage(im, 70 - sw * k / 2, y + 40 - sh * k / 2, sw * k, sh * k);
       UI.text(g, t, 130, y + 16, 24, { align: 'left', fill: '#fff27a', stroke: null });
       UI.wrap(g, d, 130, y + 44, 380, 24, 18, { fill: '#fff' });
+    });
+  },
+  p4(g) {
+    COURSES.forEach((c, ci) => {
+      const y = 150 + ci * 224;
+      UI.text(g, c.name + '  ' + c.en, 40, y + 14, 24, { align: 'left', fill: c.color[0], stroke: null });
+      UI.text(g, '難度 ' + '★'.repeat(c.stars) + '☆'.repeat(3 - c.stars), 500, y + 14, 16, { align: 'right', fill: '#ffd23f', stroke: null });
+      c.obs.forEach((o, i) => {
+        const im = Spr.get(o), sh = Math.min(70, 84 * im.height / im.width), sw = sh * im.width / im.height, by = y + 40 + i * 88;
+        g.drawImage(im, 40 + (84 - sw) / 2, by + (70 - sh) / 2, sw, sh);
+        UI.text(g, OBS_INFO[o][0], 140, by + 16, 22, { align: 'left', fill: '#fff27a', stroke: null });
+        UI.text(g, OBS_INFO[o][1], 140, by + 46, 17, { align: 'left', fill: '#fff', stroke: null });
+      });
     });
   }
 };

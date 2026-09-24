@@ -33,16 +33,16 @@ const Road = (() => {
     return { road, get lastY() { return lastY; }, setTheme(v) { theme = v; }, count: () => t.segs.length };
   }
 
-  function buildGame() {
+  function buildGame(course) {
     const t = { segs: [], cars: [], cps: [], secStart: [], warn: [], kind: 'game' };
     const b = makeBuilder(t);
-    const rand = rng(20260925);
+    const rand = rng(course.seed);
     const hillOf = () => (rand() < 0.5 ? -1 : 1) * (3 + ((rand() * 9) | 0));
-    const hairP = [0.05, 0.08, 0.12];
+    const hairP = [0.05, 0.08, 0.12].map(v => v * course.hair);
 
     b.road(10, 30, 10, 0, 0);
     for (let s = 0; s < 3; s++) {
-      b.setTheme(s);
+      b.setTheme(course.themes[s]);
       t.secStart.push(t.segs.length);
       const start = t.segs.length, target = CFG.sections[s];
       if (s > 0) b.road(20, 30, 20, 0, 0);
@@ -61,14 +61,14 @@ const Road = (() => {
       b.road(10, 50, 10, 0, 0);
       t.cps.push(t.segs.length);
     }
-    b.setTheme(2);
+    b.setTheme(course.themes[2]);
     for (let i = 0; i < 4; i++) b.road(20, 40, 20, 0, 0);
 
     t.N = t.segs.length; t.length = t.N * L;
     t.goalZ = t.cps[2] * L;
     t.segs[10].gate = 'start';
     t.cps.forEach((c, i) => { t.segs[c].gate = i === 2 ? 'goal' : 'cp'; });
-    decorate(t, rand, true);
+    decorate(t, rand, true, course);
     spawnCars(t, rand);
     return t;
   }
@@ -89,17 +89,24 @@ const Road = (() => {
   const SC = [
     { trees: ['sakura', 'treeRound', 'sakura'], bush: ['bush', 'bushFlower'], prop: ['lantern', 'signBoard'], animal: ['rabbit'] },
     { trees: ['palm', 'palm', 'pine'], bush: ['bushDry'], prop: ['umbrella', 'signBoard'], animal: ['crab'] },
-    { trees: ['pineNight', 'pineNight', 'treeNight'], bush: ['bushNight'], prop: ['redLantern', 'lantern'], animal: ['fox'] }
+    { trees: ['pineNight', 'pineNight', 'treeNight'], bush: ['bushNight'], prop: ['redLantern', 'lantern'], animal: ['fox'] },
+    { trees: ['snowPine', 'snowPineB', 'snowPine'], bush: ['snowBush'], prop: ['snowman', 'igloo'], animal: ['penguin'] },
+    { trees: ['snowPineD', 'snowPineD', 'snowPineB'], bush: ['snowBush'], prop: ['igloo', 'snowman'], animal: ['penguin'] },
+    { trees: ['snowPineN', 'snowPineN', 'xmasTree'], bush: ['snowBush'], prop: ['snowman', 'redLantern'], animal: ['rabbit'] },
+    { trees: ['lollipopA', 'lollipopB', 'lollipopC'], bush: ['gumdropA'], prop: ['cupcake', 'candyCane'], animal: ['gummy'] },
+    { trees: ['lollipopD', 'candyCane', 'lollipopD'], bush: ['gumdropB'], prop: ['donut', 'candyCane'], animal: ['gummy'] },
+    { trees: ['lollipopN', 'lollipopN2', 'candyCane'], bush: ['gumdropN'], prop: ['balloon', 'cupcake'], animal: ['gummy'] }
   ];
-  const PROPW = { lantern: 420, signBoard: 900, umbrella: 800, redLantern: 420 };
+  const PROPW = { lantern: 420, signBoard: 900, umbrella: 800, redLantern: 420, snowman: 520, igloo: 900, cupcake: 600, candyCane: 420, donut: 800, balloon: 380 };
+  const OBSW = { poop: 420, rock: 560, snowdrift: 720, iceBlock: 560, jelly: 520, gum: 680 };
   const pick = (a, r) => a[(r() * a.length) | 0];
 
-  function decorate(t, rand, items) {
+  function decorate(t, rand, items, course) {
     const segs = t.segs, N = segs.length;
     for (let i = 0; i < N; i++) {
       const s = segs[i], th = SC[s.theme];
       if (i % 3 === 0) for (const side of [-1, 1]) {
-        if (rand() < 0.6) s.sprites.push({ name: pick(th.trees, rand), offset: side * (1.9 + rand() * 2.6), w: 1000 + rand() * 600, kind: 'solid', hit: 0.2 });
+        if (rand() < 0.6) { const nm = pick(th.trees, rand); s.sprites.push({ name: nm, offset: side * (1.9 + rand() * 2.6), w: (1000 + rand() * 600) * (nm === 'candyCane' ? 0.5 : 1), kind: 'solid', hit: 0.2 }); }
       }
       if (rand() < 0.09) s.sprites.push({ name: pick(th.bush, rand), offset: (rand() < 0.5 ? -1 : 1) * (1.2 + rand() * 0.6), w: 520 + rand() * 200, kind: 'deco' });
       if (rand() < 0.02) { const nm = pick(th.prop, rand); s.sprites.push({ name: nm, offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW[nm], kind: 'deco' }); }
@@ -118,8 +125,8 @@ const Road = (() => {
         if (r < 0.33) { const n = 6 + ((rand() * 5) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         else if (r < 0.48) { const ph = rand() * 6; for (let k = 0; k < 12; k++) coin(i + k * 2, 0.62 * Math.sin(k * 0.55 + ph)); i += 24; }
         else if (r < 0.6) { put(i, { name: 'nitro', offset: lane, w: 300, kind: 'nitro', lift: 260, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
-        else if (r < 0.6 + poopP[sec]) put(i, { name: 'poop', offset: lane + (rand() - 0.5) * 0.15, w: 420, kind: 'poop' });
-        else if (r < 0.6 + poopP[sec] + rockP[sec]) put(i, { name: 'rock', offset: lane + (rand() - 0.5) * 0.12, w: 560, kind: 'rock' });
+        else if (r < 0.6 + poopP[sec]) put(i, { name: course.obs[0], offset: lane + (rand() - 0.5) * 0.15, w: OBSW[course.obs[0]], kind: course.obs[0] });
+        else if (r < 0.6 + poopP[sec] + rockP[sec]) put(i, { name: course.obs[1], offset: lane + (rand() - 0.5) * 0.12, w: OBSW[course.obs[1]], kind: course.obs[1] });
         else { const n = 5 + ((rand() * 4) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         i += 22 + ((rand() * 26) | 0);
       }
@@ -288,5 +295,5 @@ const Road = (() => {
     };
   }
 
-  return { build: k => (k === 'demo' ? buildDemo() : buildGame()), render, findSeg, attachCar, LANES };
+  return { build: (k, course) => (k === 'demo' ? buildDemo() : buildGame(course)), render, findSeg, attachCar, LANES };
 })();

@@ -32,6 +32,18 @@ powershell -ExecutionPolicy Bypass -File tools\serve.ps1
 | `builds/` | 封裝發佈版本(zip),**不進 git** |
 | `tools/` | `serve.ps1` 本機伺服器、`build.ps1` 封裝腳本 |
 
+## 賽事
+
+每組賽事有 3 個賽段(白天 / 黃昏 / 夜晚),每段有獨立場景與音樂。定義在 `js/config.js` 的 `COURSES`。
+
+| 賽事 | 場景 | 專屬障礙 |
+| --- | --- | --- |
+| 櫻花之旅 | 春日櫻花道 → 夕陽海岸 → 星夜祭典 | 大便(打滑)、石頭(翻車) |
+| 雪之國度 | 雪原晴空 → 極光黃昏 → 雪夜聖誕 | 雪堆(陷入減速)、冰塊(翻車) |
+| 糖果樂園 | 棉花糖晴空 → 巧克力黃昏 → 霓虹樂園夜 | 果凍(彈飛)、口香糖(黏住) |
+
+新增賽事:在 `THEMES` 加場景配色、`js/background.js` 加三層背景、`js/road.js` 的 `SC` 加路邊物件、`js/audio.js` 的 `TRACKS` 加音樂,再於 `COURSES` 登記。
+
 ## 更換熊貓 / 賽車圖
 
 把圖檔放進 `assets/images/` 即自動取代程式繪製的賽車(含騎士):

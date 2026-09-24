@@ -1,5 +1,7 @@
 'use strict';
 
+const OBS_FX = { poop: 'slip', rock: 'crash', snowdrift: 'mud', iceBlock: 'crash', jelly: 'bounce', gum: 'stuck' };
+
 const Game = {
   track: null,
   s: null,
@@ -8,14 +10,19 @@ const Game = {
   CRASH_T: 2.0,
   SLIP_T: 1.5,
 
+  courseId: 0,
+  BOUNCE_T: 1.0,
+
   newRun() {
-    this.track = Road.build('game');
+    this.course = COURSES[this.courseId] || COURSES[0];
+    this.track = Road.build('game', this.course);
     this.result = null;
     this.s = {
       pos: 0, x: 0, speed: 0, nitro: 1, nitroT: 0, slipT: 0, slipDir: 1, crashT: 0, invT: 0, shake: 0,
+      mudT: 0, mudCap: 1, bounceT: 0,
       sc: { dist: 0, drift: 0, coin: 0, cp: 0, time: 0, clear: 0 }, coins: 0,
       time: CFG.startTime, elapsed: 0, phase: 'countdown', countT: 3.6, cp: 0, stage: 1,
-      drift: false, bg: [0, 0, 0], bgTheme: 0, bgPrev: 0, bgFade: 0,
+      drift: false, bg: [0, 0, 0], bgTheme: this.course.themes[0], bgPrev: this.course.themes[0], bgFade: 0,
       toast: null, pops: [], parts: [], fly: [], wheel: 0, t: 0, endT: 0, tickSec: -1, bumpCool: 0, treeCool: 0
     };
   },
@@ -61,15 +68,17 @@ const Game = {
     // ---- 操作 ----
     const canCtl = playing && s.crashT <= 0;
     const thr = canCtl && inp.throttle, brk = canCtl && inp.brake;
-    const steer = (canCtl && s.slipT <= 0) ? inp.steer : 0;
+    const steer = (canCtl && s.slipT <= 0 && s.bounceT <= 0) ? inp.steer : 0;
     if (canCtl && inp.was('nitro') && s.nitro > 0 && s.nitroT <= 0) {
       s.nitro--; s.nitroT = C.nitroTime; s.slipT = 0; s.shake = 0.35; Sound.play('nitro');
       this.toast('NITRO!', '無敵衝刺!', 1.0, '#7fe4ff', 72);
     }
     if (s.nitroT > 0) s.nitroT = Math.max(0, s.nitroT - dt);
+    if (s.bounceT > 0) s.bounceT -= dt;
+    if (s.mudT > 0) s.mudT -= dt;
     const boosting = s.nitroT > 0;
 
-    let pct = s.speed / C.maxSpeed;
+    let pct = s.speed / C.maxSpeed; const p0 = pct;
     const off = Math.abs(s.x) > 1.0;
     s.drift = canCtl && s.slipT <= 0 && thr && brk && Math.abs(steer) > 0.25 && pct > 0.35;
 
@@ -90,6 +99,7 @@ const Game = {
     }
     if (off && pct > C.offroadLimit && s.phase !== 'goal') pct = Math.max(C.offroadLimit, pct - C.offroadDecel * dt);
     pct = clamp(pct, 0, 1);
+    if (s.mudT > 0 && pct > s.mudCap) pct = Math.max(s.mudCap, Math.min(pct, p0) - 1.5 * dt);
     s.speed = pct * C.maxSpeed;
 
     // ---- 橫移 / 離心力 / 打滑 ----
@@ -128,7 +138,7 @@ const Game = {
           s.time += C.bonusTime[i]; s.sc.cp += SCORE.cp; s.stage = i + 2;
           this.toast('CHECK POINT!', `TIME +${C.bonusTime[i]} 秒`, 2.2, '#ffe680', 60);
           Sound.play('checkpoint');
-          Sound.music('s' + (i + 2));
+          Sound.music(this.course.music[i + 1]);
         } else {
           s.phase = 'goal'; s.endT = 0;
           s.sc.time = Math.floor(s.time) * SCORE.timeBonus; s.sc.clear = SCORE.clear;
@@ -171,14 +181,28 @@ const Game = {
           sp.taken = true; Sound.play('nitroGet');
           if (s.nitro < CFG.nitroMax) { s.nitro++; this.pop('NITRO +1', '#7fe4ff'); }
           else { s.sc.coin += SCORE.bottleFull; this.pop('+' + SCORE.bottleFull, '#7fe4ff'); }
-        } else if ((sp.kind === 'poop' || sp.kind === 'rock') && inv) {
+        } else if (OBS_FX[sp.kind] && inv) {
           sp.taken = true; this.smash(sp.name, sp.offset, 130, 500);
-        } else if (sp.kind === 'poop' && playing && s.invT <= 0 && s.crashT <= 0 && s.slipT <= 0) {
-          sp.taken = true; s.slipT = this.SLIP_T; s.slipDir = s.x > sp.offset ? 1 : -1; s.shake = 0.25;
-          Sound.play('slip'); this.toast('打滑!', '', 1.0, '#c78a4a', 60);
-        } else if (sp.kind === 'rock' && playing && s.invT <= 0 && s.crashT <= 0) {
-          sp.taken = true; s.crashT = this.CRASH_T; s.slipT = 0; s.shake = 0.9; s.nitroT = 0;
-          Sound.play('crash'); this.toast('翻車!', '', 1.4, '#ff5c7a', 72);
+        } else if (OBS_FX[sp.kind] && playing && s.invT <= 0 && s.crashT <= 0) {
+          const fx = OBS_FX[sp.kind];
+          if (fx === 'slip' && s.slipT > 0) continue;
+          sp.taken = true;
+          if (fx === 'slip') {
+            s.slipT = this.SLIP_T; s.slipDir = s.x > sp.offset ? 1 : -1; s.shake = 0.25;
+            Sound.play('slip'); this.toast('打滑!', '', 1.0, '#c78a4a', 60);
+          } else if (fx === 'crash') {
+            s.crashT = this.CRASH_T; s.slipT = 0; s.bounceT = 0; s.shake = 0.9; s.nitroT = 0;
+            Sound.play('crash'); this.toast('翻車!', '', 1.4, '#ff5c7a', 72);
+          } else if (fx === 'mud') {
+            s.mudT = 1.4; s.mudCap = 0.3; s.shake = 0.3;
+            Sound.play('mud'); this.toast('陷入雪堆!', '', 1.0, '#bfe8ff', 56);
+          } else if (fx === 'stuck') {
+            s.mudT = 1.6; s.mudCap = 0.1; s.shake = 0.3;
+            Sound.play('mud'); this.toast('被黏住了!', '', 1.2, '#ff8fc8', 56);
+          } else if (fx === 'bounce') {
+            s.bounceT = this.BOUNCE_T; s.speed *= 0.7; s.slipT = 0; s.shake = 0.4;
+            Sound.play('bounce'); this.toast('彈飛!', '', 1.0, '#ff9fe6', 64);
+          }
         } else if (sp.kind === 'solid' && !inv && s.treeCool <= 0 && s.speed > 800) {
           s.treeCool = 0.5; s.speed *= 0.35; s.shake = 0.5;
           s.x = sp.offset - Math.sign(sp.offset) * (sp.hit + 0.3); Sound.play('bump');
@@ -257,6 +281,9 @@ const Game = {
       }
       for (const sx of [-16, 16]) emit(W / 2 + sx, y - 12, (Math.random() - 0.5) * 60, 60 + Math.random() * 80, 0.35, 5 + Math.random() * 4, Math.random() < 0.5 ? '#7fe4ff' : '#fff3a0');
     }
+    if (s.mudT > 0 && pct > 0.02) {
+      for (const sx of [-58, 58]) emit(W / 2 + sx, y - 6, (Math.random() - 0.5) * 160, -60 - Math.random() * 90, 0.55, 8 + Math.random() * 8, s.mudCap < 0.2 ? '#ff8fc8' : '#ffffff');
+    }
     if (s.crashT > 0 && Math.random() < 0.5) emit(W / 2 + (Math.random() - 0.5) * 80, y - 40, (Math.random() - 0.5) * 200, -120 - Math.random() * 120, 0.6, 6, '#ffd23f');
     s.parts.forEach(p => { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 80 * dt; });
     s.parts = s.parts.filter(p => p.life > 0);
@@ -314,6 +341,7 @@ const Game = {
     } else if (s.slipT > 0) {
       rot = (1 - s.slipT / this.SLIP_T) * TAU * 2 * -s.slipDir;
     }
+    if (s.bounceT > 0) { const p = clamp(1 - s.bounceT / this.BOUNCE_T, 0, 1); hop = Math.sin(p * Math.PI) * 170; rot = Math.sin(p * TAU) * 0.35; }
     const lean = Input.steer * 0.1 * (s.slipT > 0 || s.crashT > 0 ? 0 : 1);
     if (s.nitroT > 0) {
       const pulse = 1 + Math.sin(s.t * 14) * 0.06, cy = y - 70;
@@ -379,7 +407,7 @@ const Game = {
     UI.panel(g, 340, 10, 188, 74, 18);
     UI.text(g, 'STAGE', 434, 28, 15, { fill: '#ffd23f', stroke: null });
     UI.text(g, s.stage + ' / 3', 434, 51, 30, { fill: '#fff', stroke: '#40284a', sw: 4 });
-    UI.text(g, THEMES[s.stage - 1].name, 434, 72, 14, { fill: '#cfd8ff', stroke: null });
+    UI.text(g, THEMES[this.course.themes[s.stage - 1]].name, 434, 72, 14, { fill: '#cfd8ff', stroke: null });
     // 進度
     const prog = clamp((s.pos + C.playerZ) / this.track.goalZ, 0, 1);
     g.fillStyle = 'rgba(30,20,60,.6)'; g.beginPath(); g.roundRect ? g.roundRect(16, 98, 410, 14, 7) : g.rect(16, 98, 410, 14); g.fill();
