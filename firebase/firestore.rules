@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 排行榜:任何人可讀,只能新增(不可改、不可刪),且欄位須符合格式
+    match /{col}/{doc} {
+      allow read: if col in ['leaderboard_0', 'leaderboard_1', 'leaderboard_2'];
+      allow create: if col in ['leaderboard_0', 'leaderboard_1', 'leaderboard_2']
+        && request.resource.data.keys().hasOnly(['name', 'score', 'time', 'clear', 'ts'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 8
+        && request.resource.data.score is int
+        && request.resource.data.score >= 0 && request.resource.data.score <= 9999999
+        && request.resource.data.time is number
+        && request.resource.data.time >= 0 && request.resource.data.time < 3600
+        && request.resource.data.clear is bool
+        && request.resource.data.ts == request.time;
+      allow update, delete: if false;
+    }
+  }
+}

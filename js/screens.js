@@ -481,11 +481,19 @@ Screens.credits = {
 
 // ---------- 排行榜 ----------
 Screens.ranking = {
-  sel: 0, n: 0, hl: null, cid: 0,
+  sel: 0, n: 0, hl: null, hlId: null, cid: 0, mode: 'local', list: null, loading: false, err: false,
   enter(arg) {
-    this.hl = arg && arg.entry; this.sel = 0;
+    this.hl = arg && arg.entry; this.hlId = arg && arg.entryId; this.sel = 0;
     this.cid = arg && arg.course !== undefined ? arg.course : (Save.data.course || 0);
     if (this.hl) Sound.music('menu');
+    this.mode = Online.enabled ? 'global' : 'local'; this.load();
+  },
+  load() {
+    this.list = null; this.err = false;
+    if (!(this.mode === 'global' && Online.enabled)) { this.loading = false; return; }
+    const cid = this.cid; this.loading = true;
+    Online.top(cid).then(l => { if (this.cid === cid) { this.list = l; this.loading = false; } })
+      .catch(() => { if (this.cid === cid) { this.err = true; this.loading = false; this.mode = 'local'; } });
   },
   frame(g, dt) {
     const c = COURSES[this.cid];
@@ -493,7 +501,7 @@ Screens.ranking = {
     g.fillStyle = THEMES[c.themes[0]].grass[0]; g.fillRect(0, 300, W, H - 300);
     UI.dim(g, 0.55);
     UI.header(g, '排行榜', null);
-    const move = d => { this.cid = (this.cid + d + COURSES.length) % COURSES.length; this.hl = null; Sound.play('select'); };
+    const move = d => { this.cid = (this.cid + d + COURSES.length) % COURSES.length; this.hl = null; this.hlId = null; Sound.play('select'); this.load(); };
     UI.text(g, '◀', 60, 106, 30, { fill: '#ffd23f' }); UI.text(g, '▶', 480, 106, 30, { fill: '#ffd23f' });
     UI.text(g, tr(c.name) + "  " + c.en, W / 2, 106, 26, { fill: c.color[0], sw: 6 });
     if (Input.was('left') || UI.tapIn(20, 84, 90, 44)) move(-1);
@@ -504,10 +512,12 @@ Screens.ranking = {
     UI.text(g, '姓名', cols.name, 148, 16, { align: 'left', fill: '#7fe4ff', stroke: null });
     UI.text(g, '總積分', cols.score, 148, 16, { align: 'right', fill: '#7fe4ff', stroke: null });
     UI.text(g, '完成時間', cols.time, 148, 16, { align: 'right', fill: '#7fe4ff', stroke: null });
-    const b = Save.board(this.cid);
+    const glob = this.mode === 'global' && Online.enabled;
+    const b = glob ? (this.list || []) : Save.board(this.cid);
+    if (glob && this.loading) UI.text(g, '讀取中...', W / 2, 480, 26, { fill: '#fff' });
     for (let i = 0; i < 20; i++) {
       const y = 182 + i * 33, e = b[i];
-      const isHl = e && e === this.hl;
+      const isHl = e && (glob ? e.id === this.hlId : e === this.hl);
       g.fillStyle = isHl ? `rgba(255,210,63,${0.35 + 0.25 * Math.sin(App.t * 8)})` : (i % 2 ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.12)');
       g.fillRect(22, y - 16, 496, 32);
       const col = i === 0 ? '#ffd23f' : i === 1 ? '#e0e6f0' : i === 2 ? '#f0a070' : '#ffffff';
@@ -521,6 +531,12 @@ Screens.ranking = {
       }
     }
     UI.text(g, '★ = 完賽通關', 30, 872, 15, { align: 'left', fill: '#ffd23f', stroke: null });
+    if (this.err) UI.text(g, '無法連線,顯示本機紀錄', W - 30, 872, 15, { align: 'right', fill: '#ff9fb5', stroke: null });
+    if (Online.enabled) {
+      UI.panel(g, 20, 894, 112, 40, 20, glob ? '#2fc46a' : '#ffb02e', '#fff');
+      UI.text(g, glob ? '全球' : '本機', 76, 914, 20, { fill: '#fff' });
+      if (UI.tapIn(20, 894, 112, 40)) { this.mode = glob ? 'local' : 'global'; this.hl = null; this.hlId = null; this.err = false; Sound.play('select'); this.load(); }
+    }
     UI.begin(this);
     if (UI.button(g, this, '返回主選單', 150, 884, 240, 56, { back: true }) || Input.was('back')) App.goto('menu');
     UI.nav(this);
@@ -538,7 +554,8 @@ Screens.result = {
     this.input = document.getElementById('nameInput');
     this.input.value = Save.data.name || '';
     this.input.onkeydown = e => { if (e.key === 'Enter') this.submit(); };
-    this.shown = false; this.submitted = false;
+    this.shown = false; this.submitted = false; this.qChecked = false;
+    if (Online.enabled) Online.top(this.r.course).catch(() => {});
   },
   leave() { if (this.input) this.input.style.display = 'none'; },
   submit() {
@@ -547,6 +564,12 @@ Screens.result = {
     this.submitted = true;
     const entry = { name: nm, score: this.r.score, time: Math.round(this.r.time), clear: this.r.clear };
     Save.add(entry, this.r.course);
+    if (Online.enabled) {
+      Sound.play('confirm');
+      Online.submit(entry, this.r.course).then(id => App.goto('ranking', { entry, entryId: id, course: this.r.course }))
+        .catch(() => App.goto('ranking', { entry, course: this.r.course }));
+      return;
+    }
     Sound.play('confirm');
     App.goto('ranking', { entry, course: this.r.course });
   },
@@ -580,6 +603,7 @@ Screens.result = {
     UI.text(g, tr('完成總時間') + '   ' + fmtTime(r.time), W / 2, 610, 24, { fill: '#fff', stroke: null });
 
     if (!this.done && (Input.taps.length || Input.was('confirm')) && t > 0.5 && t < 3.6) { this.t = 3.6; Input.taps.length = 0; }
+    if (t > 3.6 && !this.qChecked) { this.qChecked = true; this.qualifies = Online.enabled ? Online.qualifies(r.score, r.course) : Save.qualifies(r.score, r.course); }
     if (t > 3.6) {
       this.done = true;
       if (this.qualifies) {

@@ -21,6 +21,7 @@
   window.addEventListener('orientationchange', () => setTimeout(resize, 200));
   resize();
 
+  Online.init();
   Input.init(canvas);
   Spr.warm();
   BG.warm();

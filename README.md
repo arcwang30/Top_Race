@@ -74,3 +74,12 @@ powershell -ExecutionPolicy Bypass -File tools\build.ps1 -Version 0.1.0
 ```
 
 會產生 `builds\TopRace_v0.1.0.zip`(可上傳 itch.io 等平台)。`builds/` 內容不會被 git 追蹤。
+
+## 線上排行榜(Firebase Firestore)
+
+1. Firebase 主控台建立 Firestore Database。
+2. 「規則」貼上 `firebase/firestore.rules` 的內容並發布。
+3. 專案設定 → 一般 → 您的應用程式 → 新增網頁應用程式,把 SDK 設定貼進 `js/firebase-config.js`。
+4. 集合 `leaderboard_0 / _1 / _2`(對應三個賽事)會在第一筆成績送出時自動建立。
+
+`apiKey` 為公開資訊,安全性由 Firestore 規則把關;`firebase-config.js` 留空時自動使用本機排行榜。
