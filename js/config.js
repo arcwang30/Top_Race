@@ -139,3 +139,10 @@ function fmtTime(sec) {
   const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
   return m + "'" + pad(s, 2) + '"';
 }
+
+// 可選車輛(外觀不同,性能相同)
+const VEHICLES = [
+  { id: 0, name: '熊貓賽車', en: 'PANDA BUGGY', desc: '經典的四驅賽車,熊貓最愛的座駕。', color: ['#8ee8ff', '#3ea8ff'] },
+  { id: 1, name: '熊貓坦克', en: 'PANDA TANK', desc: '威風的履帶戰車,熊貓從砲塔探出頭來衝刺!', color: ['#b6f08a', '#5aa84a'] },
+  { id: 2, name: '熊貓掌機車', en: 'PANDA HANDHELD', desc: '復古掌上型遊戲機變身的賽車,螢幕上還有像素跑道!', color: ['#ffe680', '#ffb02e'] }
+];

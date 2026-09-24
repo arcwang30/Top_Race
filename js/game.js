@@ -387,7 +387,7 @@ const Game = {
     if (rot) { g.translate(0, -70); g.rotate(rot); g.translate(0, 70); }
     if (s.drift) g.rotate(Input.steer * 0.17);
     g.transform(1, 0, lean, 1, 0, 0);
-    Spr.drawBuggy(g, { view, cheer, wheel: view === 'front' ? s.t * 40 : s.wheel, t: s.t, brake: Input.brake && s.phase === 'play', boost: boostFx });
+    Spr.drawBuggy(g, { veh: Save.data.vehicle || 0, view, cheer, wheel: view === 'front' ? s.t * 40 : s.wheel, t: s.t, brake: Input.brake && s.phase === 'play', boost: boostFx });
     g.restore();
   },
 

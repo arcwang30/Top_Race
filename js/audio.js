@@ -68,15 +68,7 @@ const Sound = (() => {
   const gen = (o, bpm, style) => ({ bpm, chords: chords(o.chords), lead: genLead(o), style });
 
   const TRACKS = {
-    menu: {
-      bpm: 132, chords: chords('C G Am F C G F G'),
-      lead: fromEighths([
-        76, 79, 84, 79, 76, 79, 74, 72, 71, 74, 79, 74, 71, 74, 79, N,
-        72, 76, 81, 76, 72, 76, 81, 79, 77, 81, 84, 81, 77, 81, 79, 77,
-        76, 79, 84, 79, 88, 84, 79, 76, 79, 83, 86, 83, 79, 83, 86, N,
-        77, 81, 84, 81, 79, 77, 76, 74, 71, 74, 79, 83, 86, N, 84, N]),
-      style: { arp: '8', pad: 1, bass: 'pump', drums: 'rock', bell: 1, shaker: 1, sparkle: 1 }
-    },
+    menu: gen({ key: 0, mode: 'min', chords: 'Cm Ab Eb Bb Cm Ab Bb G', seed: 91 }, 176, { arp: '16', bass: 'pump', drums: 'disco', bell: 1, brass: 1, shaker: 1, sparkle: 1 }),
     c1s1: {
       bpm: 156, chords: chords('F G Em Am F G C C'),
       lead: fromEighths([

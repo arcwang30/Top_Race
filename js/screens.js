@@ -33,14 +33,14 @@ const Demo = {
     }
     g.globalAlpha = 1;
     g.save(); g.translate(x, y + bob); g.scale(sc, sc); g.rotate(sway);
-    Spr.drawBuggy(g, { view: 'front', wheel: t * 40, t });
+    Spr.drawBuggy(g, { view: 'front', wheel: t * 40, t, veh: Save.data.vehicle || 0 });
     g.restore();
   }
 };
 
 const rearCar = (g, x, y, sc, t, boost, wheel) => {
   g.save(); g.translate(x, y + Math.sin(t * 34) * 1.2); g.scale(sc, sc);
-  Spr.drawBuggy(g, { view: 'rear', wheel, t, boost });
+  Spr.drawBuggy(g, { view: 'rear', wheel, t, boost, veh: Save.data.vehicle || 0 });
   g.restore();
 };
 
@@ -146,7 +146,7 @@ Screens.menu = {
 
     UI.begin(this);
     const items = [
-      ['開始遊戲', '#8dff8a', '#2fc46a', 'course'], ['操作說明', '#8ee8ff', '#3ea8ff', 'howto'],
+      ['開始遊戲', '#8dff8a', '#2fc46a', 'vehicle'], ['操作說明', '#8ee8ff', '#3ea8ff', 'howto'],
       ['排行榜', '#ffe680', '#ffb02e', 'ranking'], ['設定', '#d6b3ff', '#9a6bff', 'settings'],
       ['了解歷史', '#ffd6a0', '#ff9a5a', 'history'], ['CREDIT', '#ffb3d1', '#ff6b9a', 'credits']
     ];
@@ -158,6 +158,56 @@ Screens.menu = {
     UI.nav(this);
     UI.text(g, Input.padConnected ? '↑↓ / A 選擇' : '↑ ↓  選擇    Enter  決定', 16, 942, 14, { align: 'left', fill: '#40284a', stroke: '#ffffff', sw: 5 });
     UI.copyright(g);
+  }
+};
+
+// ---------- 車輛選擇 ----------
+Screens.vehicle = {
+  sel: 0, n: 0, idx: 0, anim: 1, dir: 1, t: 0,
+  enter() { this.idx = clamp(Save.data.vehicle || 0, 0, VEHICLES.length - 1); this.sel = 0; this.anim = 1; this.t = 0; Sound.music('menu'); },
+  change(d) { this.idx = (this.idx + d + VEHICLES.length) % VEHICLES.length; this.dir = d; this.anim = 0; Sound.play('select'); },
+  frame(g, dt) {
+    this.t += dt; this.anim = Math.min(1, this.anim + dt * 5);
+    const v = VEHICLES[this.idx];
+    BG.draw(g, 0, [App.t * 10, App.t * 22, App.t * 44], 330);
+    g.fillStyle = THEMES[0].grass[0]; g.fillRect(0, 330, W, H - 330);
+    UI.dim(g, 0.5);
+    UI.header(g, '選擇車輛', 'SELECT VEHICLE');
+
+    const ease = 1 - Math.pow(1 - this.anim, 3), off = (1 - ease) * 70 * this.dir;
+    g.save(); g.globalAlpha = 0.3 + 0.7 * ease; g.translate(off, 0);
+    UI.panel(g, 40, 130, 460, 640, 26, 'rgba(30,20,60,.7)', v.color[0]);
+    UI.text(g, v.name, W / 2, 190, 50, { fill: v.color[0], sw: 9 });
+    UI.text(g, v.en, W / 2, 236, 24, { fill: '#fff', sw: 5 });
+    g.fillStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.ellipse(W / 2, 560, 190, 34, 0, 0, TAU); g.fill();
+    const bob = Math.sin(this.t * 22) * 1.6;
+    for (const sx of [-1, 1]) for (let i = 0; i < 6; i++) {
+      const ph = (this.t * 1.8 + i / 6) % 1;
+      g.globalAlpha = (0.3 + 0.7 * ease) * (1 - ph) * 0.5; g.fillStyle = '#fff';
+      g.beginPath(); g.arc(W / 2 + sx * (150 + ph * 34), 550 - ph * 52, 8 + ph * 16, 0, TAU); g.fill();
+    }
+    g.globalAlpha = 0.3 + 0.7 * ease;
+    g.save(); g.translate(W / 2, 560 + bob); g.scale(1.55, 1.55); g.rotate(Math.sin(this.t * 1.7) * 0.02);
+    Spr.drawBuggy(g, { view: 'front', veh: this.idx, wheel: this.t * 40, t: this.t });
+    g.restore();
+    UI.wrap(g, v.desc, 74, 618, 392, 30, 21, { fill: '#fff' });
+    g.restore();
+
+    for (let i = 0; i < VEHICLES.length; i++) {
+      g.fillStyle = i === this.idx ? '#ffd23f' : 'rgba(255,255,255,.35)';
+      g.beginPath(); g.arc(W / 2 + (i - 1) * 26, 790, i === this.idx ? 8 : 6, 0, TAU); g.fill();
+    }
+    UI.text(g, '◀', 20, 450, 46, { fill: '#ffd23f' }); UI.text(g, '▶', 520, 450, 46, { fill: '#ffd23f' });
+    if (Input.was('left') || UI.tapIn(0, 300, 48, 300)) this.change(-1);
+    if (Input.was('right') || UI.tapIn(492, 300, 48, 300)) this.change(1);
+
+    UI.begin(this);
+    if (UI.button(g, this, '確認車輛', 110, 812, 320, 60, { c1: '#8dff8a', c2: '#2fc46a' })) {
+      Save.data.vehicle = this.idx; Save.store();
+      App.goto('course');
+    }
+    if (UI.button(g, this, '返回', 170, 884, 200, 52, { c1: '#ffb3d1', c2: '#ff6b9a', back: true }) || Input.was('back')) App.goto('menu');
+    UI.nav(this);
   }
 };
 
@@ -231,7 +281,7 @@ Screens.course = {
       if (window.tryLockPortrait) window.tryLockPortrait();
       App.goto('game');
     }
-    if (UI.button(g, this, '返回', 170, 884, 200, 52, { c1: '#ffb3d1', c2: '#ff6b9a', back: true }) || Input.was('back')) App.goto('menu');
+    if (UI.button(g, this, '返回', 170, 884, 200, 52, { c1: '#ffb3d1', c2: '#ff6b9a', back: true }) || Input.was('back')) App.goto('vehicle');
     UI.nav(this);
   }
 };
@@ -606,9 +656,9 @@ Screens.credits = {
     role(1, 250, '程式', 'AI');
     role(2, 310, '美術', 'AI');
     line(3, 380, y => UI.text(g, '特別感謝', W / 2, y, 30, { fill: '#ffd23f' }));
-    ['Kelvin Lo', 'Bubu Lin', '大王KUNI', 'KT Lee', 'Gmoto', '國見比呂'].forEach((n, i) =>
-      line(4 + i, 440 + i * 50, y => UI.text(g, n, W / 2, y, 30, { fill: '#fff' })));
-    line(10, 745, y => UI.text(g, '頂尖賽車  TOP RACE  トップレース', W / 2, y, 18, { fill: '#e6dcff', stroke: null }));
+    ['Kelvin Lo', 'Bubu Lin', '大王KUNI', 'KT Lee', 'Gmoto', '國見比呂', 'Greed'].forEach((n, i) =>
+      line(4 + i, 436 + i * 44, y => UI.text(g, n, W / 2, y, 30, { fill: '#fff' })));
+    line(11, 745, y => UI.text(g, '頂尖賽車  TOP RACE  トップレース', W / 2, y, 18, { fill: '#e6dcff', stroke: null }));
     Demo.t += dt;
     Demo.frontCar(g, W / 2, 900, 0.62, App.t);
     UI.begin(this);

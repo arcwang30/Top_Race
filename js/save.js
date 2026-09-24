@@ -2,7 +2,7 @@
 
 const Save = {
   key: 'toprace.v1',
-  data: { music: 4, sfx: 4, gyro: false, autoGas: false, lang: null, name: '', course: 0, boards: null },
+  data: { music: 4, sfx: 4, gyro: false, autoGas: false, lang: null, name: '', course: 0, vehicle: 0, boards: null },
 
   load() {
     try {

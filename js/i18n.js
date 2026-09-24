@@ -75,6 +75,11 @@ const I18N = {
 
   '全球': ['ワールド', 'GLOBAL'], '本機': ['ローカル', 'LOCAL'], '讀取中...': ['読み込み中...', 'Loading...'], '無法連線,顯示本機紀錄': ['接続できないためローカル記録を表示', 'Offline: showing local records'],
   '了解歷史': ['歴史を知る', 'Learn History'], '← → 切換分頁　↑ ↓ / 滾輪 捲動': ['← → ページ切替　↑ ↓ / ホイール スクロール', '← → Page　↑ ↓ / Wheel: scroll'],
+  '選擇車輛': ['マシンセレクト', 'SELECT VEHICLE'], '確認車輛': ['けってい！', 'CONFIRM'],
+  '熊貓賽車': ['パンダ バギー', 'Panda Buggy'], '熊貓坦克': ['パンダ戦車', 'Panda Tank'], '熊貓掌機車': ['パンダ携帯ゲーム機カー', 'Panda Handheld'],
+  '經典的四驅賽車,熊貓最愛的座駕。': ['定番の四輪駆動レーシングカー。パンダのお気に入り！', 'The classic 4WD racer, loved by the panda.'],
+  '威風的履帶戰車,熊貓從砲塔探出頭來衝刺!': ['迫力のキャタピラ戦車。パンダが砲塔から顔を出して大疾走！', 'A mighty tracked tank with the panda popping out of the turret!'],
+  '復古掌上型遊戲機變身的賽車,螢幕上還有像素跑道!': ['レトロな携帯ゲーム機が変身したマシン。画面にはドット絵のコースも！', 'A retro handheld console turned racer, with a pixel track on its screen!'],
   '無敵衝刺!': ['むてきダッシュ！', 'INVINCIBLE!'], '打滑!': ['スリップ！', 'SLIP!'], '翻車!': ['横転！', 'CRASH!'],
   '陷入雪堆!': ['雪に埋まった！', 'SNOWED IN!'], '被黏住了!': ['くっついた！', 'STUCK!'], '彈飛!': ['はね飛ばされた！', 'BOUNCED!'],
   'TIME +{0} 秒': ['TIME +{0} 秒', 'TIME +{0} sec'], '前方急彎!': ['この先急カーブ！', 'SHARP TURN AHEAD!']

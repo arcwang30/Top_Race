@@ -88,17 +88,17 @@ const Road = (() => {
 
   // ---------- 物件 ----------
   const SC = [
-    { trees: ['sakura', 'treeRound', 'sakura'], bush: ['bush', 'bushFlower'], prop: ['lantern', 'signBoard'], animal: ['rabbit'] },
-    { trees: ['palm', 'palm', 'pine'], bush: ['bushDry'], prop: ['umbrella', 'signBoard'], animal: ['crab'] },
-    { trees: ['pineNight', 'pineNight', 'treeNight'], bush: ['bushNight'], prop: ['redLantern', 'lantern'], animal: ['fox'] },
-    { trees: ['snowPine', 'snowPineB', 'snowPine'], bush: ['snowBush'], prop: ['snowman', 'igloo'], animal: ['penguin'] },
-    { trees: ['snowPineD', 'snowPineD', 'snowPineB'], bush: ['snowBush'], prop: ['igloo', 'snowman'], animal: ['penguin'] },
-    { trees: ['snowPineN', 'snowPineN', 'xmasTree'], bush: ['snowBush'], prop: ['snowman', 'redLantern'], animal: ['rabbit'] },
-    { trees: ['lollipopA', 'lollipopB', 'lollipopC'], bush: ['gumdropA'], prop: ['cupcake', 'candyCane'], animal: ['gummy'] },
-    { trees: ['lollipopD', 'candyCane', 'lollipopD'], bush: ['gumdropB'], prop: ['donut', 'candyCane'], animal: ['gummy'] },
-    { trees: ['lollipopN', 'lollipopN2', 'candyCane'], bush: ['gumdropN'], prop: ['balloon', 'cupcake'], animal: ['gummy'] }
+    { trees: ['sakura', 'treeRound', 'sakura'], bush: ['bush', 'bushFlower'], prop: ['lantern', 'lantern'], sign: true, animal: ['rabbit'] },
+    { trees: ['palm', 'palmB', 'palm', 'pine'], bush: ['bushDry'], prop: ['umbrella', 'surfboards', 'lifebuoy'], sign: true, animal: ['crab'] },
+    { trees: ['ginkgo', 'pineNight', 'treeNight', 'ginkgo'], bush: ['bushNight'], prop: ['redLantern', 'stall', 'torii', 'lantern'], animal: ['fox'] },
+    { trees: ['snowPine', 'snowPineB', 'bareSnow'], bush: ['snowBush'], prop: ['snowman', 'sled', 'igloo'], animal: ['penguin'] },
+    { trees: ['snowPineD', 'iceSpire', 'bareSnowD', 'snowPineD'], bush: ['snowBush', 'iceCluster'], prop: ['igloo', 'iceCluster', 'snowman'], animal: ['penguin'] },
+    { trees: ['snowPineN', 'xmasTree', 'snowPineN', 'xmasTree'], bush: ['snowBush'], prop: ['giftBox', 'lampPost', 'snowman'], animal: ['rabbit'] },
+    { trees: ['lollipopA', 'lollipopB', 'cottonPink', 'cottonBlue', 'lollipopC'], bush: ['gumdropA'], prop: ['cupcake', 'candyCane'], animal: ['gummy'] },
+    { trees: ['lollipopD', 'chocoTree', 'chocoTree', 'candyCane'], bush: ['gumdropB'], prop: ['iceCream', 'cookie', 'donut'], animal: ['gummy'] },
+    { trees: ['lollipopN', 'lollipopN2', 'lightPole', 'candyCane'], bush: ['gumdropN'], prop: ['popcorn', 'balloon', 'cupcake'], animal: ['gummy'] }
   ];
-  const PROPW = { lantern: 420, signBoard: 900, umbrella: 800, redLantern: 420, snowman: 520, igloo: 900, cupcake: 600, candyCane: 420, donut: 800, balloon: 380 };
+  const PROPW = { lantern: 420, signBoard: 900, umbrella: 800, redLantern: 420, snowman: 520, igloo: 900, cupcake: 600, candyCane: 420, donut: 800, balloon: 380, surfboards: 620, lifebuoy: 400, stall: 900, torii: 1100, sled: 640, iceCluster: 640, giftBox: 520, lampPost: 340, iceCream: 440, cookie: 560, popcorn: 720 };
   const OBSW = { poop: 420, rock: 560, snowdrift: 720, iceBlock: 560, jelly: 520, gum: 680 };
   const pick = (a, r) => a[(r() * a.length) | 0];
 
@@ -110,7 +110,8 @@ const Road = (() => {
         if (rand() < 0.72) { const nm = pick(th.trees, rand); s.sprites.push({ name: nm, offset: side * (1.9 + rand() * 2.6), w: (1000 + rand() * 600) * (nm === 'candyCane' ? 0.5 : 1), kind: 'solid', hit: 0.2 }); }
       }
       if (rand() < 0.2) s.sprites.push({ name: pick(th.bush, rand), offset: (rand() < 0.5 ? -1 : 1) * (1.2 + rand() * 0.6), w: 520 + rand() * 200, kind: 'deco' });
-      if (rand() < 0.02) { const nm = pick(th.prop, rand); s.sprites.push({ name: nm, offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW[nm], kind: 'deco' }); }
+      if (rand() < 0.028) { const nm = pick(th.prop, rand); s.sprites.push({ name: nm, offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW[nm], kind: 'deco' }); }
+      if (th.sign && rand() < 0.01) s.sprites.push({ name: 'signBoard', offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW.signBoard, kind: 'deco' });
       if (rand() < 0.014) s.sprites.push({ name: pick(th.animal, rand), offset: (rand() < 0.5 ? -1 : 1) * (1.15 + rand() * 0.35), w: 380, kind: 'deco', hop: rand() * 6 });
     }
     if (!items) return;
