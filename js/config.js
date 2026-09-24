@@ -30,10 +30,10 @@ const CFG = {
   centrifugal: 0.3,
   steerRate: 2.2,
 
-  sections: FAST ? [240, 240, 240] : [3400, 3600, 3800],
-  startTime: FAST ? 40 : 150,
-  bonusTime: FAST ? [30, 30] : [110, 110],
-  enemyGap: 95
+  sections: FAST ? [240, 240, 240] : [2000, 2100, 2200],
+  startTime: FAST ? 40 : 100,
+  bonusTime: FAST ? [30, 30] : [75, 75],
+  enemyGap: 170
 };
 CFG.playerZ = CFG.camH * CFG.camDepth;
 

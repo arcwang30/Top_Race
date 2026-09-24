@@ -179,6 +179,16 @@ const Sound = (() => {
     o1.start(); o2.start();
     loops.o1 = o1; loops.o2 = o2; loops.eg = eg; loops.lp = lp;
     loops.squeal = mkNoise('bandpass', 1900, 9);
+    loops.burn = mkNoise('highpass', 3200, 0.7);
+    const so = ac.createOscillator(); so.type = 'sawtooth'; so.frequency.value = 900;
+    const lfo = ac.createOscillator(); lfo.frequency.value = 11;
+    const lg = ac.createGain(); lg.gain.value = 70;
+    lfo.connect(lg); lg.connect(so.frequency);
+    const sf = ac.createBiquadFilter(); sf.type = 'bandpass'; sf.frequency.value = 1500; sf.Q.value = 5;
+    const sg = ac.createGain(); sg.gain.value = 0;
+    so.connect(sf); sf.connect(sg); sg.connect(sfxG);
+    so.start(); lfo.start();
+    loops.sqO = so; loops.sqG = sg;
     loops.rumble = mkNoise('lowpass', 260, 1);
     loops.wind = mkNoise('highpass', 1500, 0.5);
   }
@@ -193,7 +203,10 @@ const Sound = (() => {
     loops.o2.frequency.setTargetAtTime(f * 0.5, t, k);
     loops.lp.frequency.setTargetAtTime(500 + pct * 1300, t, k);
     loops.eg.gain.setTargetAtTime(o.on ? 0.09 + pct * 0.06 : 0, t, k);
-    loops.squeal.gain.setTargetAtTime(o.drift ? 0.16 : 0, t, k);
+    loops.squeal.gain.setTargetAtTime(o.drift ? 0.3 : 0, t, 0.04);
+    loops.burn.gain.setTargetAtTime(o.drift ? 0.06 + pct * 0.08 : 0, t, 0.05);
+    loops.sqO.frequency.setTargetAtTime(780 + pct * 700, t, 0.08);
+    loops.sqG.gain.setTargetAtTime(o.drift ? 0.07 + pct * 0.08 : 0, t, 0.04);
     loops.rumble.gain.setTargetAtTime(o.off ? 0.55 : (o.on ? 0.05 * pct : 0), t, k);
     loops.wind.gain.setTargetAtTime(o.on ? 0.02 + (o.boost ? 0.1 : pct * 0.04) : 0, t, k);
   }

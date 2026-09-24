@@ -34,11 +34,11 @@ const Road = (() => {
   }
 
   function buildGame() {
-    const t = { segs: [], cars: [], cps: [], secStart: [], kind: 'game' };
+    const t = { segs: [], cars: [], cps: [], secStart: [], warn: [], kind: 'game' };
     const b = makeBuilder(t);
     const rand = rng(20260925);
     const hillOf = () => (rand() < 0.5 ? -1 : 1) * (3 + ((rand() * 9) | 0));
-    const hairP = [0.07, 0.15, 0.23];
+    const hairP = [0.05, 0.08, 0.12];
 
     b.road(10, 30, 10, 0, 0);
     for (let s = 0; s < 3; s++) {
@@ -48,11 +48,13 @@ const Road = (() => {
       if (s > 0) b.road(20, 30, 20, 0, 0);
       while (t.segs.length - start < target - 100) {
         const r = rand(), dir = rand() < 0.5 ? -1 : 1, n = 40 + ((rand() * 60) | 0);
-        if (r < 0.20) b.road(n * 0.3, n * 0.4, n * 0.3, 0, rand() < 0.6 ? hillOf() : 0);
-        else if (r < 0.42) b.road(n * 0.3, n * 0.5, n * 0.3, dir * (2.2 + rand() * 1.2), rand() < 0.5 ? hillOf() : 0);
-        else if (r < 0.66) b.road(14, 26 + rand() * 16, 14, dir * (4.4 + rand()), rand() < 0.4 ? hillOf() : 0);
-        else if (r < 0.66 + hairP[s]) { b.road(12, 30 + rand() * 14, 12, dir * 8.4, 0); b.road(15, 20, 15, 0, 0); }
-        else if (r < 0.9) { b.road(15, 25, 15, dir * 4.2, 0); b.road(15, 25, 15, -dir * 4.2, 0); }
+        const warn = c => { t.warn.push({ idx: t.segs.length, dir: Math.sign(c) }); };
+        if (r < 0.14) b.road(n * 0.3, n * 0.4, n * 0.3, 0, rand() < 0.6 ? hillOf() : 0);
+        else if (r < 0.30) b.road(n * 0.3, n * 0.5, n * 0.3, dir * (2.2 + rand() * 1.2), rand() < 0.5 ? hillOf() : 0);
+        else if (r < 0.46) b.road(14, 26 + rand() * 16, 14, dir * (4.4 + rand()), rand() < 0.4 ? hillOf() : 0);
+        else if (r < 0.72) { const c = dir * (6.3 + rand() * 0.8); warn(c); b.road(12, 30 + rand() * 14, 12, c, 0); b.road(15, 25, 15, 0, 0); }
+        else if (r < 0.72 + hairP[s]) { warn(dir); b.road(12, 30 + rand() * 14, 12, dir * 8.4, 0); b.road(15, 25, 15, 0, 0); }
+        else if (r < 0.92) { b.road(15, 25, 15, dir * 4.2, 0); b.road(15, 25, 15, -dir * 4.2, 0); }
         else { const h = 8 + ((rand() * 8) | 0); b.road(20, 30, 20, 0, h); b.road(20, 30, 20, 0, -h); }
       }
       b.road(25, 30, 25, 0, -b.lastY / L);
@@ -121,6 +123,9 @@ const Road = (() => {
         else { const n = 5 + ((rand() * 4) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         i += 22 + ((rand() * 26) | 0);
       }
+    }
+    for (const w of t.warn) {
+      for (const back of [55, 38, 22]) for (const side of [-1, 1]) put(w.idx - back, { name: w.dir > 0 ? 'arrowR' : 'arrowL', offset: side * 1.5, w: 760, kind: 'deco' });
     }
   }
 

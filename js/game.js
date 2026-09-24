@@ -77,7 +77,7 @@ const Game = {
     if (s.crashT > 0) {
       pct = Math.max(0, pct - 1.6 * dt);
     } else if (s.phase === 'goal' || s.phase === 'timeup') {
-      pct = Math.max(0, pct - 0.3 * dt);
+      pct = Math.max(0, pct - (s.phase === 'goal' ? 0.45 : 0.3) * dt);
     } else if (s.phase === 'play') {
       if (s.slipT > 0) pct = Math.max(0.3, pct - 0.3 * dt);
       else if (boosting && !brk && !off) pct = Math.min(1, pct + (C.accel + C.nitroAccel) * dt);
@@ -132,7 +132,7 @@ const Game = {
         } else {
           s.phase = 'goal'; s.endT = 0;
           s.sc.time = Math.floor(s.time) * SCORE.timeBonus; s.sc.clear = SCORE.clear;
-          this.toast('GOAL!', '恭喜完賽!', 4, '#ffd23f', 100);
+          this.toast('GOAL!', '恭喜完賽!', 7.5, '#ffd23f', 100);
           Sound.stopMusic(); Sound.play('checkpoint');
         }
       }
@@ -141,7 +141,8 @@ const Game = {
     // ---- 結束 ----
     if (s.phase === 'timeup' || s.phase === 'goal') {
       s.endT += dt;
-      if (s.endT > (s.phase === 'goal' ? 4.4 : 3.4)) this.finish(s.phase === 'goal');
+      const skip = s.phase === 'goal' && s.endT > 3.5 && (Input.was('confirm') || Input.taps.length > 0);
+      if (skip || s.endT > (s.phase === 'goal' ? 8 : 3.4)) this.finish(s.phase === 'goal');
     }
 
     // ---- 背景視差 ----
@@ -240,6 +241,12 @@ const Game = {
     if (off && pct > 0.12) {
       for (const sx of [-58, 58]) emit(W / 2 + sx, y - 6, (Math.random() - 0.5) * 120, -60 - Math.random() * 80, 0.5, 8 + Math.random() * 8, THEMES[s.bgTheme].grass[1]);
     }
+    if (s.phase === 'goal' && s.endT > 2.6) {
+      for (let k = 0; k < 2; k++) {
+        const cols = ['#ff5c7a', '#ffd23f', '#7fe4ff', '#8dff8a', '#d6b3ff'];
+        s.parts.push({ x: Math.random() * W, y: -10, vx: (Math.random() - 0.5) * 60, vy: 90 + Math.random() * 160, life: 3.2, max: 3.2, r: 5, color: cols[(Math.random() * 5) | 0], conf: true });
+      }
+    }
     s.fly.forEach(f => { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 1500 * dt; f.rot += f.vr * dt; });
     s.fly = s.fly.filter(f => f.t < 1.2);
     if (boosting) {
@@ -318,14 +325,22 @@ const Game = {
       g.beginPath(); g.ellipse(W / 2, cy, 108 * pulse, 92 * pulse, 0, 0, TAU); g.stroke();
       g.restore();
     }
+    let view = 'rear', sx = 1, k = 0.76, cheer = false;
+    if (s.phase === 'goal' && s.endT > 1.2) {
+      const p = clamp((s.endT - 1.2) / 2.2, 0, 1), a = easeInOut(0, Math.PI, p);
+      view = a < Math.PI / 2 ? 'rear' : 'front';
+      sx = Math.max(0.04, Math.abs(Math.cos(a)));
+      k = 0.76 + 0.34 * p;
+      if (p >= 1) { cheer = true; hop = Math.abs(Math.sin(s.t * 7)) * 34; }
+    }
     g.save();
     if (s.invT > 0 && Math.floor(s.t * 14) % 2) g.globalAlpha = 0.45;
     g.translate(W / 2, y - hop);
-    g.scale(0.76, 0.76);
+    g.scale(k * sx, k);
     if (rot) { g.translate(0, -70); g.rotate(rot); g.translate(0, 70); }
     if (s.drift) g.rotate(Input.steer * 0.17);
     g.transform(1, 0, lean, 1, 0, 0);
-    Spr.drawBuggy(g, { view: 'rear', wheel: s.wheel, t: s.t, brake: Input.brake && s.phase === 'play', boost: s.nitroT > 0 });
+    Spr.drawBuggy(g, { view, cheer, wheel: s.wheel, t: s.t, brake: Input.brake && s.phase === 'play', boost: s.nitroT > 0 });
     g.restore();
   },
 
@@ -338,7 +353,8 @@ const Game = {
     for (const p of this.s.parts) {
       g.globalAlpha = clamp(p.life / p.max, 0, 1);
       g.fillStyle = p.color;
-      if (p.star) {
+      if (p.conf) { g.save(); g.translate(p.x, p.y); g.rotate(p.x * 0.05 + p.life * 6); g.fillRect(-p.r, -p.r * 0.6, p.r * 2, p.r * 1.2); g.restore(); }
+      else if (p.star) {
         const r = p.r * 2.2;
         g.beginPath(); g.moveTo(p.x, p.y - r); g.lineTo(p.x + r * 0.3, p.y - r * 0.3); g.lineTo(p.x + r, p.y); g.lineTo(p.x + r * 0.3, p.y + r * 0.3);
         g.lineTo(p.x, p.y + r); g.lineTo(p.x - r * 0.3, p.y + r * 0.3); g.lineTo(p.x - r, p.y); g.lineTo(p.x - r * 0.3, p.y - r * 0.3); g.closePath(); g.fill();
@@ -398,6 +414,15 @@ const Game = {
       g.fillRect(288 + i * 10.4, 176, 8, 12);
     }
 
+    // 前方急彎提示
+    if (s.phase === 'play') {
+      const zi = Math.floor((s.pos + C.playerZ) / C.segLen);
+      const w = this.track.warn.find(q => q.idx - zi > 3 && q.idx - zi < 70);
+      if (w && Math.floor(s.t * 4) % 2 === 0) {
+        UI.text(g, w.dir > 0 ? '▶▶' : '◀◀', W / 2, 236, 76, { fill: '#ffd23f', sw: 10 });
+        UI.text(g, '前方急彎!', W / 2, 284, 26, { fill: '#fff', sw: 6 });
+      }
+    }
     // 倒數 / 訊息
     if (s.phase === 'countdown' && s.countT > 0) {
       const n2 = Math.ceil(s.countT), f = s.countT % 1;
@@ -415,7 +440,7 @@ const Game = {
   },
 
   drawControls(g) {
-    if (!Input.touchMode || this.s.phase === 'over') { Input.virtual = []; return; }
+    if (!Input.touchMode || this.s.phase !== 'play' && this.s.phase !== 'countdown') { Input.virtual = []; return; }
     const gyro = Save.data.gyro && Input.gyroActive;
     const btns = [
       { id: 'throttle', x: 452, y: 872, r: 62, label: 'GO', col: '#5fdc7a' },

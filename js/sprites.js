@@ -133,13 +133,21 @@ const Spr = (() => {
     cage(g);
     R(g, -34, -104, 68, 44, 14, '#3d3d55', 3);
     // 熊貓(正面)
-    E(g, -28, -84, 9, 18, '#2b2833', 2.5, 0.5); E(g, 28, -84, 9, 18, '#2b2833', 2.5, -0.5);
+    const wv = o.cheer ? Math.sin((o.t || 0) * 14) * 0.3 : 0;
+    if (o.cheer) { E(g, -46, -130, 9, 22, '#2b2833', 2.5, 0.45 + wv); E(g, 46, -130, 9, 22, '#2b2833', 2.5, -0.45 - wv); }
+    else { E(g, -28, -84, 9, 18, '#2b2833', 2.5, 0.5); E(g, 28, -84, 9, 18, '#2b2833', 2.5, -0.5); }
     E(g, 0, -90, 27, 24, '#ffffff');
     E(g, 0, -124, 29, 26, '#ffffff');
     E(g, -12, -121, 7.5, 9.5, '#2b2833', 0, 0.4); E(g, 12, -121, 7.5, 9.5, '#2b2833', 0, -0.4);
-    E(g, -12, -122, 2.8, 3.2, '#fff', 0); E(g, 12, -122, 2.8, 3.2, '#fff', 0);
     E(g, 0, -113, 4.5, 3.2, '#2b2833', 0);
-    g.beginPath(); g.arc(0, -111, 5, 0.15 * Math.PI, 0.85 * Math.PI); g.lineWidth = 2; g.strokeStyle = '#2b2833'; g.stroke();
+    if (o.cheer) {
+      g.lineWidth = 2.5; g.strokeStyle = '#fff'; g.lineCap = 'round';
+      for (const ex of [-12, 12]) { g.beginPath(); g.arc(ex, -119, 4.5, 1.15 * Math.PI, 1.85 * Math.PI); g.stroke(); }
+      E(g, 0, -106, 6.5, 5.5, '#c2334f', 1.8);
+    } else {
+      E(g, -12, -122, 2.8, 3.2, '#fff', 0); E(g, 12, -122, 2.8, 3.2, '#fff', 0);
+      g.beginPath(); g.arc(0, -111, 5, 0.15 * Math.PI, 0.85 * Math.PI); g.lineWidth = 2; g.strokeStyle = '#2b2833'; g.stroke();
+    }
     E(g, -20, -110, 5, 3.4, 'rgba(255,110,150,.6)', 0); E(g, 20, -110, 5, 3.4, 'rgba(255,110,150,.6)', 0);
     g.beginPath(); g.ellipse(0, -131, 31, 23, 0, Math.PI, TAU); g.closePath(); fs(g, '#ff4d5e', 3);
     E(g, -12, -139, 8, 8, '#8ee8ff', 2.5); E(g, 12, -139, 8, 8, '#8ee8ff', 2.5);
@@ -307,6 +315,20 @@ const Spr = (() => {
       g.font = '900 24px ' + FONT; g.fillStyle = '#4a2a5a'; g.fillText('頂尖賽車', 110, 76);
     });
   }
+  function arrow(dir) {
+    return mk(180, 170, g => {
+      R(g, 82, 100, 16, 70, 3, '#8a5a3a', 2.5);
+      R(g, 10, 8, 160, 100, 14, '#ffd23f', 4);
+      R(g, 18, 16, 144, 84, 10, '#2b2833', 0);
+      g.save(); g.translate(90, 58); g.scale(dir, 1);
+      for (let i = 0; i < 2; i++) {
+        const x = -34 + i * 38;
+        g.beginPath(); g.moveTo(x, -34); g.lineTo(x + 30, 0); g.lineTo(x, 34); g.lineTo(x + 14, 34); g.lineTo(x + 44, 0); g.lineTo(x + 14, -34); g.closePath();
+        g.fillStyle = i ? '#ffd23f' : '#fff27a'; g.fill();
+      }
+      g.restore();
+    });
+  }
   function coin() {
     return mk(64, 64, g => {
       glow(g, 32, 32, 32, '#fff3a0', 0.6);
@@ -367,7 +389,7 @@ const Spr = (() => {
     bushDry: () => bush('#d8c25a', '#a89a3a', true),
     bushNight: () => bush('#238a7c', '#0f5a58', true),
     lantern, redLantern, umbrella, rabbit, crab, fox, signBoard: sign,
-    coin, nitro, poop, rock,
+    coin, nitro, poop, rock, arrowR: () => arrow(1), arrowL: () => arrow(-1),
     enemy1: () => enemy('#5ad27a', '#fff3a0', 'frog'),
     enemy2: () => enemy('#ff8fc7', '#ffffff', 'bunny'),
     enemy3: () => enemy('#7c5cff', '#ffd23f', 'cat')
