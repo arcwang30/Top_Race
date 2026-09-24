@@ -21,11 +21,11 @@ const Input = {
   _vPrev: {},
 
   KEYMAP: {
-    ArrowUp: ['up', 'nitro'], KeyW: ['up', 'nitro'],
+    ArrowUp: ['up'], KeyW: ['up'],
     ArrowDown: ['down'], KeyS: ['down'],
     ArrowLeft: ['left'], KeyA: ['left'],
     ArrowRight: ['right'], KeyD: ['right'],
-    Enter: ['confirm'], NumpadEnter: ['confirm'], Space: ['confirm'],
+    Enter: ['confirm'], NumpadEnter: ['confirm'], Space: ['confirm', 'nitro'],
     Escape: ['back', 'pause'], Backspace: ['back'], KeyP: ['pause']
   },
 
@@ -113,7 +113,7 @@ const Input = {
     const k = this.keys;
     const key = (...c) => c.some(x => k.has(x));
     let left = key('ArrowLeft', 'KeyA'), right = key('ArrowRight', 'KeyD');
-    let thr = key('Space'), brk = key('ArrowDown', 'KeyS', 'AltLeft', 'AltRight'), nit = key('ArrowUp', 'KeyW');
+    let thr = key('KeyW'), brk = key('AltLeft', 'AltRight'), nit = key('Space');
     let analog = 0, sy = (key('ArrowDown', 'KeyS') ? 1 : 0) - (key('ArrowUp', 'KeyW') ? 1 : 0);
 
     const pads = (navigator.getGamepads && navigator.getGamepads()) || [];
