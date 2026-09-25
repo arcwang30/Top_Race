@@ -620,7 +620,7 @@ const Game = {
     if (!Input.touchMode || this.s.phase !== 'play' && this.s.phase !== 'countdown') { Input.virtual = []; return; }
     const gyro = Save.data.gyro && Input.gyroActive, auto = Save.data.autoGas;
     const Z = [];
-    if (!gyro) Z.push({ id: 'steer', rect: [0, 730, 190, 230], col: '#ffd23f', label: '◀  滑動轉向  ▶', sub: '' });
+    if (!gyro) Z.push({ id: 'steer', rect: [0, 730, 230, 230], col: '#ffd23f', label: '◀  滑動轉向  ▶', sub: '' });
     Z.push({ id: 'nitro', rect: [350, 500, 190, 230], col: '#3ea8ff', label: 'NITRO', sub: '點一下' });
     if (auto) Z.push({ id: 'brake', rect: [350, 730, 190, 230], col: '#ff6b81', label: 'BRAKE / DRIFT', sub: '按住 剎車・甩尾' });
     else {
