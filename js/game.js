@@ -151,6 +151,7 @@ const Game = {
     let pct = s.speed / C.maxSpeed; const p0 = pct;
     const off = Math.abs(s.x) > 1.0;
     s.drift = canCtl && s.slipT <= 0 && thr && brk && Math.abs(steer) > 0.25 && pct > 0.35;
+    s.driftT = s.drift ? (s.driftT || 0) + dt : 0;
 
     // ---- 速度 ----
     if (s.crashT > 0) {
@@ -160,7 +161,7 @@ const Game = {
     } else if (s.phase === 'play') {
       if (s.slipT > 0) pct = Math.max(0.3, pct - 0.3 * dt);
       else if (boosting && !brk && !off) pct = Math.min(1, pct + (C.accel + C.nitroAccel) * dt);
-      else if (s.drift) pct = Math.max(0.3, pct - 0.045 * dt);
+      else if (s.drift) pct = Math.max(0.3, pct - lerp(0.16, 0.36, clamp((s.driftT - 0.4) / 0.4, 0, 1)) * dt);   // 甩尾初期每秒約 16%,超過約 0.8 秒後每秒約 36%
       else if (thr && !brk) { if (pct < C.normalMax) pct = Math.min(C.normalMax, pct + C.accel * dt); }
       else if (brk && !thr) pct -= C.brake * dt;
       else if (thr && brk) pct -= (Save.data.autoGas ? C.brake : 0.22) * dt;

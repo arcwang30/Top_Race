@@ -177,12 +177,26 @@ const Road = (() => {
       let i = from;
       while (i < to) {
         const r = rand(), lane = LANES[(rand() * LANES.length) | 0];
-        if (r < 0.33) { const n = 6 + ((rand() * 5) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
+        if (r < 0.33) {
+          const kindC = rand();
+          if (kindC < 0.5) { const n = 6 + ((rand() * 5) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
+          else if (kindC < 0.75) {
+            // 雙線並排:兩條相鄰車道一起排,一次吃兩排
+            const l0 = LANES[(rand() * 3) | 0];
+            for (let k = 0; k < 4; k++) { coin(i + k * 2, l0); coin(i + k * 2, l0 + 0.5); }
+            i += 8;
+          } else {
+            // V 字:由兩側往中間收攏(或由中間向兩側展開),挑一邊的斜線吃
+            const inward = rand() < 0.5;
+            for (let k = 0; k < 4; k++) { const half = inward ? 0.6 - k * 0.2 : k * 0.2, at = i + k * 5; coin(at, half); if (half > 0) coin(at, -half); }
+            i += 20;
+          }
+        }
         else if (r < 0.48) { const ph = rand() * 6; for (let k = 0; k < 12; k++) coin(i + k * 2, 0.75 * Math.sin(k * 0.55 + ph)); i += 24; }
         else if (r < 0.535) { put(i, { name: 'nitro', offset: lane, w: 300, kind: 'nitro', lift: 260, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
-        else if (r < 0.595) { put(i, { name: 'missileBox', offset: lane, w: 340, kind: 'missile', lift: 250, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
-        else if (r < 0.595 + poopP[sec]) put(i, { name: course.obs[0], offset: lane + (rand() - 0.5) * 0.15, w: OBSW[course.obs[0]], kind: course.obs[0] });
-        else if (r < 0.595 + poopP[sec] + rockP[sec]) put(i, { name: course.obs[1], offset: lane + (rand() - 0.5) * 0.12, w: OBSW[course.obs[1]], kind: course.obs[1] });
+        else if (r < 0.58) { put(i, { name: 'missileBox', offset: lane, w: 340, kind: 'missile', lift: 250, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
+        else if (r < 0.58 + poopP[sec]) put(i, { name: course.obs[0], offset: lane + (rand() - 0.5) * 0.15, w: OBSW[course.obs[0]], kind: course.obs[0] });
+        else if (r < 0.58 + poopP[sec] + rockP[sec]) put(i, { name: course.obs[1], offset: lane + (rand() - 0.5) * 0.12, w: OBSW[course.obs[1]], kind: course.obs[1] });
         else { const n = 5 + ((rand() * 4) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         i += 22 + ((rand() * 26) | 0);
       }
@@ -204,7 +218,7 @@ const Road = (() => {
         };
         c.baseX = c.x;
         t.cars.push(c);
-        z += CFG.enemyGap * course.diff.gap * (0.7 + rand() * 0.9);
+        z += CFG.enemyGap * course.diff.gap * [1, 0.85, 0.7][sec] * (0.7 + rand() * 0.9);
       }
     }
     t.cars.forEach(c => attachCar(t, c));
