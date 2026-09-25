@@ -151,7 +151,8 @@ const Game = {
     let pct = s.speed / C.maxSpeed; const p0 = pct;
     const off = Math.abs(s.x) > 1.0;
     s.drift = canCtl && s.slipT <= 0 && thr && brk && Math.abs(steer) > 0.25 && pct > 0.35;
-    s.driftT = s.drift ? (s.driftT || 0) + dt : 0;
+    const dT0 = s.driftT || 0, wasDrift = !!s.wasDrift;
+    s.driftT = s.drift ? dT0 + dt : 0; s.wasDrift = s.drift;
 
     // ---- 速度 ----
     if (s.crashT > 0) {
@@ -188,6 +189,15 @@ const Game = {
       s.x += steer * dxs;
       if (s.crashT <= 0) s.x -= dxs * pct * seg.curve * C.centrifugal * (s.drift ? 0.35 : 1);
     }
+    // ---- 甩尾偏移:甩尾中車尾往外側滑(慣性),放開後還會滑一段,再反向甩回一小段,需要玩家自己修正 ----
+    if (s.drift) {
+      const ds = Math.sign(steer);
+      s.dvx = clamp((s.dvx || 0) - ds * C.driftSlideAccel * pct * dt, -C.driftSlideMax, C.driftSlideMax); s.drDir = ds;
+    } else s.dvx = (s.dvx || 0) * Math.exp(-C.driftSlideDecay * dt);
+    if (wasDrift && !s.drift && dT0 > 0.4) { s.recT = C.driftRecoverTime; s.recVel = (s.drDir || 0) * C.driftRecoverVel * clamp(dT0 / 1.2, 0.3, 1.5); }
+    if (s.crashT > 0 || s.slipT > 0 || !playing) { s.dvx = 0; s.recT = 0; }
+    s.x += (s.dvx || 0) * dt;
+    if (s.recT > 0) { s.recT -= dt; s.x += s.recVel * Math.max(0, s.recT / C.driftRecoverTime) * pct * dt; }
     if (Save.data.autoGas && off && steer === 0 && s.crashT <= 0 && playing) s.x -= Math.sign(s.x) * 0.5 * dt;
     if (s.slipT > 0) { s.slipT -= dt; s.x += s.slipDir * dt * (0.5 + pct * 1.2); }
     if (s.crashT > 0) {

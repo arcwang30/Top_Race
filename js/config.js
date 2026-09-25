@@ -28,6 +28,8 @@ const CFG = {
   nitroAccel: 0.7,
   nitroMax: 5,
   centrifugal: 0.32,
+  // 甩尾偏移(可調):車尾往外滑的加速度 / 上限 / 放開後的衰減,以及出彎時反向甩回的速度與時間
+  driftSlideAccel: 0.7, driftSlideMax: 0.45, driftSlideDecay: 2.5, driftRecoverVel: 0.35, driftRecoverTime: 0.4,
   steerRate: 2.2,
 
   sections: FAST ? [240, 240, 240] : [2000, 2100, 2200],
