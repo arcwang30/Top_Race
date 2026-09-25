@@ -17,6 +17,9 @@ const Game = {
 
   newRun() {
     this.course = COURSES[this.courseId] || COURSES[0];
+    const D = this.course.diff;
+    this.SLIP_T = 1.5 * D.pen; this.CRASH_T = 2.0 * D.pen;
+    this.bonusTime = FAST ? CFG.bonusTime : [D.bonus, D.bonus];
     this.track = Road.build('game', this.course);
     this.track.missiles = [];
     this.view = clamp(Save.data.view === undefined ? 2 : Save.data.view, 0, VIEWS.length - 1);
@@ -24,9 +27,9 @@ const Game = {
     this.result = null;
     this.s = {
       pos: 0, x: 0, speed: 0, nitro: 1, nitroT: 0, slipT: 0, slipDir: 1, crashT: 0, invT: 0, shake: 0,
-      mudT: 0, mudCap: 1, bounceT: 0,
+      mudT: 0, mudCap: 1, bounceT: 0, vx: 0,
       sc: { dist: 0, drift: 0, coin: 0, cp: 0, time: 0, clear: 0 }, coins: 0,
-      time: CFG.startTime, elapsed: 0, phase: 'countdown', countT: 3.6, cp: 0, stage: 1,
+      time: FAST ? CFG.startTime : D.start, elapsed: 0, phase: 'countdown', countT: 3.6, cp: 0, stage: 1,
       drift: false, bg: [0, 0, 0], bgTheme: this.course.themes[0], bgPrev: this.course.themes[0], bgFade: 0,
       missileT: 0, fireT: 0, toast: null, pops: [], parts: [], fly: [], wheel: 0, t: 0, endT: 0, tickSec: -1, bumpCool: 0, treeCool: 0
     };
@@ -168,9 +171,19 @@ const Game = {
 
     // ---- 橫移 / 離心力 / 打滑 ----
     const seg = Road.findSeg(T, s.pos + this.pz);
+    const D = this.course.diff;
     const dxs = dt * C.steerRate * (0.3 + 0.7 * pct) * (s.drift ? 1.6 : 1);
-    s.x += steer * dxs;
-    if (s.crashT <= 0) s.x -= dxs * pct * seg.curve * C.centrifugal * (s.drift ? 0.35 : 1);
+    if (D.ice && playing && s.crashT <= 0 && s.slipT <= 0 && s.bounceT <= 0) {
+      // 結冰路面:橫向速度有慣性,轉向慢半拍、放開後還會繼續滑
+      const want = steer * C.steerRate * (0.3 + 0.7 * pct) * (s.drift ? 1.6 : 1);
+      s.vx += (want - s.vx) * Math.min(1, dt * (steer === 0 ? 2.2 : 3.6));
+      s.x += s.vx * dt;
+      if (s.crashT <= 0) s.x -= dxs * pct * seg.curve * C.centrifugal * 1.15 * (s.drift ? 0.35 : 1);
+    } else {
+      s.vx = 0;
+      s.x += steer * dxs;
+      if (s.crashT <= 0) s.x -= dxs * pct * seg.curve * C.centrifugal * (s.drift ? 0.35 : 1);
+    }
     if (Save.data.autoGas && off && steer === 0 && s.crashT <= 0 && playing) s.x -= Math.sign(s.x) * 0.5 * dt;
     if (s.slipT > 0) { s.slipT -= dt; s.x += s.slipDir * dt * (0.5 + pct * 1.2); }
     if (s.crashT > 0) {
@@ -201,8 +214,8 @@ const Game = {
       while (s.cp < 3 && newZ >= T.cps[s.cp] * L) {
         const i = s.cp++;
         if (i < 2) {
-          s.time += C.bonusTime[i]; s.sc.cp += SCORE.cp; s.stage = i + 2;
-          this.toast('CHECK POINT!', tr('TIME +{0} 秒', C.bonusTime[i]), 2.2, '#ffe680', 60);
+          s.time += this.bonusTime[i]; s.sc.cp += SCORE.cp; s.stage = i + 2;
+          this.toast('CHECK POINT!', tr('TIME +{0} 秒', this.bonusTime[i]), 2.2, '#ffe680', 60);
           Sound.play('checkpoint');
           Sound.music(this.course.music[i + 1]);
         } else {
@@ -230,6 +243,12 @@ const Game = {
 
     this.fx(dt, pct, boosting, off);
     Sound.setLoops({ on: s.phase !== 'over', pct, boost: boosting, drift: s.drift, off: off && pct > 0.15 });
+  },
+
+  crashPlayer() {
+    const s = this.s;
+    s.crashT = this.CRASH_T; s.slipT = 0; s.bounceT = 0; s.shake = 0.9; s.nitroT = 0;
+    this.setMood('sad', 2.2); Sound.play('crash'); this.toast('翻車!', '', 1.4, '#ff5c7a', 72);
   },
 
   collide(oldZ, newZ, playing) {
@@ -261,8 +280,7 @@ const Game = {
             s.slipT = this.SLIP_T; s.slipDir = s.x > sp.offset ? 1 : -1; s.shake = 0.25;
             this.setMood('sad', 1.8); Sound.play('slip'); this.toast('打滑!', '', 1.0, '#c78a4a', 60);
           } else if (fx === 'crash') {
-            s.crashT = this.CRASH_T; s.slipT = 0; s.bounceT = 0; s.shake = 0.9; s.nitroT = 0;
-            this.setMood('sad', 2.2); Sound.play('crash'); this.toast('翻車!', '', 1.4, '#ff5c7a', 72);
+            this.crashPlayer();
           } else if (fx === 'mud') {
             s.mudT = 1.4; s.mudCap = 0.3; s.shake = 0.3;
             this.setMood('sad', 1.6); Sound.play('mud'); this.toast('陷入雪堆!', '', 1.0, '#bfe8ff', 56);
@@ -273,6 +291,8 @@ const Game = {
             s.bounceT = this.BOUNCE_T; s.speed *= 0.7; s.slipT = 0; s.shake = 0.4;
             this.setMood('sad', 1.4); Sound.play('bounce'); this.toast('彈飛!', '', 1.0, '#ff9fe6', 64);
           }
+        } else if (sp.kind === 'solid' && sp.crash) {
+          if (!inv && playing && s.invT <= 0 && s.crashT <= 0 && s.speed > 800) this.crashPlayer();
         } else if (sp.kind === 'solid' && !inv && s.treeCool <= 0 && s.speed > 800) {
           s.treeCool = 0.5; s.speed *= 0.35; s.shake = 0.5; this.setMood('sad', 1.4);
           s.x = sp.offset - Math.sign(sp.offset) * (sp.hit + 0.3); Sound.play('bump');

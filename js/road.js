@@ -45,7 +45,7 @@ const Road = (() => {
     for (let s = 0; s < 3; s++) {
       b.setTheme(course.themes[s]);
       t.secStart.push(t.segs.length);
-      const start = t.segs.length, target = CFG.sections[s];
+      const start = t.segs.length, target = (FAST ? CFG.sections : (course.sections || CFG.sections))[s];
       if (s > 0) b.road(20, 30, 20, 0, 0);
       while (t.segs.length - start < target - 100) {
         const r = rand(), dir = rand() < 0.5 ? -1 : 1, n = 40 + ((rand() * 60) | 0);
@@ -70,7 +70,7 @@ const Road = (() => {
     t.segs[10].gate = 'start';
     t.cps.forEach((c, i) => { t.segs[c].gate = i === 2 ? 'goal' : 'cp'; });
     decorate(t, rand, true, course);
-    spawnCars(t, rand);
+    spawnCars(t, rand, course);
     return t;
   }
 
@@ -99,6 +99,7 @@ const Road = (() => {
     { trees: ['lollipopN', 'lollipopN2', 'lightPole', 'candyCane'], bush: ['gumdropN'], prop: ['popcorn', 'balloon', 'cupcake'], animal: ['gummy'] }
   ];
   const PROPW = { lantern: 420, signBoard: 900, umbrella: 800, redLantern: 420, snowman: 520, igloo: 900, cupcake: 600, candyCane: 420, donut: 800, balloon: 380, surfboards: 620, lifebuoy: 400, stall: 900, torii: 1100, sled: 640, iceCluster: 640, giftBox: 520, lampPost: 340, iceCream: 440, cookie: 560, popcorn: 720 };
+  const BIGPROP = { igloo: 0.25, stall: 0.25, torii: 0.3 };
   const OBSW = { poop: 420, rock: 560, snowdrift: 720, iceBlock: 560, jelly: 520, gum: 680 };
   const pick = (a, r) => a[(r() * a.length) | 0];
 
@@ -107,18 +108,18 @@ const Road = (() => {
     for (let i = 0; i < N; i++) {
       const s = segs[i], th = SC[s.theme];
       if (i % 2 === 0) for (const side of [-1, 1]) {
-        if (rand() < 0.72) { const nm = pick(th.trees, rand); s.sprites.push({ name: nm, offset: side * (1.9 + rand() * 2.6), w: (1000 + rand() * 600) * (nm === 'candyCane' ? 0.5 : 1), kind: 'solid', hit: 0.2 }); }
+        if (rand() < 0.72) { const nm = pick(th.trees, rand); s.sprites.push({ name: nm, offset: side * (1.9 + rand() * 2.6), w: (1000 + rand() * 600) * (nm === 'candyCane' ? 0.5 : 1), kind: 'solid', hit: 0.2, crash: true }); }
       }
       if (rand() < 0.2) s.sprites.push({ name: pick(th.bush, rand), offset: (rand() < 0.5 ? -1 : 1) * (1.2 + rand() * 0.6), w: 520 + rand() * 200, kind: 'deco' });
-      if (rand() < 0.028) { const nm = pick(th.prop, rand); s.sprites.push({ name: nm, offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW[nm], kind: 'deco' }); }
-      if (th.sign && rand() < 0.01) s.sprites.push({ name: 'signBoard', offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW.signBoard, kind: 'deco' });
+      if (rand() < 0.028) { const nm = pick(th.prop, rand); s.sprites.push({ name: nm, offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW[nm], ...(BIGPROP[nm] ? { kind: 'solid', hit: BIGPROP[nm], crash: true } : { kind: 'deco' }) }); }
+      if (th.sign && rand() < 0.01) s.sprites.push({ name: 'signBoard', offset: (rand() < 0.5 ? -1 : 1) * (1.35 + rand() * 0.4), w: PROPW.signBoard, kind: 'solid', hit: 0.25, crash: true });
       if (rand() < 0.014) s.sprites.push({ name: pick(th.animal, rand), offset: (rand() < 0.5 ? -1 : 1) * (1.15 + rand() * 0.35), w: 380, kind: 'deco', hop: rand() * 6 });
     }
     if (!items) return;
 
     const put = (i, sp) => { if (segs[i]) segs[i].sprites.push(sp); };
     const coin = (i, off) => put(i, { name: 'coin', offset: off, w: 300, kind: 'coin', lift: 230, phase: rand() * 6 });
-    const poopP = [0.06, 0.08, 0.1], rockP = [0.015, 0.025, 0.035];
+    const dO = course.diff.obs, poopP = [0.06, 0.08, 0.1].map(v => v * dO), rockP = [0.015, 0.025, 0.035].map(v => v * dO);
     for (let sec = 0; sec < 3; sec++) {
       const from = (sec === 0 ? 70 : t.cps[sec - 1] + 50), to = t.cps[sec] - 70;
       let i = from;
@@ -135,11 +136,11 @@ const Road = (() => {
       }
     }
     for (const w of t.warn) {
-      for (const back of [55, 38, 22]) for (const side of [-1, 1]) put(w.idx - back, { name: w.dir > 0 ? 'arrowR' : 'arrowL', offset: side * 1.5, w: 760, kind: 'deco' });
+      for (const back of [55, 38, 22]) for (const side of [-1, 1]) put(w.idx - back, { name: w.dir > 0 ? 'arrowR' : 'arrowL', offset: side * 1.5, w: 760, kind: 'solid', hit: 0.2, crash: true });
     }
   }
 
-  function spawnCars(t, rand) {
+  function spawnCars(t, rand, course) {
     for (let sec = 0; sec < 3; sec++) {
       let z = (sec === 0 ? 90 : t.cps[sec - 1] + 60);
       const end = t.cps[sec] - 90;
@@ -147,11 +148,11 @@ const Road = (() => {
         const type = 1 + ((rand() * 3) | 0);
         const c = {
           type, z: z * L, x: LANES[(rand() * LANES.length) | 0] + (rand() - 0.5) * 0.2, baseX: 0,
-          speed: [0.30, 0.48, 0.66][type - 1] * CFG.maxSpeed * (0.96 + rand() * 0.08), phase: rand() * 6, seg: null, percent: 0
+          speed: [0.30, 0.48, 0.66][type - 1] * course.diff.spd * CFG.maxSpeed * (0.96 + rand() * 0.08), phase: rand() * 6, seg: null, percent: 0
         };
         c.baseX = c.x;
         t.cars.push(c);
-        z += CFG.enemyGap * (0.7 + rand() * 0.9);
+        z += CFG.enemyGap * course.diff.gap * (0.7 + rand() * 0.9);
       }
     }
     t.cars.forEach(c => attachCar(t, c));
@@ -307,7 +308,7 @@ const Road = (() => {
       for (const c of s.cars) {
         const a = s.p1.screen, b = s.p2.screen, sc = lerp(a.scale, b.scale, c.percent);
         const sx = lerp(a.x, b.x, c.percent) + sc * c.x * RH * XS, sy = lerp(a.y, b.y, c.percent);
-        drawSprite(g, Spr.get('enemy' + c.type), sc, sx, sy, 640, s.clip, 0, 1, XS, YS);
+        drawSprite(g, Spr.get((c.front ? 'enemyF' : 'enemy') + c.type), sc, sx, sy, 640, s.clip, 0, 1, XS, YS);
       }
     }
 

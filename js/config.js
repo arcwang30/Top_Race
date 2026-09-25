@@ -102,17 +102,17 @@ const THEMES = [
 // 賽事(每組 3 個賽段:白天 / 黃昏 / 夜晚),各有專屬障礙與音樂
 const COURSES = [
   {
-    id: 0, name: '櫻花之旅', en: 'SAKURA TOUR', stars: 1, seed: 20260925, hair: 1,
+    id: 0, name: '櫻花之旅', en: 'SAKURA TOUR', stars: 1, seed: 20260925, hair: 0.8, sections: [1600, 2000, 2200], diff: { start: 60, bonus: 90, obs: 0.8, gap: 1.2, spd: 0.95, pen: 0.9 },
     desc: '從春日櫻花道出發,經過夕陽海岸,直奔星夜祭典!',
     themes: [0, 1, 2], obs: ['poop', 'rock'], music: ['c1s1', 'c1s2', 'c1s3'], color: ['#ffb7d5', '#ff8fbd']
   },
   {
-    id: 1, name: '雪之國度', en: 'SNOW KINGDOM', stars: 2, seed: 20261111, hair: 1.5,
-    desc: '晴朗雪原、極光黃昏、聖誕雪夜。小心雪堆與冰塊!',
+    id: 1, name: '雪之國度', en: 'SNOW KINGDOM', stars: 2, seed: 20261111, hair: 1.5, diff: { start: 80, bonus: 70, obs: 1, gap: 1, spd: 1, pen: 1, ice: true },
+    desc: '晴朗雪原、極光黃昏、聖誕雪夜。路面結冰車身會打滑,小心雪堆與冰塊!',
     themes: [3, 4, 5], obs: ['snowdrift', 'iceBlock'], music: ['c2s1', 'c2s2', 'c2s3'], color: ['#bfe8ff', '#5fb8ff']
   },
   {
-    id: 2, name: '糖果樂園', en: 'CANDY LAND', stars: 3, seed: 20270303, hair: 2,
+    id: 2, name: '糖果樂園', en: 'CANDY LAND', stars: 3, seed: 20270303, hair: 2.3, diff: { start: 78, bonus: 68, obs: 1.35, gap: 0.8, spd: 1.08, pen: 1.15 },
     desc: '棉花糖、巧克力到霓虹遊樂園。果凍會彈飛你,口香糖會黏住你!',
     themes: [6, 7, 8], obs: ['jelly', 'gum'], music: ['c3s1', 'c3s2', 'c3s3'], color: ['#ffc4ec', '#ff7ab8']
   }

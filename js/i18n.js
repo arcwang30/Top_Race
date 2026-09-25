@@ -13,7 +13,7 @@ const I18N = {
   '本賽事障礙': ['このコースの障害物', 'Obstacles'], '確認出發': ['しゅっぱつ！', 'GO!'], '返回': ['もどる', 'BACK'],
   '櫻花之旅': ['さくらツアー', 'Sakura Tour'], '雪之國度': ['ゆきのくに', 'Snow Kingdom'], '糖果樂園': ['キャンディランド', 'Candy Land'],
   '從春日櫻花道出發,經過夕陽海岸,直奔星夜祭典!': ['春の桜並木から夕焼けの海岸をぬけて、星空のお祭りへ！', 'From the spring sakura road, past the sunset coast, to the starry festival!'],
-  '晴朗雪原、極光黃昏、聖誕雪夜。小心雪堆與冰塊!': ['晴れた雪原、オーロラの夕暮れ、聖夜の雪景色。雪だまりと氷に注意！', 'Sunny snowfield, aurora dusk and a Christmas night. Watch out for snowdrifts and ice blocks!'],
+  '晴朗雪原、極光黃昏、聖誕雪夜。路面結冰車身會打滑,小心雪堆與冰塊!': ['晴れた雪原、オーロラの夕暮れ、聖夜の雪景色。路面は凍結、車体が滑る！雪だまりと氷に注意！', 'Sunny snowfield, aurora dusk and a Christmas night. Icy roads make you slide - watch out for snowdrifts and ice blocks!'],
   '棉花糖、巧克力到霓虹遊樂園。果凍會彈飛你,口香糖會黏住你!': ['わたあめ、チョコ、ネオンの遊園地。ゼリーではね飛ばされ、ガムにくっつく！', 'Cotton candy, chocolate and a neon fun park. Jelly bounces you and gum sticks to you!'],
   '春日櫻花道': ['春の桜並木', 'Spring Sakura Road'], '夕陽海岸': ['夕焼けの海岸', 'Sunset Coast'], '星夜祭典': ['星空のお祭り', 'Starry Festival'],
   '雪原晴空': ['晴れの雪原', 'Sunny Snowfield'], '極光黃昏': ['オーロラの夕暮れ', 'Aurora Dusk'], '雪夜聖誕': ['聖夜の雪', 'Snowy Xmas Night'],
@@ -74,7 +74,7 @@ const I18N = {
   '完成總時間': ['トータルタイム', 'Total Time'], '進榜!請輸入你的姓名': ['ランクイン！名前を入力してね', 'New record! Enter your name'],
   '登錄': ['登録', 'SUBMIT'], '很可惜未進入前 20 名': ['残念、20位以内に入れませんでした', 'Not in the top 20 this time'], '前往排行榜': ['ランキングへ', 'TO RANKING'],
 
-  '全球': ['ワールド', 'GLOBAL'], '本機': ['ローカル', 'LOCAL'], '讀取中...': ['読み込み中...', 'Loading...'], '無法連線,顯示本機紀錄': ['接続できないためローカル記録を表示', 'Offline: showing local records'],
+  '全球': ['ワールド', 'GLOBAL'], '本機': ['ローカル', 'LOCAL'], '讀取中...': ['読み込み中...', 'Loading...'], '無法連線,暫時無法顯示全球排行': ['接続できないため世界ランキングを表示できません', 'Offline: global ranking unavailable'],
   '了解歷史': ['歴史を知る', 'Learn History'], '← → 切換分頁　↑ ↓ / 滾輪 捲動': ['← → ページ切替　↑ ↓ / ホイール スクロール', '← → Page　↑ ↓ / Wheel: scroll'],
   '選擇車輛': ['マシンセレクト', 'SELECT VEHICLE'], '確認車輛': ['けってい！', 'CONFIRM'],
   '熊貓賽車': ['パンダ バギー', 'Panda Buggy'], '熊貓坦克': ['パンダ戦車', 'Panda Tank'], '熊貓掌機車': ['パンダ携帯ゲーム機カー', 'Panda Handheld'], '小飛翼火龍車': ['ちびウイング火竜カー', 'Mini Dragon Wing'],

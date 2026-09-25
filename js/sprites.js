@@ -144,13 +144,48 @@ const Spr = (() => {
     g.beginPath(); g.moveTo(-20, -102); g.quadraticCurveTo(0, -94, 20, -102); g.lineTo(22, -94); g.quadraticCurveTo(0, -84, -22, -94); g.closePath(); fs(g, '#ff5c7a', 2.5);
   }
 
+  // 敵車角色(正面):呱呱 / 兔兔 / 黑喵
+  function critterFront(g, kind) {
+    const scarf = c => { g.beginPath(); g.moveTo(-20, -102); g.quadraticCurveTo(0, -94, 20, -102); g.lineTo(22, -94); g.quadraticCurveTo(0, -84, -22, -94); g.closePath(); fs(g, c, 2.5); };
+    const eye = (x, y, r) => { E(g, x, y, r, r * 1.15, '#fff', 2); E(g, x, y + 1, r * 0.5, r * 0.6, '#2b2833', 0); };
+    if (kind === 'cat') {
+      E(g, 0, -90, 26, 22, '#4a4a5c');
+      poly(g, [[-27, -126], [-24, -154], [-6, -140]], '#4a4a5c'); poly(g, [[27, -126], [24, -154], [6, -140]], '#4a4a5c');
+      poly(g, [[-22, -132], [-21, -147], [-11, -139]], '#ff9fbd', 0); poly(g, [[22, -132], [21, -147], [11, -139]], '#ff9fbd', 0);
+      E(g, 0, -120, 27, 24, '#4a4a5c');
+      E(g, -11, -122, 6, 7, '#ffd23f', 2); E(g, 11, -122, 6, 7, '#ffd23f', 2); E(g, -11, -122, 1.8, 5, '#2b2833', 0); E(g, 11, -122, 1.8, 5, '#2b2833', 0);
+      E(g, 0, -113, 3.5, 2.6, '#ff9fbd', 0);
+      g.strokeStyle = '#e8e8f0'; g.lineWidth = 1.6; g.lineCap = 'round';
+      for (const s of [-1, 1]) for (const dy of [-1, 3]) { g.beginPath(); g.moveTo(s * 14, -111 + dy); g.lineTo(s * 33, -114 + dy * 1.6); g.stroke(); }
+      scarf('#ffd23f');
+    } else if (kind === 'bunny') {
+      E(g, 0, -90, 25, 22, '#ffd9ea');
+      E(g, -11, -160, 8, 24, '#ffd9ea', 3, -0.12); E(g, 11, -160, 8, 24, '#ffd9ea', 3, 0.12);
+      E(g, -11, -158, 3.5, 16, '#ff9fbd', 0, -0.12); E(g, 11, -158, 3.5, 16, '#ff9fbd', 0, 0.12);
+      E(g, 0, -120, 26, 24, '#ffd9ea');
+      E(g, -11, -121, 3.4, 4.4, '#2b2833', 0); E(g, 11, -121, 3.4, 4.4, '#2b2833', 0);
+      E(g, 0, -113, 4, 3, '#ff7fa8', 0);
+      g.beginPath(); g.arc(0, -110, 4.5, 0.15 * Math.PI, 0.85 * Math.PI); g.lineWidth = 1.8; g.strokeStyle = '#2b2833'; g.stroke();
+      E(g, -19, -111, 5, 3.4, 'rgba(255,110,150,.6)', 0); E(g, 19, -111, 5, 3.4, 'rgba(255,110,150,.6)', 0);
+      scarf('#7c5cff');
+    } else {
+      E(g, 0, -90, 26, 22, '#5ac858');
+      E(g, 0, -118, 31, 21, '#5ac858');
+      E(g, -17, -134, 11, 11, '#5ac858'); E(g, 17, -134, 11, 11, '#5ac858');
+      eye(-17, -136, 6.5); eye(17, -136, 6.5);
+      g.beginPath(); g.arc(0, -112, 11, 0.12 * Math.PI, 0.88 * Math.PI); g.lineWidth = 2.2; g.strokeStyle = '#2b5a2b'; g.stroke();
+      E(g, -21, -112, 4.5, 3, 'rgba(255,140,140,.5)', 0); E(g, 21, -112, 4.5, 3, 'rgba(255,140,140,.5)', 0);
+      scarf('#ff7a3d');
+    }
+  }
+
   function buggyFront(g, o) {
     const body = o.body || '#3ea8ff', acc = o.acc || '#ffd23f';
     g.save(); g.globalAlpha = 0.28; E(g, 0, -2, 112, 13, '#000', 0); g.restore();
     wheel(g, -94, o.wheel || 0, 40, 68); wheel(g, 94, o.wheel || 0, 40, 68);
     R(g, -84, -36, 168, 10, 4, '#4a4860', 3);
     R(g, -34, -104, 68, 44, 14, '#3d3d55', 3);
-    pandaFront(g, o);
+    if (o.rider && o.rider !== 'panda') critterFront(g, o.rider); else pandaFront(g, o);
     // 車體
     R(g, -78, -60, 156, 44, 16, body, 3);
     R(g, -60, -80, 120, 26, 12, o.body2 || body, 3);
@@ -917,6 +952,9 @@ const Spr = (() => {
       g.save(); g.translate(48, 52); g.scale(0.52, 0.52); rocketShape(g, 0, 0, 1); g.restore();
     });
   }
+  function enemyF(body, acc, kind) {
+    return mk(250, 210, g => { g.translate(125, 202); g.scale(1.02, 1.02); buggyFront(g, { body, acc, rider: kind, t: 0.4, wheel: 4 }); });
+  }
   function enemy(body, acc, kind) {
     return mk(250, 210, g => { g.translate(125, 202); g.scale(1.02, 1.02); buggyRear(g, { body, acc, rider: kind, t: 0.4, wheel: 4 }); });
   }
@@ -953,7 +991,10 @@ const Spr = (() => {
     coin, nitro, poop, rock, arrowR: () => arrow(1), arrowL: () => arrow(-1),
     enemy1: () => enemy('#5ad27a', '#fff3a0', 'frog'),
     enemy2: () => enemy('#ff8fc7', '#ffffff', 'bunny'),
-    enemy3: () => enemy('#7c5cff', '#ffd23f', 'cat')
+    enemy3: () => enemy('#7c5cff', '#ffd23f', 'cat'),
+    enemyF1: () => enemyF('#5ad27a', '#fff3a0', 'frog'),
+    enemyF2: () => enemyF('#ff8fc7', '#ffffff', 'bunny'),
+    enemyF3: () => enemyF('#7c5cff', '#ffd23f', 'cat')
   };
 
   function get(name) { return cache[name] || (cache[name] = defs[name]()); }

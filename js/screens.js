@@ -17,10 +17,31 @@ const Demo = {
     this.x = 0.28 * Math.sin(this.t * 0.6);
   },
 
+  // 標題畫面:三台敵車(遠 / 中 / 近)在熊貓後方追趕,只表演不超車
+  chasers(on) {
+    this.ensure();
+    for (const c of this.track.cars) if (c.seg) { const k = c.seg.cars.indexOf(c); if (k >= 0) c.seg.cars.splice(k, 1); }
+    this.track.cars = [];
+    if (!on) return;
+    const types = [1, 2, 3].sort(() => Math.random() - 0.5);
+    const gaps = [1050, 2200, 3500], lanes = [-0.5, 0.45, -0.15];
+    this.track.cars = types.map((type, i) => ({ type, front: true, gap: gaps[i], baseX: lanes[i], x: lanes[i], z: 0, seg: null, percent: 0, phase: Math.random() * 6 }));
+  },
+
+  moveChasers() {
+    const len = this.track.length, base = (((this.pos % len) + len) % len) + CFG.playerZ;
+    this.track.cars.forEach((c, i) => {
+      c.z = (base + c.gap + Math.sin(this.t * 0.9 + c.phase) * 260 + len) % len;
+      c.x = c.baseX + Math.sin(this.t * 0.7 + c.phase) * 0.18 + this.x * 0.5;
+      Road.attachCar(this.track, c);
+    });
+  },
+
   draw(g, hor, YS) {
     this.ensure();
     BG.draw(g, 0, this.bg, hor);
     g.fillStyle = THEMES[0].grass[0]; g.fillRect(0, hor, W, H - hor);
+    if (this.track.cars.length) this.moveChasers();
     return Road.render(g, this.track, { pos: this.pos, x: this.x, time: this.t, hor, YS });
   },
 
@@ -136,7 +157,8 @@ Screens.intro = {
 // ---------- 主選單 ----------
 Screens.menu = {
   sel: 0, n: 0,
-  enter() { this.sel = 0; Sound.music('menu'); Demo.pos = 0; },
+  enter() { this.sel = 0; Sound.music('menu'); Demo.pos = 0; Demo.chasers(true); },
+  leave() { Demo.chasers(false); },
   frame(g, dt) {
     Demo.step(dt, 3600, -1);
     Demo.draw(g, 280, 330);
@@ -850,7 +872,7 @@ Screens.ranking = {
     if (!(this.mode === 'global' && Online.enabled)) { this.loading = false; return; }
     const cid = this.cid; this.loading = true;
     Online.top(cid).then(l => { if (this.cid === cid) { this.list = l; this.loading = false; } })
-      .catch(() => { if (this.cid === cid) { this.err = true; this.loading = false; this.mode = 'local'; } });
+      .catch(() => { if (this.cid === cid) { this.err = true; this.list = []; this.loading = false; } });
   },
   frame(g, dt) {
     const c = COURSES[this.cid];
@@ -869,7 +891,7 @@ Screens.ranking = {
     UI.text(g, '姓名', cols.name, 148, 16, { align: 'left', fill: '#7fe4ff', stroke: null });
     UI.text(g, '總積分', cols.score, 148, 16, { align: 'right', fill: '#7fe4ff', stroke: null });
     UI.text(g, '完成時間', cols.time, 148, 16, { align: 'right', fill: '#7fe4ff', stroke: null });
-    const glob = this.mode === 'global' && Online.enabled;
+    const glob = Online.enabled;
     const b = glob ? (this.list || []) : Save.board(this.cid);
     if (glob && this.loading) UI.text(g, '讀取中...', W / 2, 480, 26, { fill: '#fff' });
     for (let i = 0; i < 20; i++) {
@@ -888,12 +910,7 @@ Screens.ranking = {
       }
     }
     UI.text(g, '★ = 完賽通關', 30, 872, 15, { align: 'left', fill: '#ffd23f', stroke: null });
-    if (this.err) UI.text(g, '無法連線,顯示本機紀錄', W - 30, 872, 15, { align: 'right', fill: '#ff9fb5', stroke: null });
-    if (Online.enabled) {
-      UI.panel(g, 20, 894, 112, 40, 20, glob ? '#2fc46a' : '#ffb02e', '#fff');
-      UI.text(g, glob ? '全球' : '本機', 76, 914, 20, { fill: '#fff' });
-      if (UI.tapIn(20, 894, 112, 40)) { this.mode = glob ? 'local' : 'global'; this.hl = null; this.hlId = null; this.err = false; Sound.play('select'); this.load(); }
-    }
+    if (this.err) UI.text(g, '無法連線,暫時無法顯示全球排行', W - 30, 872, 15, { align: 'right', fill: '#ff9fb5', stroke: null });
     UI.begin(this);
     if (UI.button(g, this, '返回主選單', 150, 884, 240, 56, { back: true }) || Input.was('back')) App.goto('menu');
     UI.nav(this);
