@@ -528,21 +528,22 @@ Screens.howto = {
       ['右移', '→ / D', '類比右/十字右', '虛擬鍵右/傾斜'],
       ['油門', 'W', 'RT / A', '油門按鈕'],
       ['剎車', 'M', 'LT / B', '剎車按鈕'],
-      ['氮氣', 'SPACE', 'X / Y', '氮氣按鈕']
+      ['氮氣', 'SPACE', 'X / Y', '氮氣按鈕'],
+      ['視角切換', 'C', 'View / R3', '右上相機鈕']
     ];
     rows.forEach((r, i) => {
-      const y = 204 + i * 50;
-      g.fillStyle = i % 2 ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.14)'; g.fillRect(30, y - 22, 480, 44);
+      const y = 200 + i * 44;
+      g.fillStyle = i % 2 ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.14)'; g.fillRect(30, y - 20, 480, 40);
       r.forEach((t, k) => UI.text(g, t, cols[k][1], y, k === 0 ? 22 : 15, { fill: k === 0 ? '#fff27a' : '#fff', stroke: null, maxW: k === 0 ? 96 : 118 }));
     });
-    UI.text(g, '進階技巧', W / 2, 486, 26, { fill: '#ffd23f', stroke: null });
+    UI.text(g, '進階技巧', W / 2, 474, 26, { fill: '#ffd23f', stroke: null });
     const tips = [
       ['油門', '按住不放,車速會線性加速;放開則慢慢滑行減速。'],
       ['剎車', '按下後減速(點放控制力道)。過急彎前先減速!'],
       ['甩尾', '「油門」+「剎車」同時按住,再按左/右,車身會飄移,能以不低的速度過彎,還有額外加分!'],
       ['氮氣', '按下消耗 1 瓶,BAR 條時間內瞬間加速且無敵,碰到障礙與敵車會把牠們撞飛!']
     ];
-    let y = 520;
+    let y = 508;
     tips.forEach(([t, d]) => {
       UI.text(g, t, 46, y + 4, 21, { align: 'left', fill: '#7fe4ff', stroke: null, maxW: 74 });
       const h = UI.wrap(g, d, 128, y + 4, 372, 25, 18, { fill: '#fff' });

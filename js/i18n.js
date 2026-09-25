@@ -43,6 +43,7 @@ const I18N = {
   '類比左/十字左': ['スティック左/十字左', 'Stick L / Pad L'], '類比右/十字右': ['スティック右/十字右', 'Stick R / Pad R'],
   '虛擬鍵左/傾斜': ['仮想キー左/傾き', 'Touch L / Tilt'], '虛擬鍵右/傾斜': ['仮想キー右/傾き', 'Touch R / Tilt'],
   '油門按鈕': ['アクセルボタン', 'Gas button'], '剎車按鈕': ['ブレーキボタン', 'Brake button'], '氮氣按鈕': ['ニトロボタン', 'Nitro button'],
+  '視角切換': ['視点切替', 'Camera'], '右上相機鈕': ['右上のカメラボタン', 'Top-right camera btn'],
   '進階技巧': ['テクニック', 'Tips'],
   '按住不放,車速會線性加速;放開則慢慢滑行減速。': ['押し続けると加速。離すとゆっくり減速します。', 'Hold to accelerate steadily. Release to coast and slow down.'],
   '按下後減速(點放控制力道)。過急彎前先減速!': ['押すと減速（ちょん押しで加減）。急カーブの前に減速しよう！', 'Press to slow down (tap for light braking). Slow down before sharp turns!'],

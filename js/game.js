@@ -438,7 +438,7 @@ const Game = {
       g.restore();
     }
     let view = 'rear', k = VIEWS[this.view].car, cheer = false, boostFx = s.nitroT > 0;
-    if (s.phase === 'goal' && s.endT > 1.6) {
+    if ((s.phase === 'goal' || (s.phase === 'over' && this.result && this.result.clear)) && s.endT > 1.6) {
       const t = s.endT, hy = VIEWS[this.view].hor + 22, py0 = y;
       if (t < 2.8) {
         const e = Math.pow(clamp((t - 1.6) / 1.2, 0, 1), 2);
