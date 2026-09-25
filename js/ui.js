@@ -8,6 +8,10 @@ const UI = {
     g.save();
     if (o.alpha !== undefined) g.globalAlpha = o.alpha;
     g.font = `${o.italic ? 'italic ' : ''}${o.weight || 900} ${size}px ${FONT}`;
+    if (o.maxW) {
+      const w = g.measureText(str).width;
+      if (w > o.maxW) { size = size * o.maxW / w; g.font = `${o.italic ? 'italic ' : ''}${o.weight || 900} ${size}px ${FONT}`; }
+    }
     g.textAlign = o.align || 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
     const stroke = o.stroke === undefined ? '#40284a' : o.stroke;
     if (stroke) { g.lineWidth = o.sw || Math.max(3, size * 0.16); g.strokeStyle = stroke; g.strokeText(str, x, y); }

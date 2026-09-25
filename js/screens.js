@@ -161,6 +161,165 @@ Screens.menu = {
   }
 };
 
+// ---------- 我的頭像(照片只存在這台裝置的瀏覽器) ----------
+Screens.face = {
+  sel: 0, n: 0, mode: 'main', src: null, ox: 270, oy: 400, s: 1, sMin: 1, R: 170, CX: 270, CY: 400,
+  video: null, stream: null, msg: '', msgT: 0, last: null, pd: null, pts: [], file: null, mood: 'normal',
+
+  enter() { this.mode = 'main'; this.msg = ''; this.msgT = 0; this.sel = 0; this.mood = 'normal'; },
+  leave() { this.stopCam(); },
+  say(text) { this.msg = text; this.msgT = 5; },
+
+  stopCam() {
+    if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+    this.stream = null; this.video = null;
+  },
+
+  openFile() {
+    if (!this.file) {
+      const f = document.createElement('input');
+      f.type = 'file'; f.accept = 'image/*'; f.style.display = 'none';
+      f.addEventListener('change', () => { const file = f.files && f.files[0]; f.value = ''; if (file) this.loadFile(file); });
+      document.body.appendChild(f); this.file = f;
+    }
+    this.file.click();
+  },
+  loadFile(file) {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => { this.setSource(im, im.naturalWidth, im.naturalHeight); URL.revokeObjectURL(url); };
+    im.onerror = () => { this.say('無法讀取這張圖片'); URL.revokeObjectURL(url); };
+    im.src = url;
+  },
+
+  startCam() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { this.say('無法使用相機(可能被拒絕或這台裝置沒有相機),請改用「上傳照片」。'); return; }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 720 } }, audio: false }).then(stream => {
+      if (App.name !== 'face') { stream.getTracks().forEach(t => t.stop()); return; }
+      const v = document.createElement('video');
+      v.playsInline = true; v.muted = true; v.srcObject = stream;
+      v.play().catch(() => {});
+      this.stream = stream; this.video = v; this.mode = 'camera';
+    }).catch(() => { this.mode = 'main'; this.say('無法使用相機(可能被拒絕或這台裝置沒有相機),請改用「上傳照片」。'); });
+  },
+  capture() {
+    const v = this.video;
+    if (!v || v.readyState < 2 || !v.videoWidth) return;
+    const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+    const x = c.getContext('2d'); x.translate(c.width, 0); x.scale(-1, 1); x.drawImage(v, 0, 0);
+    this.stopCam(); this.setSource(c, c.width, c.height);
+  },
+
+  setSource(src, w, h) {
+    const k = Math.min(1, 1024 / Math.max(w, h)), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+    c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+    this.src = c; this.sMin = (2 * this.R) / Math.min(c.width, c.height);
+    this.s = this.sMin; this.ox = this.CX; this.oy = this.CY; this.last = null; this.pd = null; this.mode = 'crop';
+  },
+  clampT() {
+    const hw = this.src.width * this.s / 2, hh = this.src.height * this.s / 2, R = this.R;
+    this.ox = clamp(this.ox, this.CX + R - hw, this.CX - R + hw);
+    this.oy = clamp(this.oy, this.CY + R - hh, this.CY - R + hh);
+  },
+  zoom(f) {
+    const ns = clamp(this.s * f, this.sMin, this.sMin * 6); f = ns / this.s;
+    this.ox = this.CX + (this.ox - this.CX) * f; this.oy = this.CY + (this.oy - this.CY) * f; this.s = ns; this.clampT();
+  },
+  finishCrop() {
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const x = c.getContext('2d'), k = 128 / (2 * this.R), S = this.src;
+    x.fillStyle = '#fff'; x.fillRect(0, 0, 128, 128);
+    x.drawImage(S, (this.ox - S.width * this.s / 2 - (this.CX - this.R)) * k, (this.oy - S.height * this.s / 2 - (this.CY - this.R)) * k, S.width * this.s * k, S.height * this.s * k);
+    Face.save(c); this.mode = 'main'; this.say('已儲存!頭像只存在這台裝置。');
+  },
+
+  circleMask(g) {
+    g.save(); g.fillStyle = 'rgba(15,8,35,.72)';
+    g.beginPath(); g.rect(0, 0, W, H); g.arc(this.CX, this.CY, this.R, 0, TAU, true); g.fill('evenodd');
+    g.restore();
+    g.beginPath(); g.arc(this.CX, this.CY, this.R, 0, TAU); g.lineWidth = 5; g.strokeStyle = '#fff'; g.stroke();
+  },
+
+  frame(g, dt) {
+    BG.draw(g, 0, [App.t * 8, App.t * 18, App.t * 36], 300);
+    g.fillStyle = THEMES[0].grass[0]; g.fillRect(0, 300, W, H - 300);
+    UI.dim(g, 0.6);
+    UI.header(g, '我的頭像', null);
+    if (this.msgT > 0) this.msgT -= dt;
+    const R = this.R, CX = this.CX, CY = this.CY;
+    UI.begin(this);
+    const back = () => { if (this.mode === 'main') App.goto('vehicle'); else { this.stopCam(); this.mode = 'main'; } };
+
+    if (this.mode === 'main') {
+      Face.avatar(g, CX, 250, 100, this.mood, App.t);
+      [[100, '😊', 'happy'], [440, '😢', 'sad']].forEach(([x, e, m]) => {
+        UI.panel(g, x - 32, 218, 64, 64, 32, this.mood === m ? '#ffb02e' : 'rgba(255,255,255,.16)', '#fff');
+        UI.text(g, e, x, 251, 34, { stroke: null });
+        if (UI.tapIn(x - 32, 218, 64, 64)) this.mood = this.mood === m ? 'normal' : m;
+      });
+      UI.text(g, Face.has ? '預覽(點笑臉 / 哭臉試試表情)' : '目前使用預設熊貓頭像', W / 2, 376, 17, { fill: '#cfd8ff', stroke: null });
+      UI.panel(g, 30, 396, 480, 96, 16, 'rgba(255,210,63,.16)', '#ffd23f');
+      UI.text(g, '🔒', 62, 444, 34, { stroke: null });
+      UI.wrap(g, '頭像照片只存在這台裝置的瀏覽器裡,不會上傳到任何地方,也不會出現在排行榜上。', 96, 424, 396, 26, 19, { fill: '#fff' });
+      if (this.msgT > 0) UI.wrap(g, this.msg, 40, 520, 460, 22, 16, { fill: '#ffe680' });
+      const items = [['上傳照片', () => this.openFile(), '#8ee8ff', '#3ea8ff'], ['拍照', () => this.startCam(), '#8dff8a', '#2fc46a']];
+      if (Face.has) items.push(['校正表情位置', () => { this.pts = []; this.prevMeta = JSON.parse(JSON.stringify(Face.meta)); this.mode = 'calib'; }, '#d6b3ff', '#9a6bff'], ['清除頭像', () => { Face.clear(); this.say('已清除,恢復為預設熊貓頭像。'); }, '#ffb3d1', '#ff6b9a']);
+      items.forEach(([label, fn, c1, c2], i) => { if (UI.button(g, this, label, 110, 566 + i * 62, 320, 52, { c1, c2 })) fn(); });
+      if (UI.button(g, this, '返回', 170, 830, 200, 54, { back: true })) back();
+    } else if (this.mode === 'crop') {
+      const S = this.src, w = S.width * this.s, h = S.height * this.s;
+      const ps = [];
+      for (const [id, p] of Input.pointers) { const st = Input.starts.get(id); if (st && Math.hypot(st.x - CX, st.y - CY) < R + 20) ps.push(p); }
+      if (ps.length === 1) { if (this.last) { this.ox += ps[0].x - this.last.x; this.oy += ps[0].y - this.last.y; } this.last = { x: ps[0].x, y: ps[0].y }; this.pd = null; }
+      else if (ps.length >= 2) { const d = Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y); if (this.pd) this.zoom(d / this.pd); this.pd = d; this.last = null; }
+      else { this.last = null; this.pd = null; }
+      if (Input.wheel) this.zoom(1 - Input.wheel * 0.0012);
+      for (const p of Input.pointers.values()) {
+        if (Math.hypot(p.x - 110, p.y - 640) < 40) this.zoom(1 - 0.02);
+        if (Math.hypot(p.x - 430, p.y - 640) < 40) this.zoom(1 + 0.02);
+      }
+      this.clampT();
+      g.drawImage(S, this.ox - w / 2, this.oy - h / 2, w, h);
+      this.circleMask(g);
+      UI.wrap(g, '拖曳移動、雙指或按鈕縮放,把臉放進圓圈裡', 50, 160, 440, 24, 19, { fill: '#fff' });
+      [[110, '－'], [430, '＋']].forEach(([x, t]) => { g.beginPath(); g.arc(x, 640, 34, 0, TAU); g.fillStyle = 'rgba(255,255,255,.2)'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#fff'; g.stroke(); UI.text(g, t, x, 641, 40, { stroke: null }); });
+      if (UI.button(g, this, '確定', 110, 706, 320, 56, { c1: '#8dff8a', c2: '#2fc46a' })) this.finishCrop();
+      if (UI.button(g, this, '重選', 110, 774, 320, 52, { c1: '#ffe680', c2: '#ffb02e' })) { this.mode = 'main'; }
+      if (UI.button(g, this, '返回', 170, 842, 200, 50, { back: true })) back();
+    } else if (this.mode === 'camera') {
+      const v = this.video;
+      if (v && v.readyState >= 2 && v.videoWidth) {
+        const s = (2 * R) / Math.min(v.videoWidth, v.videoHeight);
+        g.save(); g.translate(CX, CY); g.scale(-1, 1); g.drawImage(v, -v.videoWidth * s / 2, -v.videoHeight * s / 2, v.videoWidth * s, v.videoHeight * s); g.restore();
+      } else UI.text(g, '相機啟動中...', CX, CY, 24, { fill: '#fff' });
+      this.circleMask(g);
+      UI.wrap(g, '看著鏡頭,把臉放進圓圈裡,按「拍下」', 50, 160, 440, 24, 19, { fill: '#fff' });
+      if (UI.button(g, this, '拍下', 110, 720, 320, 60, { c1: '#8dff8a', c2: '#2fc46a' })) this.capture();
+      if (UI.button(g, this, '返回', 170, 800, 200, 54, { back: true })) back();
+    } else if (this.mode === 'calib') {
+      const done = this.pts.length >= 3;
+      Face.head(g, CX, CY, R, done ? (Math.floor(App.t / 1.4) % 2 ? 'sad' : 'happy') : 'normal', App.t, { ring: false });
+      g.beginPath(); g.arc(CX, CY, R, 0, TAU); g.lineWidth = 5; g.strokeStyle = '#fff'; g.stroke();
+      const names = ['點一下「左眼」的位置', '點一下「右眼」的位置', '點一下「嘴巴」的位置'];
+      UI.wrap(g, done ? '表情會疊在你設定的位置上。滿意就按「完成」。' : names[this.pts.length], 50, 160, 440, 24, 20, { fill: '#fff' });
+      if (!done) {
+        this.pts.forEach(p => { g.beginPath(); g.arc(CX - R + p[0] * 2 * R, CY - R + p[1] * 2 * R, 8, 0, TAU); g.fillStyle = '#ff5c7a'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#fff'; g.stroke(); });
+        for (const t of Input.taps) {
+          if (Math.hypot(t.x - CX, t.y - CY) <= R) this.pts.push([(t.x - (CX - R)) / (2 * R), (t.y - (CY - R)) / (2 * R)]);
+        }
+        if (this.pts.length >= 3) { Face.meta = { el: this.pts[0], er: this.pts[1], m: this.pts[2] }; }
+      }
+      if (done) {
+        if (UI.button(g, this, '完成', 110, 720, 320, 60, { c1: '#8dff8a', c2: '#2fc46a' })) { Face.store(); this.mode = 'main'; this.say('已儲存!頭像只存在這台裝置。'); }
+        if (UI.button(g, this, '重來', 110, 796, 320, 52, { c1: '#ffe680', c2: '#ffb02e' })) { this.pts = []; Face.meta = Face.defaultMeta(); }
+      }
+      if (UI.button(g, this, '返回', 170, 868, 200, 50, { back: true })) { if (this.prevMeta) Face.meta = this.prevMeta; back(); }
+    }
+    if (Input.was('back')) back();
+    UI.nav(this);
+  }
+};
+
 // ---------- 車輛選擇 ----------
 Screens.vehicle = {
   sel: 0, n: 0, idx: 0, anim: 1, dir: 1, t: 0,
@@ -206,6 +365,7 @@ Screens.vehicle = {
       Save.data.vehicle = this.idx; Save.store();
       App.goto('course');
     }
+    if (UI.button(g, this, '🙂 我的頭像', 290, 722, 200, 42, { c1: '#d6b3ff', c2: '#9a6bff', size: 20 })) { Save.data.vehicle = this.idx; Save.store(); App.goto('face'); }
     if (UI.button(g, this, '返回', 170, 884, 200, 52, { c1: '#ffb3d1', c2: '#ff6b9a', back: true }) || Input.was('back')) App.goto('menu');
     UI.nav(this);
   }
@@ -258,10 +418,10 @@ Screens.course = {
     UI.text(g, '本賽事障礙', W / 2, 612, 20, { fill: '#7fe4ff', stroke: null });
     c.obs.forEach((o, i) => {
       const im = Spr.get(o), sw = 80, sh = Math.min(64, sw * im.height / im.width), sw2 = sh * im.width / im.height;
-      const bx = 66 + i * 220;
+      const bx = 62 + i * 214;
       g.drawImage(im, bx + (80 - sw2) / 2, 640 + (64 - sh) / 2, sw2, sh);
-      UI.text(g, OBS_INFO[o][0], bx + 88, 656, 21, { align: 'left', fill: '#fff27a', stroke: null });
-      UI.text(g, OBS_INFO[o][1], bx + 88, 684, 14, { align: 'left', fill: '#fff', stroke: null });
+      UI.text(g, OBS_INFO[o][0], bx + 86, 656, 21, { align: 'left', fill: '#fff27a', stroke: null, maxW: 118 });
+      UI.wrap(g, OBS_INFO[o][1], bx + 86, 678, 118, 17, 14, { fill: '#fff' });
     });
     g.restore();
 
@@ -369,7 +529,7 @@ Screens.howto = {
     rows.forEach((r, i) => {
       const y = 204 + i * 50;
       g.fillStyle = i % 2 ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.14)'; g.fillRect(30, y - 22, 480, 44);
-      r.forEach((t, k) => UI.text(g, t, cols[k][1], y, k === 0 ? 22 : 15, { fill: k === 0 ? '#fff27a' : '#fff', stroke: null }));
+      r.forEach((t, k) => UI.text(g, t, cols[k][1], y, k === 0 ? 22 : 15, { fill: k === 0 ? '#fff27a' : '#fff', stroke: null, maxW: k === 0 ? 96 : 118 }));
     });
     UI.text(g, '進階技巧', W / 2, 486, 26, { fill: '#ffd23f', stroke: null });
     const tips = [
@@ -380,8 +540,8 @@ Screens.howto = {
     ];
     let y = 520;
     tips.forEach(([t, d]) => {
-      UI.text(g, t, 60, y + 4, 21, { align: 'left', fill: '#7fe4ff', stroke: null });
-      const h = UI.wrap(g, d, 130, y + 4, 370, 25, 18, { fill: '#fff' });
+      UI.text(g, t, 46, y + 4, 21, { align: 'left', fill: '#7fe4ff', stroke: null, maxW: 74 });
+      const h = UI.wrap(g, d, 128, y + 4, 372, 25, 18, { fill: '#fff' });
       y += Math.max(h, 30) + 14;
     });
   },
@@ -405,8 +565,8 @@ Screens.howto = {
   p4(g) {
     COURSES.forEach((c, ci) => {
       const y = 150 + ci * 224;
-      UI.text(g, tr(c.name) + "  " + c.en, 40, y + 14, 24, { align: 'left', fill: c.color[0], stroke: null });
-      UI.text(g, tr('難度') + ' ' + '★'.repeat(c.stars) + '☆'.repeat(3 - c.stars), 500, y + 14, 16, { align: 'right', fill: '#ffd23f', stroke: null });
+      UI.text(g, tr(c.name) + "  " + c.en, 40, y + 14, 24, { align: 'left', fill: c.color[0], stroke: null, maxW: 280 });
+      UI.text(g, tr('難度') + ' ' + '★'.repeat(c.stars) + '☆'.repeat(3 - c.stars), 500, y + 14, 16, { align: 'right', fill: '#ffd23f', stroke: null, maxW: 170 });
       c.obs.forEach((o, i) => {
         const im = Spr.get(o), sh = Math.min(70, 84 * im.height / im.width), sw = sh * im.width / im.height, by = y + 40 + i * 88;
         g.drawImage(im, 40 + (84 - sw) / 2, by + (70 - sh) / 2, sw, sh);

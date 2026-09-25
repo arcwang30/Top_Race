@@ -273,7 +273,7 @@ const Road = (() => {
     for (let n = dd - 1; n > 0; n--) {
       const s = segs[(bi + n) % N];
       if (s.p1.camera.z <= CFG.camDepth) continue;
-      if (s.gate) drawGate(g, s, XS, YS);
+      if (s.gate) { const ga = clamp(s.fog * 1.5 - 0.1, 0, 1); if (ga > 0.03) { g.save(); g.globalAlpha = ga; drawGate(g, s, XS, YS); g.restore(); } }
       const sc1 = s.p1.screen;
       for (const sp of s.sprites) {
         if (sp.taken) continue;

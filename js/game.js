@@ -87,12 +87,18 @@ const Game = {
   },
 
   toast(text, sub, dur, color, size) { this.s.toast = { text, sub, dur: dur || 1.6, t: 0, color: color || '#fff', size: size || 64 }; },
-  pop(text, color) { this.s.pops.push({ text, t: 0, color: color || '#ffe680', x: W / 2 + (Math.random() - 0.5) * 60 }); },
+  setMood(type, dur) {
+    const m = this.s.mood;
+    if (m && m.dur >= 100 && m.t < m.dur) return;
+    this.s.mood = { type, t: 0, dur };
+  },
+  pop(text, color) { this.setMood('happy', 1.1); this.s.pops.push({ text, t: 0, color: color || '#ffe680', x: W / 2 + (Math.random() - 0.5) * 60 }); },
 
   update(dt) {
     const s = this.s, T = this.track, C = CFG, L = C.segLen;
     s.t += dt;
     if (s.toast && (s.toast.t += dt) > s.toast.dur) s.toast = null;
+    if (s.mood && (s.mood.t += dt) > s.mood.dur) s.mood = null;
     s.pops.forEach(p => { p.t += dt; }); s.pops = s.pops.filter(p => p.t < 1.7);
     s.shake = Math.max(0, s.shake - dt * 1.6);
     s.invT = Math.max(0, s.invT - dt); s.bumpCool = Math.max(0, s.bumpCool - dt); s.treeCool = Math.max(0, s.treeCool - dt);
@@ -114,7 +120,7 @@ const Game = {
       if (s.time <= 10 && sec !== s.tickSec && s.time > 0) { s.tickSec = sec; Sound.play('tick'); }
       if (s.time <= 0) {
         s.time = 0; s.phase = 'timeup'; s.endT = 0;
-        this.toast('TIME UP', 'GAME OVER', 4, '#ff5c7a', 84);
+        this.toast('TIME UP', 'GAME OVER', 4, '#ff5c7a', 84); this.setMood('sad', 999);
         Sound.play('crash');
       }
     }
@@ -202,7 +208,7 @@ const Game = {
         } else {
           s.phase = 'goal'; s.endT = 0;
           s.sc.time = Math.floor(s.time) * SCORE.timeBonus; s.sc.clear = SCORE.clear;
-          this.toast('GOAL!', '恭喜完賽!', 9.5, '#ffd23f', 100);
+          this.toast('GOAL!', '恭喜完賽!', 9.5, '#ffd23f', 100); this.s.mood = null; this.setMood('happy', 999);
           Sound.music('goal'); Sound.play('checkpoint');
         }
       }
@@ -240,7 +246,7 @@ const Game = {
           sp.taken = true; s.coins++; s.sc.coin += SCORE.coin; Sound.play('coin'); this.pop('+' + SCORE.coin);
         } else if (sp.kind === 'missile') {
           sp.taken = true; s.missileT = 10; s.fireT = 0; Sound.play('nitroGet');
-          this.toast('飛彈!', '10 秒自動發射', 1.3, '#ffb35c', 64);
+          this.toast('飛彈!', '10 秒自動發射', 1.3, '#ffb35c', 64); this.setMood('happy', 1.1);
         } else if (sp.kind === 'nitro') {
           sp.taken = true; Sound.play('nitroGet');
           if (s.nitro < CFG.nitroMax) { s.nitro++; this.pop('NITRO +1', '#7fe4ff'); }
@@ -253,22 +259,22 @@ const Game = {
           sp.taken = true;
           if (fx === 'slip') {
             s.slipT = this.SLIP_T; s.slipDir = s.x > sp.offset ? 1 : -1; s.shake = 0.25;
-            Sound.play('slip'); this.toast('打滑!', '', 1.0, '#c78a4a', 60);
+            this.setMood('sad', 1.8); Sound.play('slip'); this.toast('打滑!', '', 1.0, '#c78a4a', 60);
           } else if (fx === 'crash') {
             s.crashT = this.CRASH_T; s.slipT = 0; s.bounceT = 0; s.shake = 0.9; s.nitroT = 0;
-            Sound.play('crash'); this.toast('翻車!', '', 1.4, '#ff5c7a', 72);
+            this.setMood('sad', 2.2); Sound.play('crash'); this.toast('翻車!', '', 1.4, '#ff5c7a', 72);
           } else if (fx === 'mud') {
             s.mudT = 1.4; s.mudCap = 0.3; s.shake = 0.3;
-            Sound.play('mud'); this.toast('陷入雪堆!', '', 1.0, '#bfe8ff', 56);
+            this.setMood('sad', 1.6); Sound.play('mud'); this.toast('陷入雪堆!', '', 1.0, '#bfe8ff', 56);
           } else if (fx === 'stuck') {
             s.mudT = 1.6; s.mudCap = 0.1; s.shake = 0.3;
-            Sound.play('mud'); this.toast('被黏住了!', '', 1.2, '#ff8fc8', 56);
+            this.setMood('sad', 1.8); Sound.play('mud'); this.toast('被黏住了!', '', 1.2, '#ff8fc8', 56);
           } else if (fx === 'bounce') {
             s.bounceT = this.BOUNCE_T; s.speed *= 0.7; s.slipT = 0; s.shake = 0.4;
-            Sound.play('bounce'); this.toast('彈飛!', '', 1.0, '#ff9fe6', 64);
+            this.setMood('sad', 1.4); Sound.play('bounce'); this.toast('彈飛!', '', 1.0, '#ff9fe6', 64);
           }
         } else if (sp.kind === 'solid' && !inv && s.treeCool <= 0 && s.speed > 800) {
-          s.treeCool = 0.5; s.speed *= 0.35; s.shake = 0.5;
+          s.treeCool = 0.5; s.speed *= 0.35; s.shake = 0.5; this.setMood('sad', 1.4);
           s.x = sp.offset - Math.sign(sp.offset) * (sp.hit + 0.3); Sound.play('bump');
         }
       }
@@ -285,7 +291,7 @@ const Game = {
         s.pos = c.z - this.pz - 250;
         const dir = s.x >= c.x ? 1 : -1;
         s.x += dir * 0.22; c.x -= dir * 0.18;
-        s.bumpCool = 0.35; s.shake = 0.5; Sound.play('bump');
+        s.bumpCool = 0.35; s.shake = 0.5; this.setMood('sad', 1.3); Sound.play('bump');
       }
     }
   },
@@ -489,10 +495,11 @@ const Game = {
     UI.text(g, 'TIME', 275, 28, 15, { fill: '#ffd23f', stroke: null });
     UI.text(g, String(Math.ceil(s.time)), 275, 62, 50, { fill: flash ? '#ff5c7a' : '#ffffff', stroke: '#40284a', sw: 5 });
     // STAGE
-    UI.panel(g, 340, 10, 188, 74, 18);
-    UI.text(g, 'STAGE', 434, 28, 15, { fill: '#ffd23f', stroke: null });
-    UI.text(g, s.stage + ' / 3', 434, 51, 30, { fill: '#fff', stroke: '#40284a', sw: 4 });
-    UI.text(g, THEMES[this.course.themes[s.stage - 1]].name, 434, 72, 14, { fill: '#cfd8ff', stroke: null });
+    UI.panel(g, 330, 10, 106, 74, 18);
+    UI.text(g, 'STAGE', 383, 28, 15, { fill: '#ffd23f', stroke: null });
+    UI.text(g, s.stage + ' / 3', 383, 51, 30, { fill: '#fff', stroke: '#40284a', sw: 4 });
+    UI.text(g, THEMES[this.course.themes[s.stage - 1]].name, 383, 72, 14, { fill: '#cfd8ff', stroke: null, maxW: 96 });
+    Face.avatar(g, 482, 45, 34, s.mood ? s.mood.type : 'normal', s.t);
     // 進度
     const prog = clamp((s.pos + this.pz) / this.track.goalZ, 0, 1);
     g.fillStyle = 'rgba(30,20,60,.6)'; g.beginPath(); g.roundRect ? g.roundRect(16, 98, 410, 14, 7) : g.rect(16, 98, 410, 14); g.fill();
