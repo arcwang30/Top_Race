@@ -43,6 +43,8 @@ const I18N = {
   '類比左/十字左': ['スティック左/十字左', 'Stick L / Pad L'], '類比右/十字右': ['スティック右/十字右', 'Stick R / Pad R'],
   '虛擬鍵左/傾斜': ['仮想キー左/傾き', 'Touch L / Tilt'], '虛擬鍵右/傾斜': ['仮想キー右/傾き', 'Touch R / Tilt'],
   '油門按鈕': ['アクセルボタン', 'Gas button'], '剎車按鈕': ['ブレーキボタン', 'Brake button'], '氮氣按鈕': ['ニトロボタン', 'Nitro button'],
+  '向左滑/傾斜': ['左へスライド/傾き', 'Slide L / Tilt'], '向右滑/傾斜': ['右へスライド/傾き', 'Slide R / Tilt'], '右下 GO 區': ['右下 GO エリア', 'Lower-right GO'], '右下區按住': ['右下を長押し', 'Hold lower-right'], '右上區點一下': ['右上をタップ', 'Tap upper-right'],
+  '◀  滑動轉向  ▶': ['◀  スライドで操作  ▶', '◀  SLIDE TO STEER  ▶'], '點一下': ['タップ', 'TAP'], '按住 剎車・甩尾': ['長押し ブレーキ・ドリフト', 'HOLD BRAKE / DRIFT'], '按住': ['長押し', 'HOLD'],
   '剩餘 10 秒': ['残り10秒', '10 SEC LEFT'],   '視角切換': ['視点切替', 'Camera'], '右上相機鈕': ['右上のカメラボタン', 'Top-right camera btn'],
   '進階技巧': ['テクニック', 'Tips'],
   '按住不放,車速會線性加速;放開則慢慢滑行減速。': ['押し続けると加速。離すとゆっくり減速します。', 'Hold to accelerate steadily. Release to coast and slow down.'],

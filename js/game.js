@@ -615,29 +615,39 @@ const Game = {
     this.drawControls(g);
   },
 
+  // 手機操作:左半邊滑動轉向、右上區域點一下 = 氮氣、右下區域按住 = 剎車 / 甩尾(自動油門關閉時右下再分出 GO)
   drawControls(g) {
     if (!Input.touchMode || this.s.phase !== 'play' && this.s.phase !== 'countdown') { Input.virtual = []; return; }
-    const gyro = Save.data.gyro && Input.gyroActive;
-    const btns = [
-      { id: 'throttle', x: 452, y: 872, r: 62, label: 'GO', col: '#5fdc7a' },
-      { id: 'brake', x: 348, y: 916, r: 42, label: 'BRAKE', col: '#ff6b81' },
-      { id: 'nitro', x: 462, y: 752, r: 46, label: 'NITRO', col: '#3ea8ff' }
-    ];
-    if (Save.data.autoGas) {
-      btns.shift();
-      Object.assign(btns[0], { x: 336, y: 884, r: 54 });
-      Object.assign(btns[1], { x: 456, y: 884, r: 54 });
+    const gyro = Save.data.gyro && Input.gyroActive, auto = Save.data.autoGas;
+    const Z = [];
+    if (!gyro) Z.push({ id: 'steer', rect: [0, 730, 190, 230], col: '#ffd23f', label: '◀  滑動轉向  ▶', sub: '' });
+    Z.push({ id: 'nitro', rect: [350, 500, 190, 230], col: '#3ea8ff', label: 'NITRO', sub: '點一下' });
+    if (auto) Z.push({ id: 'brake', rect: [350, 730, 190, 230], col: '#ff6b81', label: 'BRAKE / DRIFT', sub: '按住 剎車・甩尾' });
+    else {
+      Z.push({ id: 'brake', rect: [300, 730, 120, 230], col: '#ff6b81', label: 'BRAKE', sub: '按住 剎車・甩尾' });
+      Z.push({ id: 'throttle', rect: [420, 730, 120, 230], col: '#5fdc7a', label: 'GO', sub: '按住' });
     }
-    if (!gyro) btns.push({ id: 'left', x: 66, y: 888, r: 56, label: '◀', col: '#ffd23f' }, { id: 'right', x: 186, y: 888, r: 56, label: '▶', col: '#ffd23f' });
-    Input.virtual = btns;
-    for (const b of btns) {
-      const on = Input._vPrev[b.id];
+    Input.virtual = Z;
+    const idle = (this.s.elapsed || 0) < 8;
+    for (const z of Z) {
+      const [x, y, w, h] = z.rect, on = Input._vPrev[z.id] || (z.id === 'steer' && Input.drag);
       g.save();
-      g.globalAlpha = on ? 0.85 : 0.5;
-      g.fillStyle = b.col; g.beginPath(); g.arc(b.x, b.y, b.r * (on ? 0.94 : 1), 0, TAU); g.fill();
-      g.lineWidth = 5; g.strokeStyle = '#fff'; g.stroke();
+      g.globalAlpha = on ? 0.3 : (idle ? 0.16 : 0.09);
+      g.fillStyle = z.col; g.beginPath(); if (g.roundRect) g.roundRect(x + 6, y + 6, w - 12, h - 12, 26); else g.rect(x + 6, y + 6, w - 12, h - 12); g.fill();
+      g.globalAlpha = on ? 0.7 : (idle ? 0.45 : 0.22);
+      g.lineWidth = 3; g.setLineDash([12, 10]); g.strokeStyle = '#fff'; g.stroke();
       g.restore();
-      UI.text(g, b.label, b.x, b.y, b.r > 50 ? 30 : 20, { fill: '#fff', stroke: '#40284a', sw: 5 });
+      const ty = z.id === 'nitro' ? y + 70 : y + h - 70;
+      UI.text(g, z.label, x + w / 2, ty - (z.sub ? 12 : 0), 26, { fill: '#fff', stroke: '#40284a', sw: 5, alpha: idle || on ? 0.85 : 0.4, maxW: w - 30 });
+      if (z.sub) UI.text(g, z.sub, x + w / 2, ty + 20, 17, { fill: '#fff', stroke: '#40284a', sw: 4, alpha: idle || on ? 0.8 : 0.35, maxW: w - 24 });
+    }
+    // 滑動轉向的指示:原點圈 + 手指位置
+    const d = Input.drag;
+    if (d) {
+      g.save(); g.lineWidth = 4; g.strokeStyle = 'rgba(255,255,255,.7)'; g.fillStyle = 'rgba(255,210,63,.55)';
+      g.beginPath(); g.arc(d.x0, d.y0, 46, 0, TAU); g.stroke();
+      g.beginPath(); g.arc(clamp(d.x, d.x0 - 70, d.x0 + 70), d.y0, 30, 0, TAU); g.fill(); g.stroke();
+      g.restore();
     }
   }
 };

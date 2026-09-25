@@ -19,6 +19,8 @@ const Input = {
   padConnected: false,
   _padPrev: {},
   _vPrev: {},
+  _so: new Map(),
+  drag: null,
 
   KEYMAP: {
     ArrowUp: ['up'], KeyW: ['up'],
@@ -148,11 +150,33 @@ const Input = {
     }
 
     const vnow = {};
+    let touchSteer = null;
+    this.drag = null;
     for (const v of this.virtual) {
-      for (const p of this.pointers.values()) {
-        if (Math.hypot(p.x - v.x, p.y - v.y) <= v.r * 1.18) { vnow[v.id] = true; break; }
+      if (v.rect) {
+        // 觸控區域:以「按下的位置」決定手指屬於哪一區(拖出區域外也不換區)
+        const [rx, ry, rw, rh] = v.rect;
+        for (const [pid, p] of this.pointers) {
+          const st = this.starts.get(pid) || p;
+          if (st.x < rx || st.x > rx + rw || st.y < ry || st.y > ry + rh) continue;
+          if (v.id === 'steer') {
+            // 滑動轉向:手指按下處為原點,往左右拖 = 轉向(拖得越遠轉越多);拖太遠時原點會跟著手指走,回拉更快
+            let ox = this._so.has(pid) ? this._so.get(pid) : st.x;
+            const LOCK = 70, FOLLOW = 100;
+            if (p.x - ox > FOLLOW) ox = p.x - FOLLOW; else if (ox - p.x > FOLLOW) ox = p.x + FOLLOW;
+            this._so.set(pid, ox);
+            const dx = p.x - ox, a = Math.abs(dx) < 8 ? 0 : (Math.abs(dx) - 8) / (LOCK - 8);
+            touchSteer = clamp(Math.sign(dx) * a, -1, 1);
+            this.drag = { x0: ox, y0: st.y, x: p.x, y: p.y };
+          } else vnow[v.id] = true;
+        }
+      } else {
+        for (const p of this.pointers.values()) {
+          if (Math.hypot(p.x - v.x, p.y - v.y) <= v.r * 1.18) { vnow[v.id] = true; break; }
+        }
       }
     }
+    for (const pid of [...this._so.keys()]) if (!this.pointers.has(pid)) this._so.delete(pid);
     for (const id in vnow) if (!this._vPrev[id] && id === 'nitro') this.pressed.add('nitro');
     this._vPrev = vnow;
     left = left || vnow.left; right = right || vnow.right;
@@ -160,6 +184,7 @@ const Input = {
 
     let s = (right ? 1 : 0) - (left ? 1 : 0);
     if (analog) s = analog;
+    if (touchSteer !== null) s = touchSteer;
     if (Save.data.gyro && this.gyroActive && this.touchMode) {
       const g = Math.abs(this.gyroVal) < 3 ? 0 : this.gyroVal;
       s = clamp(g / 22, -1, 1);
