@@ -196,13 +196,32 @@ const Road = (() => {
     if (s.fog < 1) { g.globalAlpha = 1 - s.fog; g.fillStyle = th.fog; g.fillRect(0, y2, W, y1 - y2); g.globalAlpha = 1; }
   }
 
+  // 道具閃光粒子:金幣 / 氮氣 / 飛彈箱周圍的十字星閃爍,遠處也容易辨識
+  const SPARK = { coin: ['#fff7a0', '#ffffff'], nitro: ['#a8f0ff', '#ffffff'], missile: ['#ffb8ff', '#ffffff'] };
+  function sparkle(g, sp, time, cx, cy, dw, dh, alpha) {
+    const cols = SPARK[sp.kind];
+    if (!cols || dw < 5) return;
+    const R0 = Math.max(dw, dh) * 0.62;
+    g.save(); g.globalAlpha = alpha;
+    for (let k = 0; k < 5; k++) {
+      const ph = (time * 1.3 + sp.phase * 0.37 + k * 0.2) % 1, tw = Math.sin(ph * Math.PI);
+      const a = sp.phase * 3 + k * 2.4 + time * 0.6, rr = R0 * (0.55 + 0.45 * ((k * 37) % 10) / 10);
+      const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr * 0.85 - ph * R0 * 0.25, r = Math.max(2, R0 * 0.16) * tw;
+      if (r < 0.8) continue;
+      g.fillStyle = cols[k % 2];
+      g.beginPath(); g.moveTo(x, y - r); g.lineTo(x + r * 0.28, y - r * 0.28); g.lineTo(x + r, y); g.lineTo(x + r * 0.28, y + r * 0.28);
+      g.lineTo(x, y + r); g.lineTo(x - r * 0.28, y + r * 0.28); g.lineTo(x - r, y); g.lineTo(x - r * 0.28, y - r * 0.28); g.closePath(); g.fill();
+    }
+    g.restore();
+  }
+
   function drawSprite(g, img, scale, sx, sy, worldW, clipY, lift, xs, XS, YS) {
     const fw = scale * XS * worldW;
     const dw = fw * xs, dh = fw * img.height / img.width;
     if (dw < 1.5) return;
     const dx = sx - dw / 2, dy = sy - dh - scale * XS * (CFG.YS / CFG.XS) * lift;
     const clipH = clipY ? Math.max(0, dy + dh - clipY) : 0;
-    if (clipH < dh) g.drawImage(img, 0, 0, img.width, img.height - img.height * clipH / dh, dx, dy, dw, dh - clipH);
+    if (clipH < dh) { g.drawImage(img, 0, 0, img.width, img.height - img.height * clipH / dh, dx, dy, dw, dh - clipH); return { cx: sx, cy: dy + (dh - clipH) / 2, dw: fw, dh: dh - clipH }; }
   }
 
   function drawGate(g, s, XS, YS) {
@@ -282,7 +301,8 @@ const Road = (() => {
         if (sp.kind === 'coin') xs = 0.18 + 0.82 * Math.abs(Math.cos(time * 4.5 + sp.phase));
         else if (sp.kind === 'nitro') lift += Math.sin(time * 4 + sp.phase) * 40;
         else if (sp.hop !== undefined) lift = Math.abs(Math.sin(time * 5 + sp.hop)) * 170;
-        drawSprite(g, img, sc1.scale, sc1.x + sc1.w * sp.offset, sc1.y, sp.w, s.clip, lift, xs, XS, YS);
+        const dr = drawSprite(g, img, sc1.scale, sc1.x + sc1.w * sp.offset, sc1.y, sp.w, s.clip, lift, xs, XS, YS);
+        if (dr && SPARK[sp.kind]) sparkle(g, sp, time, dr.cx, dr.cy, dr.dw, dr.dh, clamp(s.fog * 2, 0.4, 1));
       }
       for (const c of s.cars) {
         const a = s.p1.screen, b = s.p2.screen, sc = lerp(a.scale, b.scale, c.percent);

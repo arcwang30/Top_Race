@@ -257,7 +257,98 @@ const Spr = (() => {
     glow(g, -66, -18, 34, '#fff7c0', 0.5); glow(g, 66, -18, 34, '#fff7c0', 0.5);
   }
 
+  // ---------- 車輛 4:小飛翼火龍四輪車 ----------
+  function dragonWing(g, side, t, y) {
+    const f = Math.sin(t * 10) * 7;
+    g.save(); g.translate(side * 68, y); g.scale(side * 0.72, 0.72);
+    poly(g, [[0, 0], [58, -46 - f], [78, -30 - f], [66, -22 - f * 0.6], [76, -6 - f * 0.4], [56, -8], [0, 16]], '#ff8a3d', 3);
+    g.strokeStyle = '#a3141c'; g.lineWidth = 3; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(4, -2); g.lineTo(58, -44 - f); g.moveTo(8, 4); g.lineTo(66, -22 - f * 0.6); g.stroke();
+    g.restore();
+  }
+  function dragonRear(g, o) {
+    const red = '#e8262c', dk = '#b31820', t = o.t || 0;
+    g.save(); g.globalAlpha = 0.28; E(g, 0, -2, 108, 13, '#000', 0); g.restore();
+    wheel(g, -84, o.wheel || 0, 36, 60); wheel(g, 84, o.wheel || 0, 36, 60);
+    g.save(); g.strokeStyle = OUT; g.lineWidth = 17; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(0, -30); g.quadraticCurveTo(-40 + Math.sin(t * 6) * 6, -8, -52, -20); g.stroke();
+    g.strokeStyle = red; g.lineWidth = 10; g.stroke(); g.restore();
+    poly(g, [[-52, -32], [-72, -20], [-52, -8]], '#ffd23f', 2.5);
+    R(g, -70, -84, 140, 62, 20, red, 3.5);
+    R(g, -50, -78, 100, 20, 8, dk, 2.5);
+    for (let i = -3; i <= 3; i++) poly(g, [[i * 15 - 7, -80], [i * 15, -96 + Math.abs(i) * 2], [i * 15 + 7, -80]], '#ffd23f', 2.5);
+    R(g, -62, -46, 22, 12, 5, o.brake ? '#ff2030' : '#ffcf40', 2.5); R(g, 40, -46, 22, 12, 5, o.brake ? '#ff2030' : '#ffcf40', 2.5);
+    if (o.brake) { glow(g, -51, -40, 34, '#ff4050', 0.7); glow(g, 51, -40, 34, '#ff4050', 0.7); }
+    E(g, 0, -34, 20, 9, '#40284a', 2.5); E(g, 0, -34, 11, 5, '#ff9a2b', 0);
+    dragonWing(g, -1, t, -70); dragonWing(g, 1, t, -70);
+    g.save(); g.translate(0, -24); g.scale(0.9, 0.9); riderRear(g, 'panda', t); g.restore();
+    if (o.boost) {
+      for (const sx of [-26, 26]) { const f = 34 + Math.random() * 26; g.save(); poly(g, [[sx - 11, -22], [sx, -22 + f], [sx + 11, -22]], '#ff7a1f', 2); poly(g, [[sx - 5, -22], [sx, -22 + f * 0.6], [sx + 5, -22]], '#fff3a0', 0); g.restore(); }
+      glow(g, 0, -20, 90, '#ff9a4a', 0.5);
+    }
+  }
+  function dragonFront(g, o) {
+    const red = '#e8262c', dk = '#b31820', t = o.t || 0;
+    g.save(); g.globalAlpha = 0.28; E(g, 0, -2, 112, 13, '#000', 0); g.restore();
+    wheel(g, -88, o.wheel || 0, 38, 62); wheel(g, 88, o.wheel || 0, 38, 62);
+    dragonWing(g, -1, t, -78); dragonWing(g, 1, t, -78);
+    R(g, -72, -88, 144, 66, 22, red, 3.5);
+    g.save(); g.translate(0, -30); g.scale(0.9, 0.9); pandaFront(g, o); g.restore();
+    poly(g, [[-30, -82], [-40, -106], [-16, -86]], "#fff0c0", 3); poly(g, [[30, -82], [40, -106], [16, -86]], "#fff0c0", 3);
+    R(g, -52, -66, 104, 46, 18, '#f4402f', 3.5);
+    R(g, -36, -36, 72, 20, 10, '#ffe9a8', 3);
+    E(g, -12, -27, 3.5, 4.5, dk, 0); E(g, 12, -27, 3.5, 4.5, dk, 0);
+    poly(g, [[-20, -16], [-15, -8], [-10, -16]], '#fff', 2); poly(g, [[10, -16], [15, -8], [20, -16]], '#fff', 2);
+    for (const sx of [-1, 1]) {
+      E(g, sx * 36, -54, 14, 12, '#fff7c0', 3); E(g, sx * 36 + sx, -53, 6, 7, '#40284a', 0); E(g, sx * 36 - 2, -57, 2.5, 2.5, '#fff', 0);
+      poly(g, [[sx * 50, -70], [sx * 24, -64], [sx * 26, -68]], dk, 2);
+    }
+    glow(g, -36, -54, 40, '#ffe27a', 0.4); glow(g, 36, -54, 40, '#ffe27a', 0.4);
+    for (let i = -2; i <= 2; i++) poly(g, [[i * 12 - 5, -68], [i * 12, -80], [i * 12 + 5, -68]], '#ffd23f', 2);
+  }
+
+  // ---------- 車輛 5:AE86(熊貓黑白配色跑車) ----------
+  function ae86Rear(g, o) {
+    const W1 = '#f6f7fb', BK = '#2a2833', t = o.t || 0;
+    g.save(); g.globalAlpha = 0.28; E(g, 0, -2, 108, 13, '#000', 0); g.restore();
+    wheel(g, -80, o.wheel || 0, 36, 56); wheel(g, 80, o.wheel || 0, 36, 56);
+    g.save(); g.translate(0, -44); g.scale(0.85, 0.85); riderRear(g, 'panda', t); g.restore();
+    poly(g, [[-58, -66], [-46, -104], [46, -104], [58, -66]], W1, 3.5);
+    poly(g, [[-46, -70], [-38, -98], [38, -98], [46, -70]], '#3f5678', 2.5);
+    poly(g, [[-30, -94], [-14, -94], [-24, -72], [-38, -72]], 'rgba(255,255,255,.28)', 0);
+    R(g, -86, -68, 172, 48, 12, W1, 3.5);
+    R(g, -86, -32, 172, 18, 8, BK, 3);
+    R(g, -70, -66, 140, 4, 1, '#e8262c', 0);
+    R(g, -82, -62, 30, 13, 4, o.brake ? '#ff2030' : '#d81f2a', 2.5); R(g, 52, -62, 30, 13, 4, o.brake ? '#ff2030' : '#d81f2a', 2.5);
+    if (o.brake) { glow(g, -67, -56, 36, '#ff4050', 0.7); glow(g, 67, -56, 36, '#ff4050', 0.7); }
+    R(g, -46, -60, 92, 24, 5, '#ffffff', 2.5);
+    g.save(); g.font = `900 15px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#15121c'; g.fillText('藤原とう乳店', 0, -47); g.restore();
+    R(g, -30, -16, 60, 8, 3, '#9aa0b8', 2.5);
+    if (o.boost) {
+      for (const sx of [-52, 52]) { const f = 30 + Math.random() * 22; g.save(); poly(g, [[sx - 10, -14], [sx, -14 + f], [sx + 10, -14]], '#ffb32b', 2); poly(g, [[sx - 5, -14], [sx, -14 + f * 0.6], [sx + 5, -14]], '#fff3a0', 0); g.restore(); }
+      glow(g, 0, -14, 90, '#7fe4ff', 0.5);
+    }
+  }
+  function ae86Front(g, o) {
+    const W1 = '#f6f7fb', BK = '#2a2833';
+    g.save(); g.globalAlpha = 0.28; E(g, 0, -2, 110, 13, '#000', 0); g.restore();
+    wheel(g, -84, o.wheel || 0, 38, 58); wheel(g, 84, o.wheel || 0, 38, 58);
+    poly(g, [[-62, -70], [-50, -128], [50, -128], [62, -70]], '#8fc2e6', 3.5);
+    g.save(); g.translate(0, -28); g.scale(0.64, 0.64); pandaFront(g, o); g.restore();
+    poly(g, [[-66, -68], [-52, -130], [-42, -128], [-52, -68]], W1, 3); poly(g, [[66, -68], [52, -130], [42, -128], [52, -68]], W1, 3);
+    R(g, -54, -138, 108, 14, 6, W1, 3.5);
+    R(g, -88, -74, 176, 54, 14, W1, 3.5);
+    poly(g, [[-52, -72], [52, -72], [66, -44], [-66, -44]], BK, 3);
+    R(g, -84, -62, 34, 16, 5, '#fff7c0', 3); R(g, 50, -62, 34, 16, 5, '#fff7c0', 3);
+    E(g, -67, -54, 8, 5, '#ffd23f', 0); E(g, 67, -54, 8, 5, '#ffd23f', 0);
+    glow(g, -67, -54, 44, '#fff7c0', 0.5); glow(g, 67, -54, 44, '#fff7c0', 0.5);
+    R(g, -22, -58, 44, 10, 4, '#15121c', 2.5); R(g, -22, -54, 44, 3, 1, '#e8262c', 0);
+    R(g, -86, -32, 172, 14, 6, BK, 3);
+    R(g, -40, -34, 80, 8, 4, '#e8262c', 2.5);
+  }
   function drawBuggy(g, o) {
+    if (o.veh === 4) { (o.view === 'front' ? ae86Front : ae86Rear)(g, o); return; }
+    if (o.veh === 3) { (o.view === 'front' ? dragonFront : dragonRear)(g, o); return; }
     if (o.veh === 1) { (o.view === 'front' ? tankFront : tankRear)(g, o); return; }
     if (o.veh === 2) { (o.view === 'front' ? consoleFront : consoleRear)(g, o); return; }
     if (o.view === 'front') {
@@ -785,6 +876,27 @@ const Spr = (() => {
       glow(g, 67, 12, 16, '#ffd23f', 0.9); E(g, 67, 12, 5, 5, '#fff3a0', 0);
     });
   }
+  function missile3() {
+    return mk(100, 130, g => {
+      glow(g, 50, 62, 44, '#ff8a3d', 0.7);
+      poly(g, [[50, 4], [78, 56], [70, 96], [50, 126], [30, 96], [22, 56]], '#ff5a1f', 3.5);
+      poly(g, [[50, 28], [66, 62], [60, 92], [50, 108], [40, 92], [34, 62]], '#ffb32b', 0);
+      poly(g, [[50, 54], [58, 76], [50, 94], [42, 76]], '#fff3a0', 0);
+    });
+  }
+  function missile4() {
+    return mk(100, 130, g => {
+      [[36, 24, 9], [52, 14, 11], [66, 26, 8]].forEach(([x, y, r]) => E(g, x, y, r, r * 0.8, 'rgba(230,230,240,.7)', 0));
+      poly(g, [[14, 64], [86, 64], [76, 112], [24, 112]], '#ffb066', 3.5);
+      R(g, 22, 96, 56, 16, 6, '#e8862c', 0);
+      E(g, 50, 64, 38, 15, '#fffdf4', 3.5);
+      R(g, 26, 52, 22, 16, 5, '#ffffff', 2); R(g, 52, 50, 22, 16, 5, '#ffffff', 2);
+      E(g, 50, 60, 30, 7, '#e0a04a', 0);
+      [[36, 58], [50, 61], [62, 57], [70, 62]].forEach(([x, y]) => E(g, x, y, 3.5, 2.8, '#b5651d', 1));
+      E(g, 40, 54, 8, 3, 'rgba(255,255,255,.8)', 0, -0.3);
+      R(g, 34, 108, 32, 8, 3, '#ffe6a0', 2.5);
+    });
+  }
   function missile2() {
     return mk(100, 130, g => {
       glow(g, 50, 110, 30, '#7fe4ff', 0.6);
@@ -799,9 +911,9 @@ const Spr = (() => {
   }
   function missileBox() {
     return mk(96, 110, g => {
-      glow(g, 48, 60, 46, '#ffb35c', 0.8);
-      R(g, 10, 34, 76, 64, 10, '#ff9a3c', 4);
-      R(g, 10, 34, 76, 14, 6, '#ffb35c', 3);
+      glow(g, 48, 60, 46, '#c78bff', 0.8);
+      R(g, 10, 34, 76, 64, 10, '#8e5cff', 4);
+      R(g, 10, 34, 76, 14, 6, '#c78bff', 3);
       g.save(); g.translate(48, 52); g.scale(0.52, 0.52); rocketShape(g, 0, 0, 1); g.restore();
     });
   }
@@ -836,7 +948,7 @@ const Spr = (() => {
     bareSnow: () => bareSnow(), bareSnowD: () => bareSnow('#7a5a78'), iceSpire, iceCluster, sled, giftBox, lampPost,
     cottonPink: () => cottonTree('#ffb3dc', '#ffe6f4'), cottonBlue: () => cottonTree('#a8e8ff', '#e6f8ff'),
     chocoTree, iceCream, cookie, popcorn, lightPole,
-    missile0, missile1, missile2, missileBox,
+    missile0, missile1, missile2, missile3, missile4, missileBox,
     cupcake, candyCane, donut, balloon, gummy, jelly, gum,
     coin, nitro, poop, rock, arrowR: () => arrow(1), arrowL: () => arrow(-1),
     enemy1: () => enemy('#5ad27a', '#fff3a0', 'frog'),

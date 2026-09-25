@@ -354,7 +354,7 @@ Screens.vehicle = {
 
     for (let i = 0; i < VEHICLES.length; i++) {
       g.fillStyle = i === this.idx ? '#ffd23f' : 'rgba(255,255,255,.35)';
-      g.beginPath(); g.arc(W / 2 + (i - 1) * 26, 790, i === this.idx ? 8 : 6, 0, TAU); g.fill();
+      g.beginPath(); g.arc(W / 2 + (i - (VEHICLES.length - 1) / 2) * 26, 790, i === this.idx ? 8 : 6, 0, TAU); g.fill();
     }
     UI.text(g, '◀', 20, 450, 46, { fill: '#ffd23f' }); UI.text(g, '▶', 520, 450, 46, { fill: '#ffd23f' });
     if (Input.was('left') || UI.tapIn(0, 300, 48, 300)) this.change(-1);
@@ -365,7 +365,7 @@ Screens.vehicle = {
       Save.data.vehicle = this.idx; Save.store();
       App.goto('course');
     }
-    if (UI.button(g, this, '🙂 我的頭像', 290, 722, 200, 42, { c1: '#d6b3ff', c2: '#9a6bff', size: 20 })) { Save.data.vehicle = this.idx; Save.store(); App.goto('face'); }
+    if (UI.button(g, this, '🙂 我的頭像', 250, 716, 240, 52, { c1: '#d6b3ff', c2: '#9a6bff', size: 24 })) { Save.data.vehicle = this.idx; Save.store(); App.goto('face'); }
     if (UI.button(g, this, '返回', 170, 884, 200, 52, { c1: '#ffb3d1', c2: '#ff6b9a', back: true }) || Input.was('back')) App.goto('menu');
     UI.nav(this);
   }
@@ -449,7 +449,10 @@ Screens.course = {
 // ---------- 遊戲 ----------
 Screens.game = {
   paused: false, sel: 0, n: 0,
-  enter() { Game.newRun(); this.paused = false; this.sel = 0; Sound.music(Game.course.music[0]); },
+  enter(arg) {
+    if (arg && arg.resume) { this.paused = true; this.sel = 2; return; }
+    Game.newRun(); this.paused = false; this.sel = 0; Sound.music(Game.course.music[0]);
+  },
   leave() { Sound.setLoops({ on: false }); Input.virtual = []; },
   pause() {
     if (!this.paused && Game.s.phase !== 'over') {
@@ -472,7 +475,8 @@ Screens.game = {
       UI.begin(this);
       if (UI.button(g, this, '繼續遊戲', 110, 380, 320, 62, { c1: '#8dff8a', c2: '#2fc46a' })) this.paused = false;
       if (UI.button(g, this, '重新開始', 110, 460, 320, 62, { c1: '#ffe680', c2: '#ffb02e' })) { this.enter(); }
-      if (UI.button(g, this, '回主選單', 110, 540, 320, 62, { c1: '#ffb3d1', c2: '#ff6b9a', back: true })) { App.goto('menu'); Sound.stopMusic(); }
+      if (UI.button(g, this, '設定', 110, 540, 320, 62, { c1: '#b3d9ff', c2: '#4f9bff' })) App.goto('settings', { from: 'game' });
+      if (UI.button(g, this, '回主選單', 110, 620, 320, 62, { c1: '#ffb3d1', c2: '#ff6b9a', back: true })) { App.goto('menu'); Sound.stopMusic(); }
       UI.nav(this);
     }
   }
@@ -580,7 +584,7 @@ Screens.howto = {
 // ---------- 設定 ----------
 Screens.settings = {
   sel: 0, n: 0,
-  enter() { this.sel = 0; },
+  enter(arg) { this.sel = 0; this.from = arg && arg.from === 'game' ? 'game' : 'menu'; },
   setVol(key, v) {
     v = clamp(v, 0, 5);
     if (v === Save.data[key]) return;
@@ -653,7 +657,7 @@ Screens.settings = {
     }
 
     this.sel = clamp(this.sel, 0, 5);
-    if (UI.buttonAt(g, this, 5, '返回', 170, 736, 200, 60, { back: true }) || Input.was('back')) App.goto('menu');
+    if (UI.buttonAt(g, this, 5, '返回', 170, 736, 200, 60, { back: true }) || Input.was('back')) { if (this.from === 'game') App.goto('game', { resume: true }); else App.goto('menu'); }
     if (Input.was('up')) { this.sel = (this.sel + 5) % 6; Sound.play('select'); }
     if (Input.was('down')) { this.sel = (this.sel + 1) % 6; Sound.play('select'); }
     UI.text(g, '音量 0~5(0 為靜音)', W / 2, 830, 18, { fill: '#e6dcff', stroke: null });
