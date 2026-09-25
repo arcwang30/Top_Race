@@ -344,6 +344,9 @@ const Sound = (() => {
       case 'beep': tone('square', 440, t, 0.14, 0.15); break;
       case 'go': tone('square', 880, t, 0.5, 0.17); tone('square', 1320, t, 0.5, 0.1); break;
       case 'tick': tone('square', 1200, t, 0.05, 0.12); break;
+      case 'timeWarn':
+        for (let i = 0; i < 3; i++) { tone('square', 1568, t + i * 0.3, 0.12, 0.17); tone('square', 1175, t + i * 0.3 + 0.14, 0.12, 0.17); }
+        tone('triangle', 784, t, 0.9, 0.12); break;
       case 'drift': noise(t, 0.2, 0.15, null, { f: 2000, type: 'bandpass', q: 5 }); break;
       case 'missile':
         noise(t, 0.45, 0.35, null, { f: 900, to: 4000, type: 'bandpass', q: 1.2 });

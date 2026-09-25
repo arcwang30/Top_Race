@@ -21,8 +21,14 @@ const Road = (() => {
 
   // ---------- 賽道建構 ----------
   function makeBuilder(t) {
-    let lastY = 0, theme = 0;
-    const add = (curve, y) => { newSeg(t, t.segs.length, lastY, y, curve, theme); lastY = y; };
+    let lastY = 0, theme = 0, lastC = 0;
+    const add = (curve, y) => { newSeg(t, t.segs.length, lastY, y, curve, theme); lastY = y; lastC = curve; };
+    // 從目前的彎度平順過渡到 toCurve(可連續串接成漸緊彎 / 蛇形彎),hill 為這段的高低差
+    const seg = (len, toCurve, hill) => {
+      len = Math.max(1, Math.round(len)); hill = hill || 0;
+      const c0 = lastC, y0 = lastY, y1 = y0 + hill * L;
+      for (let n = 0; n < len; n++) add(lerp(c0, toCurve, (1 - Math.cos((n + 1) / len * Math.PI)) / 2), easeInOut(y0, y1, (n + 1) / len));
+    };
     const road = (enter, hold, leave, curve, hill) => {
       enter = Math.max(1, Math.round(enter)); hold = Math.max(0, Math.round(hold)); leave = Math.max(1, Math.round(leave));
       const y0 = lastY, y1 = y0 + hill * L, total = enter + hold + leave;
@@ -30,15 +36,14 @@ const Road = (() => {
       for (let n = 0; n < hold; n++) add(curve, easeInOut(y0, y1, (enter + n) / total));
       for (let n = 0; n < leave; n++) add(easeInOut(curve, 0, n / leave), easeInOut(y0, y1, (enter + hold + n) / total));
     };
-    return { road, get lastY() { return lastY; }, setTheme(v) { theme = v; }, count: () => t.segs.length };
+    return { road, seg, get lastY() { return lastY; }, setTheme(v) { theme = v; }, count: () => t.segs.length };
   }
 
-  function buildGame(course) {
+  function buildGame(course, variant) {
     const t = { segs: [], cars: [], cps: [], secStart: [], warn: [], kind: 'game' };
     const b = makeBuilder(t);
-    const rand = rng(course.seed);
-    const hillOf = () => (rand() < 0.5 ? -1 : 1) * (3 + ((rand() * 9) | 0));
-    const hairP = [0.05, 0.08, 0.12].map(v => v * course.hair);
+    const rand = rng((course.seed ^ (variant || 0)) >>> 0);
+    const hillOf = () => ((b.lastY > 1800 ? -1 : b.lastY < -1800 ? 1 : (rand() < 0.5 ? -1 : 1))) * (3 + ((rand() * 9) | 0));
 
     b.setTheme(course.themes[0]);
     b.road(10, 30, 10, 0, 0);
@@ -47,15 +52,61 @@ const Road = (() => {
       t.secStart.push(t.segs.length);
       const start = t.segs.length, target = (FAST ? CFG.sections : (course.sections || CFG.sections))[s];
       if (s > 0) b.road(20, 30, 20, 0, 0);
+      let tunnels = 0, lastTunnelEnd = -9999, lastHard = false;
+      const mix = course.mix, hairW = 4 * course.hair * (1 + 0.4 * s);
+      const table = [['straight', mix.straight], ['gentle', mix.gentle], ['medium', mix.medium], ['bigL', mix.bigL], ['hair', hairW],
+        ['sweep', mix.sweep], ['chicane', mix.chicane * (1 + 0.25 * s)], ['trap', mix.trap * (1 + 0.3 * s)], ['crest', mix.crest * (1 + 0.2 * s)],
+        ['esses', mix.esses], ['hills', mix.hills], ['tunnel', mix.tunnel]];
+      const total = table.reduce((a, e) => a + e[1], 0);
+      const HARD = { bigL: 1, hair: 1, trap: 1, crest: 1, chicane: 1 };
       while (t.segs.length - start < target - 100) {
-        const r = rand(), dir = rand() < 0.5 ? -1 : 1, n = 40 + ((rand() * 60) | 0);
+        const dir = rand() < 0.5 ? -1 : 1, n = 40 + ((rand() * 60) | 0);
         const warn = c => { t.warn.push({ idx: t.segs.length, dir: Math.sign(c) }); };
-        if (r < 0.14) b.road(n * 0.3, n * 0.4, n * 0.3, 0, rand() < 0.6 ? hillOf() : 0);
-        else if (r < 0.30) b.road(n * 0.3, n * 0.5, n * 0.3, dir * (2.2 + rand() * 1.2), rand() < 0.5 ? hillOf() : 0);
-        else if (r < 0.46) b.road(14, 26 + rand() * 16, 14, dir * (4.4 + rand()), rand() < 0.4 ? hillOf() : 0);
-        else if (r < 0.72) { const c = dir * (6.3 + rand() * 0.8); warn(c); b.road(12, 30 + rand() * 14, 12, c, 0); b.road(15, 25, 15, 0, 0); }
-        else if (r < 0.72 + hairP[s]) { warn(dir); b.road(12, 30 + rand() * 14, 12, dir * 8.4, 0); b.road(15, 25, 15, 0, 0); }
-        else if (r < 0.92) { b.road(15, 25, 15, dir * 4.2, 0); b.road(15, 25, 15, -dir * 4.2, 0); }
+        if (rand() < 0.3) b.road(6, 8 + rand() * 40, 6, 0, 0);   // 隨機的喘息直線,讓彎道的間隔不固定
+        let pick = rand() * total, kind = table[0][0];
+        for (const e of table) { if (pick < e[1]) { kind = e[0]; break; } pick -= e[1]; }
+        if (kind === 'tunnel' && (tunnels >= 2 || t.segs.length - lastTunnelEnd < 450 || t.segs.length - start < 250 || t.segs.length - start + 300 > target - 100)) kind = 'sweep';
+        if (HARD[kind] && lastHard && rand() < 0.65) kind = rand() < 0.5 ? 'gentle' : 'medium';   // 避免連續好幾個難彎擠在一起
+        lastHard = !!HARD[kind];
+        if (kind === 'tunnel') {
+          // 隧道:一段暗色封閉路段(平直或微彎),入口出口有門框
+          tunnels++;
+          const c = rand() < 0.5 ? 0 : dir * (2 + rand() * 1.2);
+          b.seg(18, c * 0.5);
+          const a = t.segs.length;
+          b.seg(course.tunnel * (0.9 + rand() * 0.2), c);
+          const sty = (rand() * 3) | 0;   // 三種隧道外觀隨機擇一
+          for (let i = a; i < t.segs.length; i++) { t.segs[i].tunnel = true; t.segs[i].tStyle = sty; }
+          t.segs[a].tIn = true; t.segs[t.segs.length - 1].tOut = true;
+          b.seg(20, 0);
+          lastTunnelEnd = t.segs.length;
+          continue;
+        }
+        if (kind === 'straight') b.road(n * 0.3, n * 0.4, n * 0.3, 0, rand() < 0.6 ? hillOf() : 0);
+        else if (kind === 'gentle') b.road(n * 0.3, n * 0.5, n * 0.3, dir * (2.2 + rand() * 1.2), rand() < 0.5 ? hillOf() : 0);
+        else if (kind === 'medium') b.road(14, 26 + rand() * 16, 14, dir * (4.4 + rand()), rand() < 0.4 ? hillOf() : 0);
+        else if (kind === 'bigL') { const c = dir * (6.3 + rand() * 0.8); warn(c); b.road(12, 30 + rand() * 14, 12, c, 0); b.road(15, 25, 15, 0, 0); }
+        else if (kind === 'hair') { warn(dir); b.road(12, 30 + rand() * 14, 12, dir * 8.4, 0); b.road(15, 25, 15, 0, 0); }
+        else if (kind === 'sweep') {
+          // 長彎道:一路持續的大弧線,可帶緩坡
+          const c = dir * (2.6 + rand()), len = 110 + rand() * 90;
+          b.seg(30, c); b.seg(len, c, rand() < 0.4 ? hillOf() * 0.5 : 0); b.seg(30, 0);
+        } else if (kind === 'chicane') {
+          // 蛇形連續彎:3~5 個左右交替的短彎
+          warn(dir);
+          const cnt = 3 + ((rand() * 3) | 0);
+          for (let i = 0; i < cnt; i++) { const c = (i % 2 ? -dir : dir) * (3.8 + rand()); b.seg(12, c); b.seg(8 + rand() * 8, c); }
+          b.seg(16, 0);
+        } else if (kind === 'trap') {
+          // 漸緊彎:入口緩、越轉越急
+          warn(dir);
+          b.seg(26, dir * 2.2); b.seg(26, dir * 3.6); b.seg(24, dir * 5.4); b.seg(20, dir * 7.6); b.seg(24, dir * 7.6); b.seg(26, 0);
+        } else if (kind === 'crest') {
+          // 坡頂盲彎:爬到坡頂才看見後面的彎
+          const h = 8 + ((rand() * 4) | 0);
+          warn(dir);
+          b.seg(38, 0, h); b.seg(12, dir * (4.5 + rand() * 1.5), -h * 0.55); b.seg(26, dir * 6.5, -h * 0.45); b.seg(22, 0);
+        } else if (kind === 'esses') { b.road(15, 25, 15, dir * 4.2, 0); b.road(15, 25, 15, -dir * 4.2, 0); }
         else { const h = 8 + ((rand() * 8) | 0); b.road(20, 30, 20, 0, h); b.road(20, 30, 20, 0, -h); }
       }
       b.road(25, 30, 25, 0, -b.lastY / L);
@@ -107,6 +158,7 @@ const Road = (() => {
     const segs = t.segs, N = segs.length;
     for (let i = 0; i < N; i++) {
       const s = segs[i], th = SC[s.theme];
+      if (s.tunnel) continue;
       if (i % 2 === 0) for (const side of [-1, 1]) {
         if (rand() < 0.72) { const nm = pick(th.trees, rand); s.sprites.push({ name: nm, offset: side * (1.9 + rand() * 2.6), w: (1000 + rand() * 600) * (nm === 'candyCane' ? 0.5 : 1), kind: 'solid', hit: 0.2, crash: true }); }
       }
@@ -127,16 +179,16 @@ const Road = (() => {
         const r = rand(), lane = LANES[(rand() * LANES.length) | 0];
         if (r < 0.33) { const n = 6 + ((rand() * 5) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         else if (r < 0.48) { const ph = rand() * 6; for (let k = 0; k < 12; k++) coin(i + k * 2, 0.75 * Math.sin(k * 0.55 + ph)); i += 24; }
-        else if (r < 0.58) { put(i, { name: 'nitro', offset: lane, w: 300, kind: 'nitro', lift: 260, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
-        else if (r < 0.64) { put(i, { name: 'missileBox', offset: lane, w: 340, kind: 'missile', lift: 250, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
-        else if (r < 0.64 + poopP[sec]) put(i, { name: course.obs[0], offset: lane + (rand() - 0.5) * 0.15, w: OBSW[course.obs[0]], kind: course.obs[0] });
-        else if (r < 0.64 + poopP[sec] + rockP[sec]) put(i, { name: course.obs[1], offset: lane + (rand() - 0.5) * 0.12, w: OBSW[course.obs[1]], kind: course.obs[1] });
+        else if (r < 0.535) { put(i, { name: 'nitro', offset: lane, w: 300, kind: 'nitro', lift: 260, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
+        else if (r < 0.595) { put(i, { name: 'missileBox', offset: lane, w: 340, kind: 'missile', lift: 250, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
+        else if (r < 0.595 + poopP[sec]) put(i, { name: course.obs[0], offset: lane + (rand() - 0.5) * 0.15, w: OBSW[course.obs[0]], kind: course.obs[0] });
+        else if (r < 0.595 + poopP[sec] + rockP[sec]) put(i, { name: course.obs[1], offset: lane + (rand() - 0.5) * 0.12, w: OBSW[course.obs[1]], kind: course.obs[1] });
         else { const n = 5 + ((rand() * 4) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         i += 22 + ((rand() * 26) | 0);
       }
     }
     for (const w of t.warn) {
-      for (const back of [55, 38, 22]) for (const side of [-1, 1]) put(w.idx - back, { name: w.dir > 0 ? 'arrowR' : 'arrowL', offset: side * 1.5, w: 760, kind: 'solid', hit: 0.2, crash: true });
+      for (const back of [55, 38, 22]) if (!(segs[w.idx - back] && segs[w.idx - back].tunnel)) for (const side of [-1, 1]) put(w.idx - back, { name: w.dir > 0 ? 'arrowR' : 'arrowL', offset: side * 1.5, w: 760, kind: 'solid', hit: 0.2, crash: true });
     }
   }
 
@@ -225,6 +277,61 @@ const Road = (() => {
     if (clipH < dh) { g.drawImage(img, 0, 0, img.width, img.height - img.height * clipH / dh, dx, dy, dw, dh - clipH); return { cx: sx, cy: dy + (dh - clipH) / 2, dw: fw, dh: dh - clipH }; }
   }
 
+  // ---------- 隧道(暗色封閉路段:牆 + 天花板 + 燈,入口有門框) ----------
+  const hex = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+  const mixc = (a, b, k) => { const p = hex(a), q = hex(b); return `rgb(${Math.round(q[0] + (p[0] - q[0]) * k)},${Math.round(q[1] + (p[1] - q[1]) * k)},${Math.round(q[2] + (p[2] - q[2]) * k)})`; };
+  const TUN_H = 1400;
+  // 三種隧道外觀:0 = 紫色燈廊 / 1 = 岩洞 / 2 = 霓虹光廊
+  const TUN_STYLE = [
+    { wall: ['#3a3462', '#332d58'], ceil: '#221d42', lit: '#fff1b0' },
+    { wall: ['#7a5a44', '#6b4d3a'], ceil: '#3e2c22', lit: '#ffb45c', ring: '#9a8a7a' },
+    { wall: ['#1c2350', '#182048'], ceil: '#0f1436', lit: '#7fe8ff', ring: '#2a1f5c', neon: ['#7fe8ff', '#ff4fd0'] }
+  ];
+  function drawTunnel(g, s, th, XS) {
+    const p = s.p1.screen, q = s.p2.screen, k = CFG.YS / CFG.XS, st = TUN_STYLE[s.tStyle || 0];
+    const hp = p.scale * XS * k * TUN_H, hq = q.scale * XS * k * TUN_H;
+    if (hp < 2) return;
+    const f = s.fog, wall = mixc(st.wall[s.color], th.fog, f), ceil = mixc(st.ceil, th.fog, f), lit = mixc(st.lit, th.fog, f);
+    const xlp = p.x - p.w * 1.18, xrp = p.x + p.w * 1.18, xlq = q.x - q.w * 1.18, xrq = q.x + q.w * 1.18;
+    poly(g, xlp, p.y, xlp, p.y - hp, xlq, q.y - hq, xlq, q.y, wall);
+    poly(g, xrp, p.y, xrp, p.y - hp, xrq, q.y - hq, xrq, q.y, wall);
+    poly(g, xlp, p.y - hp, xrp, p.y - hp, xrq, q.y - hq, xlq, q.y - hq, ceil);
+    if (st.neon) {
+      // 霓虹光廊:牆上兩道光帶 + 天花板中線,顏色隨路段交替
+      const nc = mixc(st.neon[Math.floor(s.index / 6) % 2], th.fog, f);
+      for (const sd of [-1, 1]) {
+        const a1 = p.x + sd * p.w * 1.18, a2 = q.x + sd * q.w * 1.18;
+        for (const h of [0.3, 0.68]) poly(g, a1, p.y - hp * h, a1, p.y - hp * (h + 0.05), a2, q.y - hq * (h + 0.05), a2, q.y - hq * h, nc);
+      }
+      const w1 = (xrp - xlp) * 0.035, w2 = (xrq - xlq) * 0.035;
+      poly(g, p.x - w1, p.y - hp + 1, p.x + w1, p.y - hp + 1, q.x + w2, q.y - hq + 1, q.x - w2, q.y - hq + 1, nc);
+    } else if (s.tStyle === 1) {
+      // 岩洞:天花板垂下的鐘乳石 + 稀疏的暖色壁燈
+      if (s.index % 3 === 0) {
+        const cx = p.x + ((s.index * 37) % 11 - 5) / 5 * p.w * 0.9, sw = p.w * 0.1, sh = hp * (0.1 + ((s.index * 13) % 5) * 0.025);
+        poly(g, cx - sw, p.y - hp, cx + sw, p.y - hp, cx, p.y - hp + sh, cx, p.y - hp + sh, mixc('#5a4234', th.fog, f));
+      }
+      if (s.index % 10 < 2) for (const sd of [-1, 1]) {
+        const a1 = p.x + sd * p.w * 1.18, a2 = q.x + sd * q.w * 1.18;
+        poly(g, a1, p.y - hp * 0.5, a1, p.y - hp * 0.62, a2, q.y - hq * 0.62, a2, q.y - hq * 0.5, lit);
+      }
+    } else if (s.index % 8 < 2) {
+      const w1 = (xrp - xlp) * 0.16, w2 = (xrq - xlq) * 0.16;
+      poly(g, p.x - w1, p.y - hp + 1, p.x + w1, p.y - hp + 1, q.x + w2, q.y - hq + 1, q.x - w2, q.y - hq + 1, lit);
+      for (const sd of [-1, 1]) {
+        const a1 = p.x + sd * p.w * 1.18, a2 = q.x + sd * q.w * 1.18;
+        poly(g, a1, p.y - hp * 0.5, a1, p.y - hp * 0.62, a2, q.y - hq * 0.62, a2, q.y - hq * 0.5, lit);
+      }
+    }
+    if (s.tIn && hp > 8) {
+      const ow = p.w * 1.5, ot = p.y - hp * 1.2;
+      g.beginPath(); g.rect(p.x - ow, ot, ow * 2, p.y - ot); g.rect(p.x - p.w * 1.18, p.y - hp, p.w * 2.36, hp);
+      g.fillStyle = mixc(st.ring || th.rumble[0], th.fog, f); g.fill('evenodd');
+      g.lineWidth = Math.max(1, p.w * (st.neon ? 0.04 : 0.02)); g.strokeStyle = st.neon ? mixc(st.neon[1], th.fog, f) : '#40284a'; g.stroke();
+      g.strokeRect(p.x - p.w * 1.18, p.y - hp, p.w * 2.36, hp);
+    }
+  }
+
   function drawGate(g, s, XS, YS) {
     const p = s.p1.screen, q = s.p2.screen;
     if (s.p1.camera.z <= CFG.camDepth) return;
@@ -285,14 +392,17 @@ const Road = (() => {
       xacc += dx; dx += s.curve;
       s.fog = 1 / Math.exp((n / dd) * (n / dd) * FOG);
       s.clip = maxy;
-      if (s.p1.camera.z <= CFG.camDepth || s.p2.screen.y >= s.p1.screen.y || s.p2.screen.y >= maxy) continue;
+      if (s.p1.camera.z <= CFG.camDepth || s.p2.screen.y >= s.p1.screen.y || s.p2.screen.y >= maxy) { s.hid = true; continue; }
+      s.hid = false;
       drawSeg(g, s, THEMES[s.theme]);
+      if (s.tunnel) { g.fillStyle = 'rgba(12,8,36,.4)'; g.fillRect(0, s.p2.screen.y, W, s.p1.screen.y + 1 - s.p2.screen.y); }
       maxy = s.p1.screen.y;
     }
 
     for (let n = dd - 1; n > 0; n--) {
       const s = segs[(bi + n) % N];
       if (s.p1.camera.z <= CFG.camDepth) continue;
+      if (s.tunnel && !s.hid) drawTunnel(g, s, THEMES[s.theme], XS);
       if (s.gate) { const ga = clamp(s.fog * 1.5 - 0.1, 0, 1); if (ga > 0.03) { g.save(); g.globalAlpha = ga; drawGate(g, s, XS, YS); g.restore(); } }
       const sc1 = s.p1.screen;
       for (const sp of s.sprites) {
@@ -330,5 +440,5 @@ const Road = (() => {
     };
   }
 
-  return { build: (k, course) => (k === 'demo' ? buildDemo() : buildGame(course)), render, findSeg, attachCar, LANES };
+  return { build: (k, course, variant) => (k === 'demo' ? buildDemo() : buildGame(course, variant)), render, findSeg, attachCar, LANES };
 })();

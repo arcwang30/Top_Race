@@ -20,7 +20,8 @@ const Game = {
     const D = this.course.diff;
     this.SLIP_T = 1.5 * D.pen; this.CRASH_T = 2.0 * D.pen;
     this.bonusTime = FAST ? CFG.bonusTime : [D.bonus, D.bonus];
-    this.track = Road.build('game', this.course);
+    this.variant = QS.has('seed') ? (Number(QS.get('seed')) >>> 0) : ((Math.random() * 4294967296) >>> 0);   // 每一局賽道的組合都不同
+    this.track = Road.build('game', this.course, this.variant);
     this.track.missiles = [];
     this.view = clamp(Save.data.view === undefined ? 2 : Save.data.view, 0, VIEWS.length - 1);
     this.pz = VIEWS[this.view].zD;
@@ -120,6 +121,8 @@ const Game = {
     if (playing) {
       s.time -= dt; s.elapsed += dt;
       const sec = Math.ceil(s.time);
+      if (s.time > 12) s.warned = false;
+      if (s.time <= 10 && s.time > 0 && !s.warned) { s.warned = true; Sound.play('timeWarn'); this.toast('HURRY UP!', '剩餘 10 秒', 1.4, '#ff8a5c', 64); }
       if (s.time <= 10 && sec !== s.tickSec && s.time > 0) { s.tickSec = sec; Sound.play('tick'); }
       if (s.time <= 0) {
         s.time = 0; s.phase = 'timeup'; s.endT = 0;
