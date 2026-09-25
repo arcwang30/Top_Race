@@ -31,8 +31,8 @@ const CFG = {
   steerRate: 2.2,
 
   sections: FAST ? [240, 240, 240] : [2000, 2100, 2200],
-  startTime: FAST ? 40 : 100,
-  bonusTime: FAST ? [30, 30] : [75, 75],
+  startTime: FAST ? 40 : 90,
+  bonusTime: FAST ? [30, 30] : [65, 65],
   enemyGap: 170
 };
 CFG.playerZ = CFG.camH * CFG.camDepth;
@@ -156,5 +156,5 @@ const VIEWS = [
   mkView(1000, 1000 * CFG.camDepth, 390, 0.68),
   mkView(450, 560, 460, 0.76),
   mkView(730, 700, 425, 0.71),
-  mkView(150, 400, 690, 0.82)
+  mkView(190, 420, 640, 0.80)
 ];

@@ -93,7 +93,7 @@ const Game = {
     const s = this.s, T = this.track, C = CFG, L = C.segLen;
     s.t += dt;
     if (s.toast && (s.toast.t += dt) > s.toast.dur) s.toast = null;
-    s.pops.forEach(p => { p.t += dt; }); s.pops = s.pops.filter(p => p.t < 1.1);
+    s.pops.forEach(p => { p.t += dt; }); s.pops = s.pops.filter(p => p.t < 1.7);
     s.shake = Math.max(0, s.shake - dt * 1.6);
     s.invT = Math.max(0, s.invT - dt); s.bumpCool = Math.max(0, s.bumpCool - dt); s.treeCool = Math.max(0, s.treeCool - dt);
 
@@ -565,7 +565,11 @@ const Game = {
       UI.text(g, t.text, W / 2, 300, t.size * sc, { fill: t.color, stroke: '#40284a', sw: 9, alpha: a });
       if (t.sub) UI.text(g, t.sub, W / 2, 300 + t.size * 0.9, 34, { fill: '#fff', stroke: '#40284a', sw: 7, alpha: a });
     }
-    for (const p of s.pops) UI.text(g, p.text, p.x, 660 - p.t * 90, 30, { fill: p.color, stroke: '#40284a', sw: 6, alpha: 1 - p.t / 1.1 });
+    // 得分 / 加分提示:堆疊在左上方(時速與氮氣資訊下方),不擋住路面
+    s.pops.slice(-4).reverse().forEach((p, i) => {
+      const a = p.t < 1.3 ? 1 : (1.7 - p.t) / 0.4, slide = (1 - clamp(p.t / 0.15, 0, 1)) * -40;
+      UI.text(g, p.text, 18 + slide, 258 + i * 28, 21, { align: 'left', fill: p.color, stroke: '#40284a', sw: 5, alpha: clamp(a, 0, 1) });
+    });
 
     this.drawControls(g);
   },

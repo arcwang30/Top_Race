@@ -113,7 +113,7 @@ const Input = {
     const k = this.keys;
     const key = (...c) => c.some(x => k.has(x));
     let left = key('ArrowLeft', 'KeyA'), right = key('ArrowRight', 'KeyD');
-    let thr = key('KeyW'), brk = key('AltLeft', 'AltRight'), nit = key('Space');
+    let thr = key('KeyW'), brk = key('KeyM'), nit = key('Space');
     let analog = 0, sy = (key('ArrowDown', 'KeyS') ? 1 : 0) - (key('ArrowUp', 'KeyW') ? 1 : 0);
 
     const pads = (navigator.getGamepads && navigator.getGamepads()) || [];

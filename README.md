@@ -62,7 +62,7 @@ powershell -ExecutionPolicy Bypass -File tools\serve.ps1
 | 左移 | ← / A | 類比左、十字左 | 虛擬鍵左、陀螺儀 |
 | 右移 | → / D | 類比右、十字右 | 虛擬鍵右、陀螺儀 |
 | 油門 | W | RT、A | 油門按鈕 |
-| 剎車 | ALT | LT、B | 剎車按鈕 |
+| 剎車 | M | LT、B | 剎車按鈕 |
 | 氮氣 | SPACE | X、Y | 氮氣按鈕 |
 | 暫停 | ESC / P | Start | 右上暫停鈕 |
 
