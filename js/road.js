@@ -200,7 +200,7 @@ const Road = (() => {
     const fw = scale * XS * worldW;
     const dw = fw * xs, dh = fw * img.height / img.width;
     if (dw < 1.5) return;
-    const dx = sx - dw / 2, dy = sy - dh - scale * YS * lift;
+    const dx = sx - dw / 2, dy = sy - dh - scale * XS * (CFG.YS / CFG.XS) * lift;
     const clipH = clipY ? Math.max(0, dy + dh - clipY) : 0;
     if (clipH < dh) g.drawImage(img, 0, 0, img.width, img.height - img.height * clipH / dh, dx, dy, dw, dh - clipH);
   }

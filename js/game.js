@@ -19,7 +19,7 @@ const Game = {
     this.course = COURSES[this.courseId] || COURSES[0];
     this.track = Road.build('game', this.course);
     this.track.missiles = [];
-    this.view = clamp(Save.data.view || 0, 0, VIEWS.length - 1);
+    this.view = clamp(Save.data.view === undefined ? 2 : Save.data.view, 0, VIEWS.length - 1);
     this.pz = VIEWS[this.view].zD;
     this.result = null;
     this.s = {
@@ -37,7 +37,7 @@ const Game = {
     return Math.min(SCORE.max, Math.floor(c.dist + c.drift + c.coin + c.cp + c.time + c.clear));
   },
 
-  cycleView() { this.setView((this.view + 1) % VIEWS.length); },
+  cycleView() { this.setView((this.view + VIEWS.length - 1) % VIEWS.length); },
   setView(i) {
     const s = this.s, V = VIEWS[i];
     if (s) s.pos = Math.max(0, s.pos + this.pz - V.zD);
