@@ -26,7 +26,7 @@ const Input = {
     ArrowLeft: ['left'], KeyA: ['left'],
     ArrowRight: ['right'], KeyD: ['right'],
     Enter: ['confirm'], NumpadEnter: ['confirm'], Space: ['confirm', 'nitro'],
-    Escape: ['back', 'pause'], Backspace: ['back'], KeyP: ['pause']
+    Escape: ['back', 'pause'], Backspace: ['back'], KeyP: ['pause'], KeyC: ['view']
   },
 
   init(canvas) {
@@ -134,7 +134,7 @@ const Input = {
         this._padPrev[i] = now;
       };
       edge(12, 'up'); edge(13, 'down'); edge(14, 'left'); edge(15, 'right');
-      edge(0, 'confirm'); edge(1, 'back'); edge(9, 'confirm', 'pause'); edge(2, 'nitro'); edge(3, 'nitro');
+      edge(0, 'confirm'); edge(1, 'back'); edge(9, 'confirm', 'pause'); edge(2, 'nitro'); edge(3, 'nitro'); edge(8, 'view'); edge(11, 'view');
       const ay = gp.axes[1] || 0;
       if (Math.abs(ay) > 0.3) sy += ay; if (b(13)) sy += 1; if (b(12)) sy -= 1;
       const vUp = ay < -0.6, vDown = ay > 0.6;

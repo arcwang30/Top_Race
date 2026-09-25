@@ -3,7 +3,7 @@
 // 偽 3D 賽道:建構(賽道 / 物件 / 敵車)與繪製
 const Road = (() => {
   const L = CFG.segLen, RH = CFG.roadHalf;
-  const LANES = [-0.62, 0, 0.62];
+  const LANES = [-0.75, -0.25, 0.25, 0.75];
   const FOG = 5;
 
   function findSeg(t, z) { return t.segs[Math.floor(z / L) % t.N]; }
@@ -123,12 +123,13 @@ const Road = (() => {
       const from = (sec === 0 ? 70 : t.cps[sec - 1] + 50), to = t.cps[sec] - 70;
       let i = from;
       while (i < to) {
-        const r = rand(), lane = LANES[(rand() * 3) | 0];
+        const r = rand(), lane = LANES[(rand() * LANES.length) | 0];
         if (r < 0.33) { const n = 6 + ((rand() * 5) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
-        else if (r < 0.48) { const ph = rand() * 6; for (let k = 0; k < 12; k++) coin(i + k * 2, 0.62 * Math.sin(k * 0.55 + ph)); i += 24; }
-        else if (r < 0.6) { put(i, { name: 'nitro', offset: lane, w: 300, kind: 'nitro', lift: 260, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
-        else if (r < 0.6 + poopP[sec]) put(i, { name: course.obs[0], offset: lane + (rand() - 0.5) * 0.15, w: OBSW[course.obs[0]], kind: course.obs[0] });
-        else if (r < 0.6 + poopP[sec] + rockP[sec]) put(i, { name: course.obs[1], offset: lane + (rand() - 0.5) * 0.12, w: OBSW[course.obs[1]], kind: course.obs[1] });
+        else if (r < 0.48) { const ph = rand() * 6; for (let k = 0; k < 12; k++) coin(i + k * 2, 0.75 * Math.sin(k * 0.55 + ph)); i += 24; }
+        else if (r < 0.58) { put(i, { name: 'nitro', offset: lane, w: 300, kind: 'nitro', lift: 260, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
+        else if (r < 0.64) { put(i, { name: 'missileBox', offset: lane, w: 340, kind: 'missile', lift: 250, phase: rand() * 6 }); for (let k = 1; k <= 3; k++) coin(i + k * 2, lane); i += 8; }
+        else if (r < 0.64 + poopP[sec]) put(i, { name: course.obs[0], offset: lane + (rand() - 0.5) * 0.15, w: OBSW[course.obs[0]], kind: course.obs[0] });
+        else if (r < 0.64 + poopP[sec] + rockP[sec]) put(i, { name: course.obs[1], offset: lane + (rand() - 0.5) * 0.12, w: OBSW[course.obs[1]], kind: course.obs[1] });
         else { const n = 5 + ((rand() * 4) | 0); for (let k = 0; k < n; k++) coin(i + k * 2, lane); i += n * 2; }
         i += 22 + ((rand() * 26) | 0);
       }
@@ -145,7 +146,7 @@ const Road = (() => {
       while (z < end) {
         const type = 1 + ((rand() * 3) | 0);
         const c = {
-          type, z: z * L, x: LANES[(rand() * 3) | 0] + (rand() - 0.5) * 0.2, baseX: 0,
+          type, z: z * L, x: LANES[(rand() * LANES.length) | 0] + (rand() - 0.5) * 0.2, baseX: 0,
           speed: [0.30, 0.48, 0.66][type - 1] * CFG.maxSpeed * (0.96 + rand() * 0.08), phase: rand() * 6, seg: null, percent: 0
         };
         c.baseX = c.x;
@@ -249,7 +250,7 @@ const Road = (() => {
     const bi = Math.floor(pos / L) % N, bs = segs[bi], bp = (pos % L) / L;
     const ps = segs[Math.floor((pos + pz) / L) % N], pp = ((pos + pz) % L) / L;
     const py = lerp(ps.p1.world.y, ps.p2.world.y, pp);
-    const camY = CFG.camH + py;
+    const camY = (cam.camH || CFG.camH) + py;
     const dd = cam.drawDist || CFG.drawDist;
     let maxy = H, xacc = 0, dx = -(bs.curve * bp);
 
@@ -287,6 +288,17 @@ const Road = (() => {
         const a = s.p1.screen, b = s.p2.screen, sc = lerp(a.scale, b.scale, c.percent);
         const sx = lerp(a.x, b.x, c.percent) + sc * c.x * RH * XS, sy = lerp(a.y, b.y, c.percent);
         drawSprite(g, Spr.get('enemy' + c.type), sc, sx, sy, 640, s.clip, 0, 1, XS, YS);
+      }
+    }
+
+    if (t.missiles) {
+      for (const m of t.missiles) {
+        const di = Math.floor(m.z / L) - bi;
+        if (di < 1 || di >= dd) continue;
+        const s = segs[Math.floor(m.z / L) % N];
+        if (s.p1.camera.z <= CFG.camDepth) continue;
+        const pc = (m.z % L) / L, a = s.p1.screen, b = s.p2.screen, sc = lerp(a.scale, b.scale, pc);
+        drawSprite(g, Spr.get(m.sprite), sc, lerp(a.x, b.x, pc) + sc * m.x * RH * XS, lerp(a.y, b.y, pc), 380, s.clip, 120, 1, XS, YS);
       }
     }
 

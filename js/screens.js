@@ -298,7 +298,10 @@ Screens.game = {
     }
   },
   frame(g, dt) {
-    if (!this.paused && (Input.was('pause') || Input.taps.some(t => Math.hypot(t.x - 490, t.y - 106) < 30))) this.pause();
+    let tapView = false, tapPause = false;
+    for (const t of Input.taps) { const d1 = Math.hypot(t.x - 452, t.y - 106), d2 = Math.hypot(t.x - 490, t.y - 106); if (Math.min(d1, d2) < 26) { if (d1 < d2) tapView = true; else tapPause = true; } }
+    if (tapView || Input.was('view')) { Game.cycleView(); Input.taps.length = 0; }
+    if (!this.paused && (Input.was('pause') || tapPause)) this.pause();
     else if (this.paused && Input.was('pause')) { this.paused = false; Input.pressed.clear(); Input.taps.length = 0; }
     if (!this.paused) Game.update(dt);
     if (App.name !== 'game') return;
@@ -386,12 +389,13 @@ Screens.howto = {
     const items = [
       ['coin', '金幣', '取得後獲得 1000 分。', 44, 0],
       ['nitro', '氮氣瓶', '最多 5 瓶,使用後極速加速且無敵,可撞飛障礙與敵車!', 34, 0],
+      ['missileBox', '飛彈箱', '取得後 10 秒內車子會自動發射飛彈,擊飛前方敵車與障礙(不可累積)。', 40, 0],
       ['enemy1', '呱呱 (青蛙)', '龜速直行的路障車,超車時小心。', 0, 1],
       ['enemy2', '兔兔 (兔子)', '左右蛇行前進,難以預測。', 0, 1],
       ['enemy3', '黑喵 (黑貓)', '速度快,還會擋住你的路線!', 0, 1]
     ];
     items.forEach(([nm, t, d, w, car], i) => {
-      const y = 165 + i * 122, im = Spr.get(nm), sw = car ? 96 : w, sh = sw * im.height / im.width;
+      const y = 158 + i * 104, im = Spr.get(nm), sw = car ? 96 : w, sh = sw * im.height / im.width;
       const k = Math.min(1, 70 / sh);
       g.drawImage(im, 70 - sw * k / 2, y + 40 - sh * k / 2, sw * k, sh * k);
       UI.text(g, t, 130, y + 16, 24, { align: 'left', fill: '#fff27a', stroke: null });

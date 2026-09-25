@@ -11,11 +11,16 @@ const Game = {
   SLIP_T: 1.5,
 
   courseId: 0,
+  view: 0,
+  pz: 0,
   BOUNCE_T: 1.0,
 
   newRun() {
     this.course = COURSES[this.courseId] || COURSES[0];
     this.track = Road.build('game', this.course);
+    this.track.missiles = [];
+    this.view = clamp(Save.data.view || 0, 0, VIEWS.length - 1);
+    this.pz = VIEWS[this.view].zD;
     this.result = null;
     this.s = {
       pos: 0, x: 0, speed: 0, nitro: 1, nitroT: 0, slipT: 0, slipDir: 1, crashT: 0, invT: 0, shake: 0,
@@ -23,13 +28,62 @@ const Game = {
       sc: { dist: 0, drift: 0, coin: 0, cp: 0, time: 0, clear: 0 }, coins: 0,
       time: CFG.startTime, elapsed: 0, phase: 'countdown', countT: 3.6, cp: 0, stage: 1,
       drift: false, bg: [0, 0, 0], bgTheme: this.course.themes[0], bgPrev: this.course.themes[0], bgFade: 0,
-      toast: null, pops: [], parts: [], fly: [], wheel: 0, t: 0, endT: 0, tickSec: -1, bumpCool: 0, treeCool: 0
+      missileT: 0, fireT: 0, toast: null, pops: [], parts: [], fly: [], wheel: 0, t: 0, endT: 0, tickSec: -1, bumpCool: 0, treeCool: 0
     };
   },
 
   total() {
     const c = this.s.sc;
     return Math.min(SCORE.max, Math.floor(c.dist + c.drift + c.coin + c.cp + c.time + c.clear));
+  },
+
+  cycleView() { this.setView((this.view + 1) % VIEWS.length); },
+  setView(i) {
+    const s = this.s, V = VIEWS[i];
+    if (s) s.pos = Math.max(0, s.pos + this.pz - V.zD);
+    this.view = i; this.pz = V.zD;
+    Save.data.view = i; Save.store();
+    Sound.play('select');
+  },
+
+  fireMissile() {
+    const s = this.s;
+    this.track.missiles.push({ z: s.pos + this.pz + 200, x: s.x, sprite: 'missile' + (Save.data.vehicle || 0), speed: s.speed + 15000, t: 0 });
+    Sound.play('missile');
+  },
+
+  updateMissiles(dt) {
+    const s = this.s, T = this.track, L = CFG.segLen, pzNow = s.pos + this.pz;
+    for (const m of T.missiles.slice()) {
+      let tgt = null, best = 14000;
+      for (let k = 0; k < 40; k++) {
+        const sg = T.segs[(Math.floor(m.z / L) + k) % T.N];
+        for (const c of sg.cars) if (!c.dead && c.z > m.z && c.z - m.z < best && Math.abs(c.x - m.x) < 1.0) { tgt = c; best = c.z - m.z; }
+        if (tgt) break;
+      }
+      if (tgt) m.x += clamp(tgt.x - m.x, -3 * dt, 3 * dt);
+      m.z += m.speed * dt; m.t += dt;
+      let hit = false;
+      for (let k = -2; k <= 2 && !hit; k++) {
+        const sg = T.segs[(Math.floor(m.z / L) + k + T.N) % T.N];
+        for (const c of sg.cars.slice()) {
+          if (c.dead || Math.abs(c.x - m.x) > 0.45 || Math.abs(c.z - m.z) > 450) continue;
+          c.dead = true; sg.cars.splice(sg.cars.indexOf(c), 1);
+          this.smash('enemy' + c.type, c.x, 170, 2000, this.pz / (this.pz + Math.max(0, c.z - pzNow)));
+          hit = true; break;
+        }
+        if (hit) break;
+        for (const sp of sg.sprites) {
+          if (sp.taken || !OBS_FX[sp.kind] || Math.abs(sp.offset - m.x) > 0.42) continue;
+          if (Math.abs(sg.index * L + 100 - m.z) > 380) continue;
+          sp.taken = true;
+          this.smash(sp.name, sp.offset, 130, 500, this.pz / (this.pz + Math.max(0, sg.index * L - pzNow)));
+          hit = true; break;
+        }
+      }
+      if (hit) { T.missiles.splice(T.missiles.indexOf(m), 1); continue; }
+      if (m.z - pzNow > 17000 || m.t > 3) T.missiles.splice(T.missiles.indexOf(m), 1);
+    }
   },
 
   toast(text, sub, dur, color, size) { this.s.toast = { text, sub, dur: dur || 1.6, t: 0, color: color || '#fff', size: size || 64 }; },
@@ -76,6 +130,10 @@ const Game = {
     if (s.nitroT > 0) s.nitroT = Math.max(0, s.nitroT - dt);
     if (s.bounceT > 0) s.bounceT -= dt;
     if (s.mudT > 0) s.mudT -= dt;
+    if (s.missileT > 0) {
+      s.missileT = Math.max(0, s.missileT - dt); s.fireT -= dt;
+      if (playing && s.crashT <= 0 && s.fireT <= 0) { this.fireMissile(); s.fireT = 0.7; }
+    }
     const boosting = s.nitroT > 0;
 
     let pct = s.speed / C.maxSpeed; const p0 = pct;
@@ -103,7 +161,7 @@ const Game = {
     s.speed = pct * C.maxSpeed;
 
     // ---- 橫移 / 離心力 / 打滑 ----
-    const seg = Road.findSeg(T, s.pos + C.playerZ);
+    const seg = Road.findSeg(T, s.pos + this.pz);
     const dxs = dt * C.steerRate * (0.3 + 0.7 * pct) * (s.drift ? 1.6 : 1);
     s.x += steer * dxs;
     if (s.crashT <= 0) s.x -= dxs * pct * seg.curve * C.centrifugal * (s.drift ? 0.35 : 1);
@@ -116,9 +174,9 @@ const Game = {
     if (Math.abs(s.x) > 2.6) { s.x = clamp(s.x, -2.6, 2.6); if (pct > 0.3 && s.treeCool <= 0) { s.speed *= 0.7; s.treeCool = 0.4; s.shake = 0.3; Sound.play('bump'); } }
 
     // ---- 位置 ----
-    const oldZ = s.pos + C.playerZ;
+    const oldZ = s.pos + this.pz;
     s.pos += s.speed * dt;
-    const newZ = s.pos + C.playerZ;
+    const newZ = s.pos + this.pz;
     s.wheel += s.speed * dt * 0.012;
 
     // ---- 得分 ----
@@ -130,6 +188,7 @@ const Game = {
 
     this.collide(oldZ, newZ, playing);
     this.updateCars(dt, newZ);
+    this.updateMissiles(dt);
 
     // ---- 檢查點 / 終點 ----
     if (playing) {
@@ -144,7 +203,7 @@ const Game = {
           s.phase = 'goal'; s.endT = 0;
           s.sc.time = Math.floor(s.time) * SCORE.timeBonus; s.sc.clear = SCORE.clear;
           this.toast('GOAL!', '恭喜完賽!', 9.5, '#ffd23f', 100);
-          Sound.stopMusic(); Sound.play('checkpoint');
+          Sound.music('goal'); Sound.play('checkpoint');
         }
       }
     }
@@ -179,6 +238,9 @@ const Game = {
         if (Math.abs(s.x - sp.offset) > hw) continue;
         if (sp.kind === 'coin') {
           sp.taken = true; s.coins++; s.sc.coin += SCORE.coin; Sound.play('coin'); this.pop('+' + SCORE.coin);
+        } else if (sp.kind === 'missile') {
+          sp.taken = true; s.missileT = 10; s.fireT = 0; Sound.play('nitroGet');
+          this.toast('飛彈!', '10 秒自動發射', 1.3, '#ffb35c', 64);
         } else if (sp.kind === 'nitro') {
           sp.taken = true; Sound.play('nitroGet');
           if (s.nitro < CFG.nitroMax) { s.nitro++; this.pop('NITRO +1', '#7fe4ff'); }
@@ -220,7 +282,7 @@ const Game = {
         if (s.speed <= c.speed || Math.abs(c.x - s.x) > 0.5 || s.bumpCool > 0) continue;
         if (Math.abs(newZ - c.z) > 240) continue;
         s.speed = c.speed * 0.9;
-        s.pos = c.z - CFG.playerZ - 250;
+        s.pos = c.z - this.pz - 250;
         const dir = s.x >= c.x ? 1 : -1;
         s.x += dir * 0.22; c.x -= dir * 0.18;
         s.bumpCool = 0.35; s.shake = 0.5; Sound.play('bump');
@@ -228,14 +290,15 @@ const Game = {
     }
   },
 
-  smash(name, off, w, pts) {
-    const s = this.s, y = this.info ? this.info.playerY : 850;
-    const x = W / 2 + clamp((off - s.x) * 250, -220, 220);
+  smash(name, off, w, pts, r) {
+    r = r || 1;
+    const s = this.s, V = VIEWS[this.view], py0 = this.info ? this.info.playerY : 850;
+    const x = W / 2 + clamp((off - s.x) * 287 * r, -230, 230), y0 = V.hor + (py0 - V.hor) * r - 90 * r;
     const dir = (off - s.x) >= 0 ? 1 : -1;
-    s.fly.push({ img: Spr.get(name), x, y: y - 90, vx: dir * (260 + Math.random() * 260), vy: -650 - Math.random() * 250, rot: 0, vr: dir * (8 + Math.random() * 6), w, t: 0 });
+    s.fly.push({ img: Spr.get(name), x, y: y0, vx: dir * (260 + Math.random() * 260) * r, vy: (-650 - Math.random() * 250) * (0.5 + r / 2), rot: 0, vr: dir * (8 + Math.random() * 6), w: w * r * (name.startsWith('enemy') ? 1 : 1), t: 0 });
     s.sc.coin += pts; this.pop('SMASH! +' + pts, '#ffd23f');
-    s.shake = Math.max(s.shake, 0.35); Sound.play('bump');
-    for (let i = 0; i < 14; i++) s.parts.push({ x, y: y - 90, vx: (Math.random() - 0.5) * 520, vy: -Math.random() * 420, life: 0.55, max: 0.55, r: 4, color: Math.random() < 0.5 ? '#fff3a0' : '#7fe4ff', star: true });
+    s.shake = Math.max(s.shake, 0.3 * r); Sound.play(r < 0.99 ? 'explode' : 'bump');
+    for (let i = 0; i < 16; i++) s.parts.push({ x, y: y0, vx: (Math.random() - 0.5) * 520 * r, vy: -Math.random() * 420 * r, life: 0.6, max: 0.6, r: 5 * Math.max(0.6, r), color: ['#fff3a0', '#ffb32b', '#ff5c3a', '#7fe4ff'][(Math.random() * 4) | 0], star: true });
   },
 
   updateCars(dt, pz) {
@@ -245,10 +308,10 @@ const Game = {
       const rel = c.z - pz;
       if (rel > CFG.drawDist * CFG.segLen * 1.2 || rel < -6000) continue;
       c.z += c.speed * dt;
-      if (c.type === 2) c.x = clamp(c.baseX + 0.5 * Math.sin(s.t * 1.4 + c.phase), -0.8, 0.8);
+      if (c.type === 2) c.x = clamp(c.baseX + 0.5 * Math.sin(s.t * 1.4 + c.phase), -0.9, 0.9);
       else if (c.type === 3) {
         const target = (rel > 0 && rel < 4800) ? s.x : c.baseX;
-        c.x = clamp(c.x + clamp(target - c.x, -0.6 * dt, 0.6 * dt), -0.8, 0.8);
+        c.x = clamp(c.x + clamp(target - c.x, -0.6 * dt, 0.6 * dt), -0.9, 0.9);
       }
       if (c.z >= T.N * CFG.segLen - 400) c.z = T.N * CFG.segLen - 400;
       Road.attachCar(T, c);
@@ -318,12 +381,13 @@ const Game = {
   draw(g) {
     const s = this.s, T = this.track;
     const th = THEMES[s.bgTheme];
-    BG.draw(g, s.bgTheme, s.bg, CFG.horizon);
-    if (s.bgFade > 0) BG.draw(g, s.bgPrev, s.bg, CFG.horizon, s.bgFade);
-    g.fillStyle = th.grass[0]; g.fillRect(0, CFG.horizon, W, H - CFG.horizon);
+    const V = VIEWS[this.view], hor = V.hor;
+    BG.draw(g, s.bgTheme, s.bg, hor);
+    if (s.bgFade > 0) BG.draw(g, s.bgPrev, s.bg, hor, s.bgFade);
+    g.fillStyle = th.grass[0]; g.fillRect(0, hor, W, H - hor);
     g.save();
     if (s.shake > 0) g.translate((Math.random() - 0.5) * s.shake * 16, (Math.random() - 0.5) * s.shake * 10);
-    this.info = Road.render(g, T, { pos: s.pos, x: s.x, time: s.t });
+    this.info = Road.render(g, T, { pos: s.pos, x: s.x, time: s.t, hor: V.hor, XS: V.XS, YS: V.YS, playerZ: V.zD, camH: V.camH });
     this.drawSpeedLines(g);
     this.drawPlayer(g);
     this.drawParts(g);
@@ -336,7 +400,7 @@ const Game = {
     const a = clamp((pct - 0.6) * 1.6, 0, 0.6) + (s.nitroT > 0 ? 0.3 : 0);
     if (a <= 0.02) return;
     g.save(); g.strokeStyle = s.nitroT > 0 ? '#bff2ff' : '#ffffff'; g.lineWidth = 2; g.globalAlpha = a * 0.7;
-    const cx = W / 2, cy = CFG.horizon + 30;
+    const cx = W / 2, cy = VIEWS[this.view].hor + 30;
     for (let i = 0; i < 18; i++) {
       const ang = Math.random() * TAU, r0 = 200 + Math.random() * 200, r1 = r0 + 60 + Math.random() * 120;
       g.beginPath(); g.moveTo(cx + Math.cos(ang) * r0, cy + Math.sin(ang) * r0 * 1.4); g.lineTo(cx + Math.cos(ang) * r1, cy + Math.sin(ang) * r1 * 1.4); g.stroke();
@@ -367,12 +431,12 @@ const Game = {
       g.beginPath(); g.ellipse(W / 2, cy, 108 * pulse, 92 * pulse, 0, 0, TAU); g.stroke();
       g.restore();
     }
-    let view = 'rear', k = 0.76, cheer = false, boostFx = s.nitroT > 0;
+    let view = 'rear', k = VIEWS[this.view].car, cheer = false, boostFx = s.nitroT > 0;
     if (s.phase === 'goal' && s.endT > 1.6) {
-      const t = s.endT, hy = CFG.horizon + 22, py0 = y;
+      const t = s.endT, hy = VIEWS[this.view].hor + 22, py0 = y;
       if (t < 2.8) {
         const e = Math.pow(clamp((t - 1.6) / 1.2, 0, 1), 2);
-        k = lerp(0.76, 0.06, e); y = lerp(py0, hy, e); boostFx = true;
+        k = lerp(VIEWS[this.view].car, 0.06, e); y = lerp(py0, hy, e); boostFx = true;
       } else {
         view = 'front';
         if (t < 5.6) {
@@ -430,7 +494,7 @@ const Game = {
     UI.text(g, s.stage + ' / 3', 434, 51, 30, { fill: '#fff', stroke: '#40284a', sw: 4 });
     UI.text(g, THEMES[this.course.themes[s.stage - 1]].name, 434, 72, 14, { fill: '#cfd8ff', stroke: null });
     // 進度
-    const prog = clamp((s.pos + C.playerZ) / this.track.goalZ, 0, 1);
+    const prog = clamp((s.pos + this.pz) / this.track.goalZ, 0, 1);
     g.fillStyle = 'rgba(30,20,60,.6)'; g.beginPath(); g.roundRect ? g.roundRect(16, 98, 410, 14, 7) : g.rect(16, 98, 410, 14); g.fill();
     g.fillStyle = '#7fe4ff'; g.beginPath(); g.roundRect ? g.roundRect(16, 98, Math.max(8, 410 * prog), 14, 7) : g.rect(16, 98, 410 * prog, 14); g.fill();
     for (let i = 0; i < 3; i++) {
@@ -442,6 +506,22 @@ const Game = {
     // 暫停鈕
     g.fillStyle = 'rgba(30,20,60,.6)'; g.beginPath(); g.arc(490, 106, 20, 0, TAU); g.fill();
     g.fillStyle = '#fff'; g.fillRect(482, 96, 6, 20); g.fillRect(494, 96, 6, 20);
+    // 視角鈕(相機圖示 + 目前視角編號)
+    g.fillStyle = 'rgba(30,20,60,.6)'; g.beginPath(); g.arc(452, 106, 20, 0, TAU); g.fill();
+    g.fillStyle = '#fff'; g.beginPath(); g.roundRect ? g.roundRect(440, 99, 24, 16, 4) : g.rect(440, 99, 24, 16); g.fill();
+    g.fillRect(446, 95, 10, 5);
+    g.fillStyle = '#3ea8ff'; g.beginPath(); g.arc(452, 107, 5, 0, TAU); g.fill();
+    g.fillStyle = '#ffd23f'; g.beginPath(); g.arc(465, 96, 8, 0, TAU); g.fill();
+    UI.text(g, String(this.view + 1), 465, 96.5, 12, { fill: '#40284a', stroke: null });
+    // 飛彈剩餘時間
+    if (s.missileT > 0) {
+      const pulse = 0.75 + 0.25 * Math.sin(s.t * 10);
+      UI.panel(g, 12, 202, 250, 30, 15, 'rgba(120,50,20,.75)', '#ffb35c');
+      g.drawImage(Spr.get('missileBox'), 18, 204, 22, 26);
+      UI.text(g, '飛彈', 48, 217, 15, { align: 'left', fill: '#ffe680', stroke: null, alpha: pulse });
+      g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(96, 211, 152, 10);
+      g.fillStyle = '#ffb35c'; g.fillRect(96, 211, 152 * (s.missileT / 10), 10);
+    }
     // NITRO
     UI.panel(g, 12, 124, 250, 72, 18);
     UI.text(g, 'NITRO', 26, 140, 14, { align: 'left', fill: '#7fe4ff', stroke: null });
@@ -465,7 +545,7 @@ const Game = {
 
     // 前方急彎提示
     if (s.phase === 'play') {
-      const zi = Math.floor((s.pos + C.playerZ) / C.segLen);
+      const zi = Math.floor((s.pos + this.pz) / C.segLen);
       const w = this.track.warn.find(q => q.idx - zi > 3 && q.idx - zi < 70);
       if (w && Math.floor(s.t * 4) % 2 === 0) {
         UI.text(g, w.dir > 0 ? '▶▶' : '◀◀', W / 2, 236, 76, { fill: '#ffd23f', sw: 10 });

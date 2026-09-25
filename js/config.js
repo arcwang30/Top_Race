@@ -7,9 +7,9 @@ const FAST = QS.has('fast');
 
 const CFG = {
   segLen: 200,
-  roadHalf: 1000,
+  roadHalf: 1150,
   rumble: 3,
-  lanes: 3,
+  lanes: 4,
   drawDist: 220,
   camH: 1000,
   camDepth: 1 / Math.tan(50 * Math.PI / 180),
@@ -145,4 +145,15 @@ const VEHICLES = [
   { id: 0, name: '熊貓賽車', en: 'PANDA BUGGY', desc: '經典的四驅賽車,熊貓最愛的座駕。', color: ['#8ee8ff', '#3ea8ff'] },
   { id: 1, name: '熊貓坦克', en: 'PANDA TANK', desc: '威風的履帶戰車,熊貓從砲塔探出頭來衝刺!', color: ['#b6f08a', '#5aa84a'] },
   { id: 2, name: '熊貓掌機車', en: 'PANDA HANDHELD', desc: '復古掌上型遊戲機變身的賽車,螢幕上還有像素跑道!', color: ['#ffe680', '#ffb02e'] }
+];
+
+// 視角(1 = 預設、2 = 壓低在熊貓背後、3 = 介於兩者之間)。地面上玩家車位置與賽道寬度固定,只改鏡頭高度 / 距離 / 地平線
+function mkView(camH, zD, hor, car) {
+  const roadPx = 287, yPlayer = 850;
+  return { camH, zD, hor, car, XS: roadPx * zD / (CFG.roadHalf * CFG.camDepth), YS: (yPlayer - hor) * zD / (camH * CFG.camDepth) };
+}
+const VIEWS = [
+  mkView(1000, 1000 * CFG.camDepth, 390, 0.68),
+  mkView(450, 560, 460, 0.76),
+  mkView(730, 700, 425, 0.71)
 ];

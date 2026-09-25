@@ -80,6 +80,8 @@ const I18N = {
   '經典的四驅賽車,熊貓最愛的座駕。': ['定番の四輪駆動レーシングカー。パンダのお気に入り！', 'The classic 4WD racer, loved by the panda.'],
   '威風的履帶戰車,熊貓從砲塔探出頭來衝刺!': ['迫力のキャタピラ戦車。パンダが砲塔から顔を出して大疾走！', 'A mighty tracked tank with the panda popping out of the turret!'],
   '復古掌上型遊戲機變身的賽車,螢幕上還有像素跑道!': ['レトロな携帯ゲーム機が変身したマシン。画面にはドット絵のコースも！', 'A retro handheld console turned racer, with a pixel track on its screen!'],
+  '飛彈!': ['ミサイル！', 'MISSILE!'], '10 秒自動發射': ['10秒間 自動発射', 'AUTO-FIRE 10 SEC'], '飛彈': ['ミサイル', 'MISSILE'], '飛彈箱': ['ミサイルボックス', 'Missile Box'],
+  '取得後 10 秒內車子會自動發射飛彈,擊飛前方敵車與障礙(不可累積)。': ['取ると10秒間、自動でミサイルを発射。前方のライバルや障害物を撃ち飛ばす（重ねがけ不可）。', 'For 10 seconds your vehicle auto-fires missiles at rivals and obstacles ahead (does not stack).'],
   '無敵衝刺!': ['むてきダッシュ！', 'INVINCIBLE!'], '打滑!': ['スリップ！', 'SLIP!'], '翻車!': ['横転！', 'CRASH!'],
   '陷入雪堆!': ['雪に埋まった！', 'SNOWED IN!'], '被黏住了!': ['くっついた！', 'STUCK!'], '彈飛!': ['はね飛ばされた！', 'BOUNCED!'],
   'TIME +{0} 秒': ['TIME +{0} 秒', 'TIME +{0} sec'], '前方急彎!': ['この先急カーブ！', 'SHARP TURN AHEAD!']

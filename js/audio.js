@@ -69,6 +69,15 @@ const Sound = (() => {
 
   const TRACKS = {
     menu: gen({ key: 0, mode: 'min', chords: 'Cm Ab Eb Bb Cm Ab Bb G', seed: 91 }, 176, { arp: '16', bass: 'pump', drums: 'disco', bell: 1, brass: 1, shaker: 1, sparkle: 1 }),
+    goal: {
+      bpm: 152, chords: chords('C G Am F C F G C'),
+      lead: fromEighths([
+        72, 76, 79, 84, 79, 84, 88, 84, 71, 74, 79, 83, 79, 83, 86, 83,
+        72, 76, 81, 84, 81, 84, 88, 84, 77, 81, 84, 89, 84, 81, 77, 81,
+        79, 84, 88, 91, 88, 84, 79, 84, 77, 81, 84, 89, 93, 89, 84, 81,
+        79, 83, 86, 91, 86, 83, 79, 74, 84, N, 88, N, 91, N, 96, N]),
+      style: { arp: '16', bass: 'pump', drums: 'bounce', bell: 1, brass: 1, shaker: 1, sparkle: 1 }
+    },
     c1s1: {
       bpm: 156, chords: chords('F G Em Am F G C C'),
       lead: fromEighths([
@@ -336,6 +345,14 @@ const Sound = (() => {
       case 'go': tone('square', 880, t, 0.5, 0.17); tone('square', 1320, t, 0.5, 0.1); break;
       case 'tick': tone('square', 1200, t, 0.05, 0.12); break;
       case 'drift': noise(t, 0.2, 0.15, null, { f: 2000, type: 'bandpass', q: 5 }); break;
+      case 'missile':
+        noise(t, 0.45, 0.35, null, { f: 900, to: 4000, type: 'bandpass', q: 1.2 });
+        tone('sawtooth', 220, t, 0.4, 0.14, null, { to: 900, lp: 2500 });
+        tone('square', 660, t, 0.08, 0.12, null, { to: 990 }); break;
+      case 'explode':
+        noise(t, 0.6, 0.6, null, { f: 2800, to: 200, type: 'lowpass' });
+        tone('sine', 140, t, 0.45, 0.55, null, { to: 40 });
+        tone('square', 500, t, 0.18, 0.12, null, { to: 100 }); break;
       case 'cheer':
         for (let i = 0; i < 12; i++) noise(t + i * 0.13 + Math.random() * 0.05, 0.55, 0.14, null, { f: 700 + Math.random() * 1000, type: 'bandpass', q: 1.1 });
         tone('sawtooth', 380, t, 0.45, 0.1, null, { to: 720, lp: 2400 }); tone('sawtooth', 480, t + 0.06, 0.45, 0.09, null, { to: 900, lp: 2400 });
