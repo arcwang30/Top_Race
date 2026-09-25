@@ -37,7 +37,7 @@ const Game = {
     return Math.min(SCORE.max, Math.floor(c.dist + c.drift + c.coin + c.cp + c.time + c.clear));
   },
 
-  cycleView() { this.setView((this.view + VIEWS.length - 1) % VIEWS.length); },
+  cycleView() { this.setView([2, 3, 1, 0][this.view]); },
   setView(i) {
     const s = this.s, V = VIEWS[i];
     if (s) s.pos = Math.max(0, s.pos + this.pz - V.zD);
@@ -506,13 +506,15 @@ const Game = {
     // 暫停鈕
     g.fillStyle = 'rgba(30,20,60,.6)'; g.beginPath(); g.arc(490, 106, 20, 0, TAU); g.fill();
     g.fillStyle = '#fff'; g.fillRect(482, 96, 6, 20); g.fillRect(494, 96, 6, 20);
-    // 視角鈕(相機圖示 + 目前視角編號)
+    // 視角鈕(相機圖示 + 目前視角編號),放在時速表下方靠右
+    g.save(); g.translate(44, 118);
     g.fillStyle = 'rgba(30,20,60,.6)'; g.beginPath(); g.arc(452, 106, 20, 0, TAU); g.fill();
     g.fillStyle = '#fff'; g.beginPath(); g.roundRect ? g.roundRect(440, 99, 24, 16, 4) : g.rect(440, 99, 24, 16); g.fill();
     g.fillRect(446, 95, 10, 5);
     g.fillStyle = '#3ea8ff'; g.beginPath(); g.arc(452, 107, 5, 0, TAU); g.fill();
     g.fillStyle = '#ffd23f'; g.beginPath(); g.arc(465, 96, 8, 0, TAU); g.fill();
-    UI.text(g, String(this.view + 1), 465, 96.5, 12, { fill: '#40284a', stroke: null });
+    UI.text(g, String([1, 3, 2, 4][this.view]), 465, 96.5, 12, { fill: '#40284a', stroke: null });
+    g.restore();
     // 飛彈剩餘時間
     if (s.missileT > 0) {
       const pulse = 0.75 + 0.25 * Math.sin(s.t * 10);

@@ -214,7 +214,7 @@ const Road = (() => {
       poly(g, p.x - p.w + p.w * 2 * a, p.y + 1, p.x - p.w + p.w * 2 * b, p.y + 1, q.x - q.w + q.w * 2 * b, q.y, q.x - q.w + q.w * 2 * a, q.y,
         (k + s.index) % 2 ? '#ffffff' : '#2b2833');
     }
-    const H1 = p.scale * YS * 1500, pw = Math.max(3, p.w * 0.1), bh = H1 * 0.3;
+    const H1 = p.scale * XS * (CFG.YS / CFG.XS) * 1500, pw = Math.max(3, p.w * 0.1), bh = H1 * 0.3;
     if (H1 < 6) return;
     const top = p.y - H1, col = goal ? '#2b2833' : (start ? '#3ea8ff' : '#ff5c7a');
     for (const side of [-1, 1]) {

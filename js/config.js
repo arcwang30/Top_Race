@@ -155,5 +155,6 @@ function mkView(camH, zD, hor, car) {
 const VIEWS = [
   mkView(1000, 1000 * CFG.camDepth, 390, 0.68),
   mkView(450, 560, 460, 0.76),
-  mkView(730, 700, 425, 0.71)
+  mkView(730, 700, 425, 0.71),
+  mkView(150, 400, 690, 0.82)
 ];

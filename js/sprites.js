@@ -49,16 +49,6 @@ const Spr = (() => {
     g.restore();
   }
 
-  function cage(g) {
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    const path = () => {
-      g.beginPath(); g.moveTo(-48, -60); g.lineTo(-48, -152); g.quadraticCurveTo(-48, -174, -26, -174);
-      g.lineTo(26, -174); g.quadraticCurveTo(48, -174, 48, -152); g.lineTo(48, -60);
-    };
-    path(); g.lineWidth = 11; g.strokeStyle = OUT; g.stroke();
-    path(); g.lineWidth = 5; g.strokeStyle = '#eef1fa'; g.stroke();
-  }
-
   function riderRear(g, kind, t) {
     const w = Math.sin(t * 9) * 6;
     const scarf = c => {
@@ -103,7 +93,6 @@ const Spr = (() => {
     g.save(); g.globalAlpha = 0.28; E(g, 0, -2, 106, 13, '#000', 0); g.restore();
     wheel(g, -88, o.wheel || 0); wheel(g, 88, o.wheel || 0);
     R(g, -80, -36, 160, 10, 4, '#4a4860', 3);
-    cage(g);
     R(g, -44, -98, 88, 44, 14, '#3d3d55', 3);
     riderRear(g, o.rider || 'panda', o.t || 0);
     R(g, -72, -62, 144, 44, 15, body, 3);
@@ -153,7 +142,6 @@ const Spr = (() => {
     g.save(); g.globalAlpha = 0.28; E(g, 0, -2, 112, 13, '#000', 0); g.restore();
     wheel(g, -94, o.wheel || 0, 40, 68); wheel(g, 94, o.wheel || 0, 40, 68);
     R(g, -84, -36, 168, 10, 4, '#4a4860', 3);
-    cage(g);
     R(g, -34, -104, 68, 44, 14, '#3d3d55', 3);
     pandaFront(g, o);
     // 車體

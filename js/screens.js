@@ -299,7 +299,7 @@ Screens.game = {
   },
   frame(g, dt) {
     let tapView = false, tapPause = false;
-    for (const t of Input.taps) { const d1 = Math.hypot(t.x - 452, t.y - 106), d2 = Math.hypot(t.x - 490, t.y - 106); if (Math.min(d1, d2) < 26) { if (d1 < d2) tapView = true; else tapPause = true; } }
+    for (const t of Input.taps) { if (Math.hypot(t.x - 496, t.y - 224) < 30) tapView = true; else if (Math.hypot(t.x - 490, t.y - 106) < 26) tapPause = true; }
     if (tapView || Input.was('view')) { Game.cycleView(); Input.taps.length = 0; }
     if (!this.paused && (Input.was('pause') || tapPause)) this.pause();
     else if (this.paused && Input.was('pause')) { this.paused = false; Input.pressed.clear(); Input.taps.length = 0; }
